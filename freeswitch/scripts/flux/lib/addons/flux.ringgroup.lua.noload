@@ -5,7 +5,7 @@ end
 function check_local_call(destination_number)
 	local query = "SELECT sip_devices.id as sip_id,sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation,sip_devices.codec as sip_codec FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
    
-    Logger.debug("[CHECK_LOCAL_CALL_RINGGROUP] Query :" .. query)
+    Logger.debug("[CHECK_LOCAL_CALL] Query :" .. query)
     assert (dbh:query(query, function(u)
         sip2sipinfo = u;
     end))
@@ -27,7 +27,6 @@ function get_ringgroup(rgroupid)
 end
 
 function fail_cdrs_pbx(xml,callerid_array,userinfo,destination_number)
-    Logger.notice("[RINGGROUP] fail_cdrs_pbx ");
 	hangup_cause = "NO_ROUTE_DESTINATION";
 	local sound_path = "/usr/share/freeswitch/sounds/pt/BR/karina/"
 	audio_file = sound_path ..  "flux-badphone.wav";
@@ -58,7 +57,6 @@ function fail_cdrs_pbx(xml,callerid_array,userinfo,destination_number)
 end
 
 function did_pbx_info(xml,didinfo,userinfo,config,xml_did_rates,callerid_array)
-    Logger.info("[RINGGROUP] did_pbx_info ");
     table.insert(xml, [[<action application="set" data="did_calltype=]]..didinfo['call_type']..[["/>]]);
 	table.insert(xml, [[<action application="set" data="did_extensions=]]..didinfo['extensions']..[["/>]]);
     Logger.info("[RINGGROUP] Call Type : "..didinfo['call_type'])
@@ -92,16 +90,13 @@ function did_pbx_info(xml,didinfo,userinfo,config,xml_did_rates,callerid_array)
                 if(call_direction == 'local')then
                     table.insert(xml, [[<action application="set" data="calltype=LOCAL"/>]]);
                 end
-                if(call_direction == 'inbound')then
-                    table.insert(xml, [[<action application="export" data="call_type=Ring Group"/>]]);
-                end
-                local sound_path = "/usr/share/freeswitch/sounds/pt/BR/karina/"
+                local sound_path = "/usr/share/freeswitch/sounds/en/us/callie/"
                 audio_file = sound_path ..  "flux-badphone.wav";
                 if (config['playback_audio_notification'] == "0") then
                     table.insert(xml, [[<action application="playback" data="]]..audio_file..[["/>]]);
-                end            
-                table.insert(xml, [[<action application="set" data="sip_ignore_remote_cause=true"/>]]);        
---                table.insert(xml, [[<action application="info" data=""/>]]);
+                end
+                table.insert(xml, [[<action application="set" data="sip_ignore_remote_cause=true"/>]]);
+                table.insert(xml, [[<action application="info" data=""/>]]);
                 table.insert(xml, [[<action application="set" data="call_processed=internal"/>]]);
                 table.insert(xml, [[<action application="set" data="effective_destination_number=]]..destination_number..[["/>]]); 
                 table.insert(xml, [[<action application="set" data="last_bridge_hangup_cause=UNALLOCATED_NUMBER"/>]]);        
@@ -136,9 +131,9 @@ function did_pbx_info(xml,didinfo,userinfo,config,xml_did_rates,callerid_array)
                 final_count = get_trim_value(final_count);
                 Logger.info("Final Count : "..final_count.."===")
                 if (propmt_flag == 'false') then
-                    group_confirm = "confirm=true,dialed_user="..params_ring[destination]..",";
+                    group_confirm = "confirm=false,dialed_user="..params_ring[destination]..",";
                 else
-                    group_confirm = "confirm=true,dialed_user="..params_ring[destination]..",";
+                    group_confirm = "confirm=false,dialed_user="..params_ring[destination]..",";
                 end
                 if(params_ring[destination] ~= nil)then
                     if(params_ring[timeout] == nil or params_ring[timeout] == 'null')then
@@ -148,23 +143,15 @@ function did_pbx_info(xml,didinfo,userinfo,config,xml_did_rates,callerid_array)
                         params_ring[delay] =0
                     end
                     if(tonumber(final_count) == 0)then
-                        ringgroup_dlr_str = ringgroup_dlr_str .."[sip_invite_params=user=local,sip_h_p-call_type='custom_forward',call_timeout="..params_ring[timeout]..","..group_confirm.."leg_timeout="..params_ring[timeout]..",leg_delay_start="..params_ring[delay].."]".."user/"..params_ring[destination].."@"..params:getHeader("variable_sip_contact_host")..":"..params:getHeader("variable_sip_contact_port")..separated
+                        ringgroup_dlr_str = ringgroup_dlr_str .."[sip_invite_params=user=local,sip_h_p-call_type='custom_forward',call_timeout="..params_ring[timeout]..","..group_confirm.."leg_timeout="..params_ring[timeout]..",leg_delay_start="..params_ring[delay].."]".."user/"..params_ring[destination].."@"..params:getHeader("variable_sip_to_host")..":"..params:getHeader("variable_sip_contact_port")..separated
                     end
                 end
             end
-            Logger.info("RingGroup Dlr Str : "..ringgroup_dlr_str);
-            table.insert(xml, [[<action application="set" data="ringback=$${pt-ring}"/>]]);
-            table.insert(xml, [[<action application="set" data="ignore_early_media=true"/>]]);
-            table.insert(xml, [[<action application="ring_ready"/>]]);
+            Logger.info("RingGroup Dlr Str : "..ringgroup_dlr_str)
             table.insert(xml, [[<action application="set" data="effective_caller_id_name=]]..callerid_array['cid_name']..[["/>]]);
             table.insert(xml, [[<action application="set" data="effective_caller_id_number=]]..callerid_array['cid_number']..[["/>]]);
             table.insert(xml, [[<action application="set" data="module_name=ringgroup"/>]]);
-            table.insert(xml, [[<action application="set" data="variable_sip_to_host=$${domain_name}"/>]]);
-            table.insert(xml, [[<action application="set" data="sip_destination_number=]]..destination_number..[["/>]]);
-            table.insert(xml, [[<action application="bridge" data="{sip_h_P-call_type='custom_forward'}]]..ringgroup_dlr_str..[["/>]]);
-            table.insert(xml, [[<action application="lua" data="flux/lib/sip_routing/flux-sipdevice-routing.lua"/>]]);
-            table.insert(xml, [[<action application="info" data=""/>]]);
---            fail_cdrs_pbx(xml,callerid_array,userinfo,destination_number)
+                table.insert(xml, [[<action application="bridge" data="{sip_h_P-call_type='custom_forward'}]]..ringgroup_dlr_str..[["/>]]);
         end
     else
         fail_cdrs_pbx(xml,callerid_array,userinfo,destination_number)
