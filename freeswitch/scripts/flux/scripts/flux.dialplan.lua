@@ -176,11 +176,12 @@ Logger.info("[Accountcode : ".. accountcode .."]" );
 
 
 --Destination number string 
-number_loop_str = number_loop(destination_number,'blocked_patterns') 
-number_loop_str_orig = number_loop(callerid_number,'blocked_patterns')
+number_loop_str = number_loop(destination_number,'blocked_patterns')
+number_loop_str_orig = number_loop(callerid_number,'pattern')
 
 
 -- Do authorization
+
 userinfo = doauthorization("number",accountcode,call_direction,destination_number,number_loop_str,config)
 
 --------------------------------------- SPEED DIAL --------------------------------------
