@@ -63,7 +63,7 @@ function sip_device_routing(xml,destination_number,destinationinfo,callerid_arra
 	Logger.info("[PBX_SIP_ROUTING] SIP ID : "..destinationinfo['sip_id'])
 	local sip_routing_arr = sip_routing_info(destinationinfo['sip_id'])
 
-	-- if(sip_routing_arr and tonumber(sip_routing_arr['do_not_disturb']) == 1)then
+	if(sip_routing_arr and tonumber(sip_routing_arr['do_not_disturb']) == 1)then
 		Logger.info("[PBX_SIP_ROUTING] Call Forwarding Flag : "..sip_routing_arr['call_forwarding_flag'])
 		local sip_destination_number = destination_number
 		if(tonumber(sip_routing_arr['call_forwarding_flag']) == 0 and sip_routing_arr['call_forwarding_destination'] ~= nil and sip_routing_arr['call_forwarding_destination'] ~= '' and sip_routing_arr['call_forwarding_destination'] ~= '0')then
@@ -92,12 +92,13 @@ function sip_device_routing(xml,destination_number,destinationinfo,callerid_arra
 		table.insert(xml, [[<action application="set" data="not_register_flag=]]..sip_routing_arr['not_register_flag']..[["/>]]);
 		table.insert(xml, [[<action application="set" data="not_register_destination=]]..sip_routing_arr['not_register_destination']..[["/>]]);
 		table.insert(xml, [[<action application="set" data="variable_sip_to_host=]]..params:getHeader("variable_sip_to_host")..[["/>]]);
---		table.insert(xml, [[<action application="set" data="variable_sip_to_port=]]..params:getHeader("variable_sip_to_port")..[["/>]]);
+		--table.insert(xml, [[<action application="set" data="variable_sip_to_port=]]..params:getHeader("variable_sip_to_port")..[["/>]]);
 		table.insert(xml, [[<action application="set" data="leg_timeout=]]..config['leg_timeout']..[["/>]]);
 		table.insert(xml, [[<action application="set" data="userinfo_id=]]..userinfo['id']..[["/>]]);
 		table.insert(xml, [[<action application="set" data="sip_destination_number=]]..sip_destination_number..[["/>]]);
 		table.insert(xml, [[<action application="set" data="did_number=]]..sip_destination_number..[["/>]]);
 		table.insert(xml, [[<action application="lua" data="flux/lib/sip_routing/flux-sipdevice-routing.lua"/>]]);
+	end
 end
 
 function freeswitch_xml_local(xml,destination_number,destinationinfo,callerid_array)
