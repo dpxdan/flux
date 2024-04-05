@@ -56,7 +56,7 @@ if session:ready() then
 	last_disposition = session:getVariable("originate_disposition");
 	last_sip_rates = session:getVariable("origination_rates");
 	variable_sip_to_host = session:getVariable("variable_sip_to_host");
-	variable_sip_to_port = session:getVariable("internal_sip_port");
+	variable_sip_contact_port = session:getVariable("internal_sip_port");
 	userinfo_id = session:getVariable("userinfo_id");
 	did_number = session:getVariable("did_number");
 
@@ -72,7 +72,7 @@ if session:ready() then
 		routing_destination = on_busy_destination
 		permission_flag = on_busy_flag
 	end
-	if last_disposition == "NO_USER_RESPONSE" or last_disposition == "CALL_REJECTED" or last_disposition == "NO_ANSWER" or last_disposition == "SUBSCRIBER_ABSENT"  or last_disposition == "NORMAL_TEMPORARY_FAILURE"  or last_disposition == "ALLOTTED_TIMEOUT" then
+	if last_disposition == "NO_USER_RESPONSE" or last_disposition == "NO_ANSWER" or last_disposition == "SUBSCRIBER_ABSENT"  or last_disposition == "NORMAL_TEMPORARY_FAILURE"  or last_disposition == "ALLOTTED_TIMEOUT" then
 		routing_destination = no_answer_destination
 		permission_flag = no_answer_flag
 	end
@@ -83,17 +83,14 @@ if session:ready() then
 	end
 
 	if(routing_destination ~= '' and permission_flag ~= '' and tonumber(permission_flag) == 0) then
-		bridge = "{ignore_early_media=true,sip_h_P-did_number="..did_number..",sip_h_P-call_type='custom_forward',sip_h_P-Accountcode="..userinfo_id.."}user/"..routing_destination.."@"..variable_sip_to_host..":"..variable_sip_to_port
+		bridge = "{ignore_early_media=true,sip_h_P-did_number="..did_number..",sip_h_P-call_type='custom_forward',sip_h_P-Accountcode="..userinfo_id.."}user/"..routing_destination.."@"..variable_sip_to_host..":"..variable_sip_contact_port
 		session:execute("bridge", bridge)
 	end
 	if last_disposition ~= "SUCCESS" then
 	 	session:execute("answer");
-	 	hangup_cause_disp = session:setVariable("hangup_cause", last_disposition)
---	 	hangup_cause = session.setVariable("hangup_cause", last_disposition);
 
-	 logger("Dialed User For Route :" .. last_disposition );
-	 
-	 --session:execute("voicemail", "default "..variable_sip_to_host.." "..sip_destination_number);
+	 logger("Dialed User For Voicemail :" .. sip_destination_number );
+	 session:execute("voicemail", "default "..variable_sip_to_host.." "..sip_destination_number);
 
 	end
 

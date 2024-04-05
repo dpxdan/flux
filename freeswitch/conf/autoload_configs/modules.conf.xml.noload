@@ -45,10 +45,8 @@
 <!--     <load module="mod_conference"/> -->
     <load module="mod_dptools"/>
 <!--     <load module="mod_expr"/> -->
-    <load module="mod_fifo"/>
+<!--     <load module="mod_fifo"/> -->
     <load module="mod_voicemail"/> 
-     <load module="mod_valet_parking"/>
-     <load module="mod_directory"/>
 <!--    <load module="mod_limit"/>-->
 <!--     <load module="mod_esf"/> -->
 <!--     <load module="mod_fsv"/> -->
@@ -57,7 +55,7 @@
     <!-- Dialplan Interfaces -->
     <!-- <load module="mod_dialplan_directory"/> -->
     <load module="mod_dialplan_xml"/>
-<!--    <load module="mod_dialplan_asterisk"/> -->
+<!--     <load module="mod_dialplan_asterisk"/> -->
 
     <!-- Codec Interfaces -->
 <!--    <load module="mod_voipcodecs"/>-->
@@ -72,7 +70,7 @@
     <load module="mod_sndfile"/>
     <load module="mod_native_file"/>
     <!--For icecast/mp3 streams/files-->
-    <load module="mod_shout"/>
+    <!--<load module="mod_shout"/>-->
     <!--For local streams (play all the files in a directory)-->
     <load module="mod_local_stream"/>
     <load module="mod_tone_stream"/>
@@ -93,6 +91,5 @@
     
     <!-- Say -->
     <load module="mod_say_en"/>
-    <load module="mod_say_pt"/>
   </modules>
 </configuration>

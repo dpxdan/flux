@@ -44,7 +44,7 @@ CREATE ALGORITHM = UNDEFINED DEFINER = `fluxuser`@`127.0.0.1` SQL SECURITY DEFIN
 -- View structure for packages_view_copy1
 -- ----------------------------
 DROP VIEW IF EXISTS `packages_view_copy1`;
-CREATE ALGORITHM = UNDEFINED DEFINER = `fluxuser`@`127.0.0.1` SQL SECURITY DEFINER VIEW `packages_view_copy1` AS select `O`.`order_id` AS `id`,`P`.`id` AS `product_id`,`P`.`name` AS `package_name`,`O`.`free_minutes` AS `free_minutes`,`P`.`applicable_for` AS `applicable_for`,`P`.`status` AS `status`,`P`.`price` AS `price`,`O`.`accountid` AS `accountid`,`O`.`is_terminated` AS `is_terminated` from (`products` `P` join `order_items` `O`) where ((`P`.`id` = `O`.`product_id`) and (`P`.`product_category` = 1) and (`P`.`status` = 0) and ((`O`.`termination_date` >= (utc_timestamp() - interval 1 month)) or (`O`.`termination_date` = '0000-00-00 00:00:00')));
+CREATE ALGORITHM = UNDEFINED DEFINER = `fluxuser`@`127.0.0.1` SQL SECURITY INVOKER VIEW `packages_view_copy1` AS select `O`.`order_id` AS `id`,`P`.`id` AS `product_id`,`P`.`name` AS `package_name`,`O`.`free_minutes` AS `free_minutes`,`P`.`applicable_for` AS `applicable_for`,`P`.`status` AS `status`,`P`.`price` AS `price`,`O`.`accountid` AS `accountid`,`O`.`is_terminated` AS `is_terminated` from (`products` `P` join `order_items` `O`) where ((`P`.`id` = `O`.`product_id`) and (`P`.`product_category` = 1) and (`P`.`status` = 0) and ((`O`.`termination_date` >= (utc_timestamp() - interval 1 month)) or (`O`.`termination_date` = '0000-00-00 00:00:00')));
 
 -- ----------------------------
 -- View structure for view_accounts_permissions
