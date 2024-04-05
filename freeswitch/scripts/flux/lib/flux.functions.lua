@@ -34,7 +34,7 @@ end
 -- Get Calling Card Access numbers list
 function get_cc_access_number(destination_number)
         local query = "SELECT access_number FROM accessnumber WHERE access_number = '"..destination_number.."' AND status=0 limit 1";
-        Logger.debug("[DOAUTHORIZATION] Query :" .. query)
+        Logger.debug("[get_cc_access_number] Query :" .. query)
         local cc_access_number;
         assert (dbh:query(query, function(u)
                 cc_access_number = u;
@@ -284,7 +284,7 @@ function ipauthentication(destination_number,from_ip)
 	return ipinfo;
 end
 -- Do Account authorization
-function doauthorization(field_type,accountcode,call_direction,destination_number,number_loop,config)
+function doauthorization(field_type,accountcode,call_direction,destination_number,number_loop_str,config)
     local callstart = os.date("!%Y-%m-%d %H:%M:%S")
     local query = "SELECT * FROM "..TBL_USERS.." WHERE "..field_type.." = \""..accountcode.."\" AND deleted = 0 limit 1";
     Logger.debug("[DOAUTHORIZATION] Query :" .. query)
@@ -319,8 +319,9 @@ function doauthorization(field_type,accountcode,call_direction,destination_numbe
     	    Logger.warning("[DOAUTHORIZATION] ["..accountcode.."] Insufficent balance ("..balance..") to make calls..!!");
 --    	    userinfo['ACCOUNT_ERROR'] = 'NO_SUFFICIENT_FUND'
     	else
-    	    if (call_direction == 'outbound') then     
-    		    if (check_blocked_prefix (userinfo,destination_number,number_loop) == "false") then
+    	    if (call_direction == 'outbound') then
+				number_loop_str = number_loop(destination_number,'blocked_patterns')
+    		    if (check_blocked_prefix (userinfo,destination_number,number_loop_str) == "false") then
 	    	        Logger.warning("[DOAUTHORIZATION] ["..accountcode.."] You are not allowed to dial number..!!");
                     userinfo['ACCOUNT_ERROR'] = 'DESTINATION_BLOCKED'
 	    	        return userinfo
