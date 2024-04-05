@@ -6,7 +6,7 @@
 	   need it) -->
       <!-- one or more |-delim of configuration|directory|dialplan -->
 
-      <param name="gateway-url" value="http://localhost:8735/index.php" bindings="directory|configuration"/> 
+      <param name="gateway-url" value="http://127.0.0.1:8735/index.php" bindings="directory|configuration"/> 
 
 <!--	<param name="gateway-url" value="http://localhost/pune/directory/index.php" bindings="directory"/> -->
 
