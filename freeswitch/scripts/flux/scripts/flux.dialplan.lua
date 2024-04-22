@@ -669,7 +669,11 @@ if (userinfo ~= nil) then
 		    	--~ Logger.notice(termination_value['path']..": "..termination_value['cost'] .." > "..user_rates['cost']..", skipping")  
 			    	
 		if (tonumber(termination_value['cost']) > tonumber(user_rates['cost']) ) then	
-			Logger.notice(termination_value['path']..": "..termination_value['cost'] .." > "..user_rates['cost']..", skipping for loss less routing")  
+			Logger.notice(termination_value['path']..": "..termination_value['cost'] .." > "..user_rates['cost']..", skipping for loss less routing")
+			Logger.info("=============== Termination Rates Information ===================")
+			Logger.info("ID : "..termination_value['outbound_route_id'])
+			Logger.info("Code : "..termination_value['pattern'])
+			Logger.info("Trunk Name : "..termination_value['trunk_name'])
 		--	k = k+1    	
 		else
 			Logger.info("=============== Termination Rates Information ===================")
