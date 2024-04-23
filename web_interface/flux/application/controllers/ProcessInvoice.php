@@ -700,7 +700,7 @@ else {
 		} else {
 			$no_renew_insert_arr = array(
 				"cron_date" => $this->CurrentDate,
-				'message' => "Nenhum pedido para renova‹o.",
+				'message' => "Nenhum pedido para renovar.",
 
 			);
 			$this->invoice_log->write_log('no_renew', json_encode($no_renew_insert_arr));
@@ -991,7 +991,7 @@ else {
 			else {
 				$no_renew_insert_arr = array(
 					"cron_date" => $this->CurrentDate,
-					'message' => "Nenhum pedido para renova‹o.",
+					'message' => "Nenhum pedido para renovar.",
 	
 				);
 				$this->invoice_log->write_log('no_renew', json_encode($no_renew_insert_arr));
