@@ -83,6 +83,61 @@ class New_Invoices_model extends CI_Model {
         return array_values($numbers);
     }
 
+    public function getCdrs($filter) {
+            $query = $this->db->get_where('cdrs', array(
+                'accountid' => $filter->accountid,
+                'callstart >=' => $filter->fromdate->format('Y-m-d H:i:s'),
+                'callstart <=' => $filter->todate->format('Y-m-d H:i:s'),
+                'debit >' => 0,
+                'billseconds >' => 0
+            ));
+    
+            $cdrs = $query->result_object();
+    
+            $numbers = array();
+    
+            foreach ($cdrs as $key => $cdr) {
+                $number = preg_replace("/[^0-9]/", '', explode(' ', $cdr->sip_user)[0]);
+    
+                if (!isset($numbers[$number])) {
+                    $numbers[$number] = new stdClass();
+                    $numbers[$number]->number = $number;
+                    $numbers[$number]->calls = array();
+                    $numbers[$number]->callsDuration = 0.00;
+                    $numbers[$number]->callsValue = 0.00;
+                    $numbers[$number]->lineNumber = count($numbers);
+                }
+    
+                $call = new stdClass();
+    
+                $call->destinationPhone = preg_replace("/[^0-9]/", "", $cdr->callednum);
+                $call->destinationType = $cdr->calltype;
+                
+    
+                $call->date = DateTime::createFromFormat('Y-m-d H:i:s', $cdr->callstart);
+                $call->date = $call->date->format('d/m/Y H:i:s');
+    
+                $call->duration = $cdr->billseconds;
+                $call->durationFormatted = gmdate('H:i:s', $call->duration);
+    
+                $call->value = $cdr->debit;
+                if($call->destinationType == "Gratuita" || $call->destinationType == "FREE" || $call->destinationType == "Chamada Gratuita" ) {
+                $call->destinationType = $cdr->notes;                
+                $call->value = "0.00";
+                }
+    
+                $numbers[$number]->calls[] = $call;
+                $numbers[$number]->callsDuration += $call->duration;
+                $numbers[$number]->callsValue += $call->value;
+            }
+    
+            foreach ($numbers as $number) {
+                $number->callsDurationFormatted = gmdate('H:i:s', $number->callsDuration);
+            }
+    
+            return array_values($numbers);
+        }
+
     public function getPlans($filter) {
         $this->db->select('*');
         $this->db->from('packages_view');
@@ -248,6 +303,20 @@ class New_Invoices_model extends CI_Model {
         return $summary;
     }
 
+    public function summarizeCdrs($filter, $invoice) {
+            $invoice->range = $this->getRange($filter);
+            $invoice->expirationDate = $this->getExpirationDate($filter);
+    
+            $invoice->total = 0.00;
+    
+            $summary = array();
+            $summary[] = $this->calculateTotalPlans($invoice);
+            $summary[] = $this->calculateTotalCDRS($invoice);
+            $summary[] = $this->calculateTaxes($invoice,$filter);
+    
+            return $summary;
+        }
+
     public function summarizeMan($filter, $invoice) {
         $invoice->range = $this->getRange($filter);
         $invoice->expirationDate = $this->getExpirationDate($filter);
@@ -281,6 +350,26 @@ class New_Invoices_model extends CI_Model {
 
         return $summaryCalls;
     }
+
+    private function calculateTotalCDRS($invoice) {
+            $summaryCalls = new stdClass();
+            $summaryCalls->label = "Ligações";
+            $summaryCalls->value = 0.00;
+    
+            $invoice->totalCallsDurantion = 0;
+    
+            foreach ($invoice->numbers as $number) {
+                $summaryCalls->value += $number->callsValue;
+                $invoice->totalCallsDurantion += $number->callsDuration;
+            }
+    
+            $invoice->totalCallsValue = $summaryCalls->value;
+            $invoice->totalCallsDurationFormatted = gmdate('H:i:s', $invoice->totalCallsDurantion);
+    
+            $invoice->total += $summaryCalls->value;
+    
+            return $summaryCalls;
+        }
 
     private function calculateTotalPlans($invoice) {
         $summaryPlans = new stdClass();

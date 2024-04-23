@@ -102,7 +102,7 @@ class Invoices extends MX_Controller
                 $invoice_date = $this->common->convert_GMT_to_new('','',$value['generate_date']);
                 $from_date = $this->common->convert_GMT_to_new('','',$value['from_date']);
                 $due_date = $this->common->convert_GMT_to_new('','',$value['due_date']);
-                $to_date = $this->common->convert_GMT_to_new('','',$from_date);
+                $to_date = $this->common->convert_GMT_to_new('','',$value['to_date']);
 
                 $outstanding = ($value['is_paid'] == 1) ? $value['debit'] - $value['credit'] : "0.00";
                 $invoice_total = '';
@@ -123,6 +123,7 @@ class Invoices extends MX_Controller
                 }
                 
                 //$download2 = "<a  href=" . $url2 . $value['id'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
+                $download3 = "<a  href=" . '/invoices/invoice_download_cdrs/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download CDR' ><i class='fa fa-money fa-fw'></i></a>&nbsp";
                 if ($value['type'] == 'I') {
                     if ($value['confirm'] == 0) {
                         if ($value['generate_type'] == 1) {
@@ -218,15 +219,14 @@ class Invoices extends MX_Controller
                         $value['number'],
                         $invoice_type,
                         isset($account_array['company_name']) && !empty($account_array['company_name']) ? $account_array['company_name'] . ' ' . '</br>' . $account_array['number'] : $account_array['first_name'] . ' ' . $account_array['last_name'] . '</br>' . $account_array['number'],
-                        $invoice_date,
                         $from_date,
+                        $to_date,
                         $due_date,
                         $this->common->currency_decimal($amount),
 //                        $this->common->currency_decimal($outstanding),
                         $this->common->reseller_select_value("first_name,last_name,number,company_name", "accounts", $value['reseller_id']),
-                        $download
-			//. ' ' . $payment . ' ' . $delete_button
-                        //$download2 . ' ' .$payment_edit . '<br>' . $payment . ' ' . $delete_button
+                        $download . ' ' . $download3 
+//                        $download . ' ' .$payment_edit . ' ' . $payment . ' ' . $download2
                     )
                 );
                 $total_value = $total_value + $value['debit'];
@@ -2157,7 +2157,6 @@ class Invoices extends MX_Controller
     		$this->load->model('new_invoices_model');
     
     		$filter = $this->new_invoices_model->getFilter($invoiceId);
-    
     		$invoice = new stdClass();
     		$invoice->numbers = $this->new_invoices_model->getCalls($filter);
     		$invoice->plans = $this->new_invoices_model->getPlans($filter);
@@ -2241,6 +2240,56 @@ class Invoices extends MX_Controller
 		force_download($invoiceFileName, $pdf);
     	    
     	    	}
+  
+  		function invoice_download_cdrs($invoiceId) 
+  		{
+  		error_reporting(E_ALL);
+  		ini_set('display_errors', 1);
+  
+  		$this->load->model('new_invoices_model');
+  
+  		$filter = $this->new_invoices_model->getFilter($invoiceId);
+  				$this->invoice_log->write_log ( 'invoice_pdf_filter', json_encode($filter) );
+  
+  		$invoice = new stdClass();
+  		$invoice->numbers = $this->new_invoices_model->getCdrs($filter);
+  //		$invoice->numberst = $this->new_invoices_model->getCdrs($filter);
+  		$invoice->plans = $this->new_invoices_model->getPlans($filter);
+  		$invoice->packages = $this->new_invoices_model->getPackages($filter);
+  		$invoice->customer = $this->new_invoices_model->getCustomer($filter);
+  		$invoice->summary = $this->new_invoices_model->summarizeCdrs($filter, $invoice);
+  				$this->invoice_log->write_log ( 'invoice_pdf_info', json_encode($invoice) );
+  
+  		include_once(APPPATH . 'libraries/integration/jasper/JasperReport.php');
+  		$jasperReport = JasperReport::getInstance('invoice_pdf.jasper');
+  		$jasperReport->addSubReport('SUBREPORT_CALLS', 'subreport_calls_list.jasper');
+  		$jasperReport->addParameter('LOGO', $this->new_invoices_model->getCompanyLogo($filter));
+  		$jasperReport->addParameter('IS_SHOW_EXPIRATION_DATE', TRUE);
+  		$jasperReport->setData($invoice);
+  
+  		$pdf = $jasperReport->toPdf();
+  
+  		$invoiceFileName = "fatura_";
+  
+  		if (!empty($invoice->customer->companyName)) {
+  			$invoiceFileName .= (str_replace(' ', '_', $invoice->customer->companyName) . "_");
+  		}
+  
+  		$invoiceDate = DateTime::createFromFormat('d/m/Y', $invoice->range->beginDate)->format('Ymd');
+  		$invoiceFileName .= "{$invoice->customer->accountNumber}_{$invoiceDate}.pdf";
+  		$invoicePath = APPPATH . 'invoices/' .$invoice->customer->accountNumber.'/'.$invoiceDate.'/';
+  
+  		if (!is_dir($invoicePath)) {
+  			 mkdir($invoicePath , 0777, TRUE);
+  			 };
+  		$file = ''.$invoicePath.''.$invoiceFileName;
+  		file_put_contents($file, $pdf);
+  
+  		$this->load->helper('download');
+  
+  		force_download($invoiceFileName, $pdf);
+  					
+  						}
     	
     function invoice_download($invoiceId) {
     		error_reporting(E_ALL);

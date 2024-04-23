@@ -75,23 +75,23 @@ class invoices_form extends common
                 "center"
             ),
             array(
-                gettext("Invoice Date"),
-                "100",
-                "generate_date",
-                "generate_date",
-                "generate_date",
-                "convert_to_date",
-                "",
-                "true",
-                "center"
-            ),
-            array(
                 gettext("From Date"),
                 "120",
                 "from_date",
                 "from_date",
                 "",
                 "get_from_date",
+                "",
+                "true",
+                "center"
+            ),
+            array(
+                gettext("To Date"),
+                "100",
+                "to_date",
+                "to_date",
+                "to_date",
+                "convert_to_date",
                 "",
                 "true",
                 "center"
