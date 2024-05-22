@@ -308,9 +308,9 @@ install_mysql ()
                 apt install gnupg -y
                 sudo apt install -y dirmngr --install-recommends
                 apt-get install software-properties-common -y
-                sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
-                wget https://repo.mysql.com/mysql-apt-config_0.8.13-1_all.deb
-                sudo dpkg -i mysql-apt-config_0.8.13-1_all.deb
+                sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B7B3B788A8D3785C
+                wget https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
+                sudo dpkg -i mysql-apt-config_0.8.24-1_all.deb
                 apt update -y
                 #apt -y install unixodbc unixodbc-bin
                         apt-get -y install unixodbc unixodbc-dev
