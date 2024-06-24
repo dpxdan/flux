@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------------------------------------------------
-GUIA DE INSTALAÇÃO FLUXSBC Versão 6.3
+GUIA DE INSTALAÇÃO FLUXSBC Versão 6.4
 --------------------------------------------------------------------------------------------------------------------------
 
 INSTALAÇÃO
@@ -17,7 +17,6 @@ Passo 3: Inicie o processo de instalação.
 ./flux_install.sh
 
 Após a instalação, salve as informações em um local seguro.
-
 
 
 DUVIDAS:
