@@ -208,7 +208,7 @@ jQuery(function($) {
 	
   <?php
  
-    $this->db->select('*');
+  $this->db->select('*');
 	$this->db->where('domain',$_SERVER['HTTP_HOST']);
 	$result=$this->db->get('invoice_conf');
 	if($result->num_rows() > 0){
@@ -221,15 +221,13 @@ jQuery(function($) {
   	 // start FLUXENT-3818
     if($this->session->userdata['logintype'] == 2 || $this->session->userdata['logintype'] == -1 || $this->session->userdata['logintype'] == 1 || $this->session->userdata['logintype'] == 0 ){
      $user_footer = $this->session->userdata('user_footer');  
-     if(isset($user_footer) && $user_footer != '') {  
-      if ($user_footer == 'Flux SBC - Unindo pessoas e negócios.'){
-        $user_footer = '';
-         } ?>
-           <div class="col-md-5 py-2 px-2 text-md-left text-light">Copyright @ <?php echo date("Y"); ?> <a class="text-warning" href="http://flux.net.br" target="_blank"> <?php echo gettext("Flux Telecom")?></a>. <?php echo gettext("All Rights Reserved.")?>
-           </div>
-               	    
-      <?php } ?>
-      
+     if(isset($footer) && $footer != '') {
+         ?>
+           <div class="col-md-5 py-2 px-2 text-md-left text-light"><?php echo $footer?></div>
+           <?php }else{?>
+            <div class="col-md-5 py-2 px-2 text-md-left text-light">Copyright @ <?php echo date("Y"); ?> <a class="text-warning" href="http://flux.net.br" target="_blank"> <?php echo gettext("Flux Telecom")?></a>. <?php echo gettext("All Rights Reserved.")?>
+                </div>
+      <?php }?>
 
 		<div class="col py-2">
   	   		 <label class="text-light" style="margin-top:3px;"><i> <?php echo gettext('Follow us on:')?> </i></label>
@@ -308,4 +306,3 @@ if (isset($selected_locale) && $value['locale'] == $selected_locale) {
 </body>
 </html>
  
-
