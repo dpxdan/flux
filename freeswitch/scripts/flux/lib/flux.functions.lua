@@ -56,12 +56,12 @@ function get_speeddial_number(destination_number,accountid)
 	end
 end
 -- Define call direction
-function define_call_direction(destination_number,accountcode,config)  
-	local didinfo = check_did(destination_number,config);
-	local diddata = check_did_bkp(destination_number,config);
+function define_call_direction(destination_number,accountcode,config, callerid_number)  
+	local didinfo = check_did(destination_number,config,callerid_number);
+	local diddata = check_did_bkp(destination_number,config,callerid_number);
 	local sip2sipinfo
 	if(didinfo == nil) then
-  		sip2sipinfo = check_local_call(destination_number);
+  		sip2sipinfo = check_local_call(destination_number,callerid_number);
 	end
 	if (didinfo ~= nil) then
 		call_direction = "inbound";
@@ -76,9 +76,12 @@ function define_call_direction(destination_number,accountcode,config)
 end
 
 -- Check avilable DID info 
-function is_did(destination_number,config)
+function is_did(destination_number,config, callerid_number)
 	local did_localization = nil 
 	local check_did_info = ""
+
+	destination_number = check_local_number(destination_number, callerid_number)
+	
 	if (config['did_global_translation'] ~= nil and config['did_global_translation'] ~= '' and tonumber(config['did_global_translation']) > 0) then
 		did_localization = get_localization(config['did_global_translation'],'O')
 		-- @TODO: Apply localization logic for DID global translation
@@ -97,8 +100,10 @@ function is_did(destination_number,config)
 end
 
 -- Check DID info
-function check_did(destination_number,config,custom_callerid)
+function check_did(destination_number,config,callerid_number)
 	local did_localization = nil
+	destination_number = check_local_number(destination_number, callerid_number)
+
 	if (config['did_global_translation'] ~= nil and config['did_global_translation'] ~= '' and tonumber(config['did_global_translation']) > 0) then
 		did_localization = get_localization(config['did_global_translation'],'O')
 		-- @TODO: Apply localization logic for DID global translation
@@ -195,8 +200,10 @@ end
 end
 
 
-function check_did_bkp(destination_number,config)
+function check_did_bkp(destination_number,config,callerid_number)
 	local did_localization = nil 
+	destination_number = check_local_number(destination_number, callerid_number)
+
 	if (config['did_global_translation'] ~= nil and config['did_global_translation'] ~= '' and tonumber(config['did_global_translation']) > 0) then
 		did_localization = get_localization(config['did_global_translation'],'O')
 		-- @TODO: Apply localization logic for DID global translation
@@ -258,7 +265,9 @@ function check_did_reseller(destination_number,userinfo,config)
 end
 
 -- Check local info 
-function check_local_call(destination_number)
+function check_local_call(destination_number,callerid_number)
+	destination_number = check_local_number(destination_number,callerid_number)
+	Logger.info("[CHECK_LOCAL_CALL] Check local call for: ".. destination_number)
 	local query = "SELECT sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
 	Logger.debug("[CHECK_LOCAL_CALL] Query :" .. query)
 	assert (dbh:query(query, function(u)
@@ -344,6 +353,18 @@ function doauthorization(field_type,accountcode,call_direction,destination_numbe
     return userinfo
 end
 
+function check_local_number(destination_number, callerid_number)
+	if string.len(destination_number) == 8 then
+		Logger.info("[CHECK_LOCAL_NUMBER] Local Call: "..destination_number)
+		local cn_callerid_number = string.sub(callerid_number, 1, 2)
+		Logger.info("[CHECK_LOCAL_NUMBER] CN of Caller Number: "..cn_callerid_number)
+		destination_number = cn_callerid_number .. destination_number
+		Logger.info("[CHECK_LOCAL_NUMBER] Formatted Number: "..destination_number)
+	end
+
+	return destination_number
+end
+
 -- Get balance from account info 
 function get_balance_old(userinfo,rates,config)
 
@@ -364,7 +385,6 @@ function get_balance_old(userinfo,rates,config)
     if fraud_check_balance_update then balance=fraud_check_balance_update(userinfo,balance,rates) end
     return balance
 end
-
 
 -- Get balance mudanca bilhetagem
 function get_balance(userinfo,rates,config)
