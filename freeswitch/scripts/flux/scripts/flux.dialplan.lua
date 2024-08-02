@@ -21,12 +21,14 @@
 --------------------------------------------------------------------------------------
 
 destination_number = params:getHeader("Caller-Destination-Number")
+callerid_number = params:getHeader('Caller-Caller-ID-Number')
 
 if (destination_number == nil) then
     return;
 end
 
 Logger.info("[Dialplan] Dialed number : "..destination_number)
+Logger.info("[Dialplan] Caller number : "..callerid_number)
 
 if (params:getHeader("variable_sip_h_P-Voice_broadcast") == 'true') then
 	destination_number = params:getHeader("variable_sip_h_P-cb_destination")
@@ -93,7 +95,8 @@ local accountname = 'default'
 local original_destination_number=''
 package_id = 0
 if (params:getHeader('variable_accountcode') ~= nil) then
-accountcode = params:getHeader("variable_accountcode")
+	accountcode = params:getHeader("variable_accountcode")
+	Logger.info("[Dialplan] Accountcode TESTE : ".. accountcode)
 end
 
 
@@ -122,8 +125,7 @@ if accountcode then
 	end
 end
 sipcall = params:getHeader("variable_sipcall")
-
-call_direction = define_call_direction(destination_number,accountcode,config)
+call_direction = define_call_direction(destination_number,accountcode,config,callerid_number)
 
 Logger.info("[Dialplan] Call direction DEBUG : ".. call_direction)
 
@@ -201,7 +203,7 @@ end
 --Added for fraud detection checking
 --if fraud_check then fraud_check(accountcode,destination_number) end
 
-is_did_check = is_did(destination_number,config);
+is_did_check = is_did(destination_number,config,callerid_number);
 if (is_did_check ~= nil and is_did_check['id']) then
     Logger.info("[Dialplan] New Call direction HEREE : ".. call_direction)
 	error_xml_without_cdr(destination_number,"NO_ROUTE_DESTINATION",calltype,config['playback_audio_notification'],userinfo['id'])
