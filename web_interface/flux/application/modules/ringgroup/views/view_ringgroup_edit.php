@@ -206,7 +206,7 @@
                   <?php } ?>
 
                   <div class="col-md-6 form-group">
-                    <label class="p-0 control-label"><?php echo gettext("Estratégia de toque); ?></label>
+                    <label class="p-0 control-label"><?php echo gettext("Estratégia de toque"); ?></label>
                     <select name="strategy" class='col-md-12 form-control selectpicker form-control-lg' data-live-search="true" onChange="changeTest(this.value)">
                      <option value="sequence" <?php if($edit_array['strategy'] == 'sequence'){ echo  'selected="selected"'; }?>><?php echo gettext("Sequencial"); ?></option>
                      <option value="simultaneous" <?php if($edit_array['strategy'] == 'simultaneous'){ echo  'selected="selected"'; }?>><?php echo gettext("Simultâneo"); ?></option>
