@@ -2,15 +2,15 @@ function custom_inbound_7(xml,didinfo,userinfo,config,xml_did_rates,callerid_arr
 	if did_pbx_info then did_pbx_info(xml,didinfo,userinfo,config,xml_did_rates,callerid_array) end
 end
 
-function check_local_call(destination_number)
-	local query = "SELECT sip_devices.id as sip_id,sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation,sip_devices.codec as sip_codec FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
+-- function check_local_call(destination_number)
+-- 	local query = "SELECT sip_devices.id as sip_id,sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation,sip_devices.codec as sip_codec FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
    
-    Logger.debug("[CHECK_LOCAL_CALL_RINGGROUP] Query :" .. query)
-    assert (dbh:query(query, function(u)
-        sip2sipinfo = u;
-    end))
-    return sip2sipinfo;
-end
+--     Logger.debug("[CHECK_LOCAL_CALL_RINGGROUP] Query :" .. query)
+--     assert (dbh:query(query, function(u)
+--         sip2sipinfo = u;
+--     end))
+--     return sip2sipinfo;
+-- end
 
 function get_trim_value (s)
     return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
