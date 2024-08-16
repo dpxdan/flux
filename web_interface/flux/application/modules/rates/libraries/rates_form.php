@@ -1077,6 +1077,30 @@ class rates_form extends common
                 ),
                 'update_drp_type'
             );
+
+            $call_type = array(
+                gettext('Call Type'),
+                'call_type',
+                'SELECT',
+                '',
+                '',
+                'tOOL TIP',
+                'Please Enter account number',
+                'id',
+                'call_type',
+                'calltype',
+                'build_dropdown',
+                'where_arr',
+                array(
+                    "status" => "0"
+                ),
+                array(
+                    'name' => 'call_type[operator]',
+                    'class' => 'update_drp'
+                ),
+                'update_drp_type'
+            );
+
         $form['forms'] = array(
             "rates/origination_rate_batch_update/",
             array(
@@ -1176,7 +1200,9 @@ class rates_form extends common
                 ''
             ),
 
-            $trunk
+            $trunk,
+
+            $call_type
         );
 
         $form['button_search'] = array(
