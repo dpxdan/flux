@@ -111,7 +111,7 @@ verification ()
 Os Tokens de Acesso são necessários para acessar os pacotes de instalação do Softswitch."
         echo ""
 
-        echo "Caso não posua o token, entre em contato com daniel@flux.net.br"
+        echo "Caso não posua o token, entre em contato com felipe@flux.net.br"
         sleep 3s
         echo "" && echo ""
         read -p "Insira o token Flux: ${FS_TOKEN}"
@@ -136,7 +136,7 @@ Os Tokens de Acesso são necessários para acessar os pacotes de instalação do
                         echo "Token inválido"
                         echo "******************************************************************************"
                         echo ""
-                        echo "Para mais informacoes daniel@flux.net.br "
+                        echo "Para mais informacoes felipe@flux.net.br "
                         echo ""
                         echo "******************************************************************************"
                         sleep 3s
@@ -164,7 +164,7 @@ Os Tokens de Acesso são necessários para acessar os pacotes de instalação do
                         echo "Token inválido"
                         echo "******************************************************************************"
                         echo ""
-                        echo "Para mais informacoes daniel@flux.net.br "
+                        echo "Para mais informacoes felipe@flux.net.br "
                         echo ""
                         echo "******************************************************************************"
                         sleep 3s
