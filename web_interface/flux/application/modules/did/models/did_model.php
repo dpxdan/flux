@@ -45,7 +45,7 @@ class DID_model extends CI_Model
 view_dids.price,view_dids.billing_type,view_dids.billing_days,
 ,view_dids.product_id,view_dids.account_id', array(
                         'dids.status' => 0,
-                        'view_dids.account_id' => $accountinfo['id']
+                        'dids.parent_id' => $accountinfo['id']
                     ), 'view_dids', 'dids.product_id=view_dids.product_id', 'inner', $limit, $start, 'DESC', 'dids.id');
                 }
             } else {
@@ -56,7 +56,7 @@ view_dids.price,view_dids.billing_type,view_dids.billing_days,
 view_dids.price,view_dids.billing_type,view_dids.billing_days,
 ,view_dids.product_id,view_dids.account_id', array(
                         'dids.status' => 0,
-                        'view_dids.account_id' => $accountinfo['id']
+                        'dids.parent_id' => $accountinfo['id']
                     ), 'view_dids', 'dids.product_id=view_dids.product_id', 'inner', $limit, $start, 'DESC', 'dids.id');
                 }
             }
