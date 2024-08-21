@@ -3166,7 +3166,7 @@ class Freeswitch_form extends common
                     '',
                     '',
                     '',
-                    'set_sip_config_option'
+                    'set_option_default_false'
                 ),
 
                 array(
@@ -3419,7 +3419,7 @@ class Freeswitch_form extends common
                     '',
                     '',
                     '',
-                    'set_sip_config_option'
+                    'set_option_default_false'
                 ),
                 array(
                     gettext('Password'),
