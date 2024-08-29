@@ -31,11 +31,17 @@ function check_local_call_adv(destination_number)
     assert (dbh:query(query, function(u)
         sip2sipinfo = u;
     end))
+	Logger.debug("[CHECK_LOCAL_CALL_ADV] sip2sipinfo")
+	for k, v in pairs(sip2sipinfo) do
+		Logger.debug("[CHECK_LOCAL_CALL_ADV] " .. k .. " : " .. tostring(v))
+	end
+	Logger.debug("[CHECK_LOCAL_CALL_ADV] sip_id "..sip2sipinfo['sip_id'])
     return sip2sipinfo;
 end
 
 function sip_device_fail_over(didinfo,xml,destination_number)
-	SipDestinationInfo = check_local_call(didinfo['extensions'],didinfo['accountid']) 
+	Logger.debug("[SIP_DEVICE_FAIL_OVER]")
+	SipDestinationInfo = check_local_call_adv(didinfo['extensions'],didinfo['accountid']) 
 	if(SipDestinationInfo and SipDestinationInfo ~= '')then
 		local sip_routing_arr = sip_routing_info(SipDestinationInfo['sip_id'])
 		if(sip_routing_arr)then
@@ -148,6 +154,7 @@ function freeswitch_xml_local(xml,destination_number,destinationinfo,callerid_ar
 end
 
 function custom_inbound_0(xml,didinfo,userinfo,config,xml_did_rates,callerid_array,livecall_data)
+	Logger.info("[PBX_SIP_ROUTING] CUSTOM INBOUND 0");
 	config['leg_timeout'] = didinfo['leg_timeout'];
 	is_local_extension = "1"
 	local bridge_str = ""
@@ -165,7 +172,8 @@ function custom_inbound_0(xml,didinfo,userinfo,config,xml_did_rates,callerid_arr
 				bridge_str = bridge_str..deli_str[i]
 			end
 		end
-		SipDestinationInfo = check_local_call(didinfo['extensions'],didinfo['accountid']) 
+		-- SipDestinationInfo = check_local_call(didinfo['extensions'],didinfo['accountid'])
+		SipDestinationInfo = check_local_call_adv(didinfo['extensions'])
 		if(SipDestinationInfo and SipDestinationInfo ~= '')then
 			sip_device_routing(xml,didinfo['extensions'],SipDestinationInfo,callerid_array) 
 		else
