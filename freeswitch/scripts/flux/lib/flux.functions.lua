@@ -127,7 +127,7 @@ function check_did(destination_number,config,custom_callerid)
 			Logger.warning("[CALLERID_NUMBER] Callerid:" .. a)
 			if (didinfo['area_code'] == area_number) then
 	--		area_number_cut = string.sub(a, 3, 3)
-				area_number_dest = number_loop(a,'patterns')
+				area_number_dest = number_loop(a,'pattern')
 				local query_rate_area = "SELECT * FROM "..TBL_ORIGINATION_RATES.." WHERE "..area_number_dest.." AND status = 0 AND (pricelist_id = "..didinfo['rate_group'].." OR accountid="..didinfo['accountid']..")  ORDER BY accountid DESC,LENGTH(pattern) DESC,cost DESC LIMIT 1";
 
 				Logger.notice("CHAMADA DE ENTRADA COM O MESMO CN DO CLIENTE")
@@ -364,7 +364,6 @@ function get_balance_old(userinfo,rates,config)
     if fraud_check_balance_update then balance=fraud_check_balance_update(userinfo,balance,rates) end
     return balance
 end
-
 
 -- Get balance mudanca bilhetagem
 function get_balance(userinfo,rates,config)
