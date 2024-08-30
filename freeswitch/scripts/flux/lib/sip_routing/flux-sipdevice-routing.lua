@@ -87,11 +87,10 @@ if session:ready() then
 		session:execute("bridge", bridge)
 	end
 	if last_disposition ~= "SUCCESS" then
-	 	session:execute("answer");
+	 	-- session:execute("answer");
+		 session:streamFile("/usr/share/freeswitch/sounds/pt/BR/karina/flux-indisponivel.wav")
 	 	hangup_cause_disp = session:setVariable("hangup_cause", last_disposition)
---	 	hangup_cause = session.setVariable("hangup_cause", last_disposition);
-
-	 logger("Dialed User For Route :" .. last_disposition );
+		--hangup_cause = session.setVariable("hangup_cause", last_disposition);
 	 
 	 --session:execute("voicemail", "default "..variable_sip_to_host.." "..sip_destination_number);
 

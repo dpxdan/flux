@@ -562,12 +562,12 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." is not authenticated!!";
 		hangup_cause = "AUTHENTICATION_FAIL";
-		audio_file = sound_path ..  "flux_expired.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "ACCOUNT_INACTIVE_DELETED") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." is either inactive or deleted!!";
 		hangup_cause = "ACCOUNT_INACTIVE_DELETED";
-		audio_file = sound_path ..  "flux_expired.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 		if(account_id ~= '' and tonumber(account_id) >= 0)then post_cdrs = 1 end
 	--~ Fraud Detection
 	elseif(error_code == "FRAUD_CALL_PER_ACCOUNT") then
@@ -597,49 +597,49 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 		log_type = "DEBUG";
 		log_message = "Accountcode ".. accountcode.." Account has been expired!!";
 		hangup_cause = "ACCOUNT_EXPIRE";
-		audio_file = sound_path ..  "flux_expired.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "NO_SUFFICIENT_FUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." doesn't have sufficiant fund!!";
 		hangup_cause = "NO_SUFFICIENT_FUND";
-		audio_file = sound_path ..  "flux-not-enough-credit.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "DESTINATION_BLOCKED") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") is blocked for account!!";
 		hangup_cause = "DESTINATION_BLOCKED";
-		audio_file = sound_path ..  "flux-badnumber.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "ORIGNATION_RATE_NOT_FOUND") then
 		log_type = "WARNING";
 
 		log_message = "Accountcode ".. accountcode ..". Dialed number ("..destination_number..")  origination rates not found!!";
 		hangup_cause = "ORIGNATION_RATE_NOT_FOUND";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "RESELLER_COST_CHEAP") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") , Reseller call is priced too cheap! Call being barred!!";
 		hangup_cause = "RESELLER_COST_CHEAP";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 
 	elseif(error_code == "TERMINATION_RATE_NOT_FOUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") termination rates not found!!";
 		hangup_cause = "TERMINATION_RATE_NOT_FOUND";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "DID_DESTINATION_NOT_FOUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") destination not found!!";
 		hangup_cause = "DID_DESTINATION_NOT_FOUND";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "UNALLOCATED_NUMBER") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed DID number ("..destination_number..") is inactive!!";
 		hangup_cause = "UNALLOCATED_NUMBER";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	elseif(error_code == "NO_ROUTE_DESTINATION") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed DID number ("..destination_number..") routes not set!!";
 		hangup_cause = "NO_ROUTE_DESTINATION";
-		audio_file = sound_path ..  "flux-badphone.wav";
+		audio_file = sound_path ..  "flux-indisponivel.wav";
 	end
 	    Logger.debug("post_cdrs:::" .. post_cdrs)
 	if(calltype ~= "FLUX-CALLINGCARD" and tonumber(post_cdrs) ==0) then

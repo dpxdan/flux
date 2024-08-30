@@ -53,13 +53,13 @@ function sip_device_fail_over(didinfo,xml,destination_number)
 			table.insert(xml, [[<action application="set" data="not_register_destination=]]..sip_routing_arr['not_register_destination']..[["/>]]);
 			table.insert(xml, [[<action application="set" data="variable_sip_to_host=]]..params:getHeader("variable_sip_to_host")..[["/>]]);
 --			table.insert(xml, [[<action application="set" data="variable_sip_to_port=]]..params:getHeader("variable_sip_to_port")..[["/>]]);
-			table.insert(xml, [[<action application="set" data="leg_timeout=]]..config['leg_timeout']..[["/>]]);
-			table.insert(xml, [[<action application="set" data="userinfo_id=]]..SipDestinationInfo['accountid']..[["/>]]);
-			table.insert(xml, [[<action application="set" data="sip_destination_number=]]..didinfo['extensions']..[["/>]]);
-			table.insert(xml, [[<action application="set" data="destination_number=]]..destination_number..[["/>]]);
-			table.insert(xml, [[<action application="set" data="did_number=]]..didinfo['did_number']..[["/>]]);
-			table.insert(xml, [[<action application="lua" data="flux/lib/sip_routing/flux-sipdevice-routing.lua"/>]]);
 		end 
+		table.insert(xml, [[<action application="set" data="leg_timeout=]]..config['leg_timeout']..[["/>]]);
+		table.insert(xml, [[<action application="set" data="userinfo_id=]]..SipDestinationInfo['accountid']..[["/>]]);
+		table.insert(xml, [[<action application="set" data="sip_destination_number=]]..didinfo['extensions']..[["/>]]);
+		table.insert(xml, [[<action application="set" data="destination_number=]]..destination_number..[["/>]]);
+		table.insert(xml, [[<action application="set" data="did_number=]]..didinfo['did_number']..[["/>]]);
+		table.insert(xml, [[<action application="lua" data="flux/lib/sip_routing/flux-sipdevice-routing.lua"/>]]);
 	end
 end
 
