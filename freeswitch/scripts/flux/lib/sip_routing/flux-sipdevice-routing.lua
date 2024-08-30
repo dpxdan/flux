@@ -88,7 +88,9 @@ if session:ready() then
 	end
 	if last_disposition ~= "SUCCESS" then
 	 	-- session:execute("answer");
-		 session:streamFile("/usr/share/freeswitch/sounds/pt/BR/karina/flux-indisponivel.wav")
+		 if tonumber(config['playback_audio_notification']) == 0 then
+			session:streamFile("/usr/share/freeswitch/sounds/pt/BR/karina/flux-indisponivel.wav")
+		 end
 	 	hangup_cause_disp = session:setVariable("hangup_cause", last_disposition)
 		--hangup_cause = session.setVariable("hangup_cause", last_disposition);
 	 
