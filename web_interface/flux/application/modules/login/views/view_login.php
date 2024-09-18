@@ -21,10 +21,10 @@ if (isset($invoiceconf['website_title']) && $invoiceconf['website_title'] != '')
 }
 ?>
     </title>
-    <?php $user_favicon = $this->session->userdata('user_favicon');?>
+    <?php $user_favicon = $invoiceconf['favicon'];?>
 
     <link rel="icon"
-	href="<?echo base_url(); ?>assets/images/<?echo $user_favicon ?>" />
+	href="<?echo base_url(); ?>upload/<?echo $user_favicon ?>" />
 <link href="<?=base_url()?>assets/css/bootstrap.min.css"
 	rel="stylesheet">
 <link
