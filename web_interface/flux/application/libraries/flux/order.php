@@ -20,36 +20,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
-/*
 
-==> /var/log/mysql/mysql.log <==
-2023-02-26T10:32:03.204946Z	29658 Query	SELECT id,used_seconds FROM counters  WHERE  accountid = 18 AND package_id = 39 AND status=1 LIMIT 1
-
-==> /var/log/flux/flux.log <==
-[2023-02-26 07:32:03] GET Counters  : SELECT id,used_seconds FROM counters  WHERE  accountid = 18 AND package_id = 39 AND status=1 LIMIT 1
-[2023-02-26 07:32:03] Insert Counters  : 
-
-==> /var/log/mysql/mysql.log <==
-2023-02-26T10:32:03.205390Z	29658 Query	INSERT INTO counters (product_id,package_id,accountid,type) VALUES (4,orders.id,18,0)
-2023-02-26T10:32:03.214287Z	29658 Query	SELECT id,used_seconds FROM counters  WHERE  accountid = 18 AND package_id = 39 AND status=1 LIMIT 1
-
-==> /var/log/flux/flux.log <==
-[2023-02-26 07:32:03] GET Counters  : SELECT id,used_seconds FROM counters  WHERE  accountid = 18 AND package_id = 39 AND status=1 LIMIT 1
-[2023-02-26 07:32:03] available_seconds  : 12000
-
-[2023-02-26 07:32:03] free_minutes  : 200
-
-[2023-02-26 07:32:03] used_seconds  : 0
-
-[2023-02-26 07:32:03] duration  : 4
-
-[2023-02-26 07:32:03] Update Counters  : UPDATE counters SET used_seconds = 60 WHERE id = 1334
-
-==> /var/log/mysql/mysql.log <==
-2023-02-26T10:32:03.214967Z	29658 Query	UPDATE counters SET used_seconds = 60 WHERE id = 1334
-
-
-*/
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
 class order {
@@ -60,7 +31,7 @@ class order {
 		$this->CI->load->library ( 'session' );	
 		$this->CI->load->library ('flux/payment');
 		$this->CI->load->library ('flux/invoice');
-		$this->CI->load->library("Invoice_log");
+		$this->CI->load->library("flux_log");
 		$this->CI->load->model ( 'common_model' );
 	}
 	function confirm_product_order($productarr,$account_id){ 
@@ -243,9 +214,8 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 					$product_info->price= ($product_info->price * $product_info->quantity);
 					$product_info->invoice_type = ($product_info->product_category == 3) ? "credit":"debit";
 					$product_info->charge_type = $this->CI->common->get_field_name("code","category",array("id"=>$product_info->product_category)); 
-					$product_info->description = "".$product_info->name."";
+					$product_info->description= $product_info->charge_type." (".$product_info->name." X ".$product_info->quantity.") has been added.";
 					$product_info->is_apply_tax =($product_info->payment_by == "Account Balance")?"false":"true";
-//					$product_info->add_invoice_credit ="false";
 
 					$last_payment_id=$this->CI->payment->add_payments_transcation((array)$product_info,(array)$accountdata,$account_currency_info);
 					$orderobjArr['accounts'][$key]->invoiceid=$last_payment_id;
@@ -361,7 +331,7 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 				"ip"=>$this->getRealIpAddr()
 				);
 				
-		$this->CI->invoice_log->write_log('generate_order', json_encode($order_insert_array_log));		
+		$this->CI->flux_log->write_log('generate_order', json_encode($order_insert_array_log));		
 		$order_insert_array = array(
 				"order_id" =>crc32(uniqid()),
 				"parent_order_id" => $parent_order_id,
@@ -385,7 +355,18 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 				);		
 		
 		$this->CI->db->insert("counters",$counters_insert_array);
-		//$last_id = $this->CI->db->insert_id();
+		$counter_id = $this->CI->db->insert_id();
+		
+
+        $counters_insert_array_log = array(
+                "id" => $counter_id,
+				"product_id" =>$product_info->id,
+				"package_id" => $last_id,
+				"accountid"=>$account_info->id,
+				"type"=>$created_by_accountinfo['id']
+				);		
+		$this->CI->flux_log->write_log('counters_insert_array_log', json_encode($counters_insert_array_log));
+		
 		 $order_item_array_log = array(
 							"order_id" =>$last_id,
 							"product_category" =>$product_info->product_category,
@@ -406,8 +387,8 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 							"exchange_rate"=>$account_currency_info['currencyrate'],
 							"to_currency"=>$account_currency_info['currency']
 							);
+		$this->CI->flux_log->write_log('create_order_item', json_encode($order_item_array_log));
 			
-			$this->CI->invoice_log->write_log('create_order_item', json_encode($order_item_array_log));
 		  $order_item_array = array(
 					"order_id" =>$last_id,
 					"product_category" =>$product_info->product_category,
