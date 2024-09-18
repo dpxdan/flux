@@ -161,7 +161,7 @@ function load_sofia($logger, $db, $config) {
 		foreach ( $settings as $set_key => $set_val ) {
 			$xml .= "       <param name=\"" . $set_key . "\" value=\"" . $set_val . "\"/>\n";
 		}
-		$xml .= "       <param name=\"user-agent-string\" value=\"FluxSBC 6.0\"/>\n";
+		// $xml .= "       <param name=\"user-agent-string\" value=\"FluxSBC 6.0\"/>\n";
 
 		$xml .= "   </settings>\n";
 		
