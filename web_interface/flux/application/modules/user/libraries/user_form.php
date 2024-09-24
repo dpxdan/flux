@@ -1213,17 +1213,17 @@ class User_form extends common
                 "right"
             ),
             $billing_days,
-            array(
-                gettext("Is Purchased?"),
-                "100",
-                "number",
-                "number",
-                "number",
-                "check_did_avl",
-                "",
-                "true",
-                "center"
-            ),
+            // array(
+            //     gettext("Is Purchased?"),
+            //     "100",
+            //     "number",
+            //     "number",
+            //     "number",
+            //     "check_did_avl",
+            //     "",
+            //     "true",
+            //     "center"
+            // ),
             array(
                 gettext("Call Type"),
                 "90",
@@ -1245,19 +1245,19 @@ class User_form extends common
                 "",
                 "true",
                 "center"
-            ),
-            array(
-                gettext("Call Forward"),
-                "90",
-                "id",
-                "id",
-                "id",
-                "build_did_forward",
-                "",
-                "true",
-                "center"
-            )/*,
-            $modified_date*/
+            )
+            // array(
+            //     gettext("Call Forward"),
+            //     "90",
+            //     "id",
+            //     "id",
+            //     "id",
+            //     "build_did_forward",
+            //     "",
+            //     "true",
+            //     "center"
+            // )/*,
+            // $modified_date*/
         ));
         return $grid_field_arr;
     }
