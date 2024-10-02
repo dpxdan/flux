@@ -30,6 +30,7 @@ class invoice {
 		$this->CI->load->model ( 'common_model' );
 		$this->CI->load->library ( 'session' );
 		$this->CI->load->library("Invoice_log");
+		$this->CI->load->library("flux_log");
 	}
 
 	function get_invoice_date($select, $accountid = 0, $reseller_id, $order_by = 'id') {
@@ -273,11 +274,12 @@ class invoice {
 		return $invoice_id;
 	}
 	function update_balance($amount, $accountid, $payment_type,$invoice_type) {
+		$this->CI->flux_log->write_log('invoice', json_encode($invoice_type));
 		if($invoice_type == 'credit'){
 			  $query = "update accounts set balance =  IF(posttoexternal=1,balance-" . $amount . ",balance+" . $amount . ") where id ='" . $accountid . "'"; 
 			return $this->CI->db->query ( $query );
 		}else{
-			 $query = "update accounts set balance =  IF(posttoexternal=1,balance+" . $amount . ",balance-" . $amount . ") where id ='" . $accountid . "'"; 
+			 $query = "update accounts set balance =  IF(posttoexternal=1,balance+" . $amount . ",balance+" . $amount . ") where id ='" . $accountid . "'"; 
 			return $this->CI->db->query ( $query );
 
 		}
