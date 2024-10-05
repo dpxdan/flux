@@ -641,7 +641,7 @@ if (userinfo ~= nil) then
 		Logger.debug("[Dialplan] Generated XML:" .. XML_STRING)  
 	elseif (call_direction == 'local') then
 		local SipDestinationInfo;
-		SipDestinationInfo = check_local_call(destination_number)
+		SipDestinationInfo = check_local_call(destination_number,callerid_number)
 		
 		xml = freeswitch_xml_header(xml,destination_number,accountcode,maxlength,call_direction,accountname,xml_user_rates,customer_userinfo,config,nil,nil,callerid_array,original_destination_number)
 

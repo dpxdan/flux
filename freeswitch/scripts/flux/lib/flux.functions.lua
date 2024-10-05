@@ -268,7 +268,7 @@ end
 function check_local_call(destination_number,callerid_number)
 	destination_number = check_local_number(destination_number,callerid_number)
 	Logger.info("[CHECK_LOCAL_CALL] Check local call for: ".. destination_number)
-	local query = "SELECT sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
+	local query = "SELECT sip_devices.id as sip_id, sip_devices.username as username,accounts.number as accountcode,sip_devices.accountid as accountid,accounts.did_cid_translation as did_cid_translation FROM "..TBL_SIP_DEVICES.." as sip_devices,"..TBL_USERS.." as  accounts WHERE accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND sip_devices.username=\"" ..destination_number .."\" limit 1";
 	Logger.debug("[CHECK_LOCAL_CALL] Query :" .. query)
 	assert (dbh:query(query, function(u)
 		sip2sipinfo = u;
@@ -590,6 +590,10 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 		if( rates['init_inc'] == nil)then
 			rates['init_inc']=0;
 		end
+		if (rates['custom_call_type'] == nil) then
+		Logger.warning("[FIND_DID_RATE] DID Rate group not found or Inactive!!!")
+		rates['custom_call_type'] = rates['call_type']
+	    end
 		if (rates['country_id']==nil) then rates['country_id']=28 end
 		xml_rates = "ID:"..rates['id'].."|CODE:"..rates['pattern'].."|DESTINATION:"..rates['comment'].."|CONNECTIONCOST:"..rates['connectcost'].."|INCLUDEDSECONDS:"..rates['includedseconds'].."|CT:"..rates['custom_call_type'].."|COST:"..rates['cost'].."|INC:"..rates['inc'].."|INITIALBLOCK:"..rates['init_inc'].."|RATEGROUP:"..rate_group['id'].."|MARKUP:"..rate_group['markup'].."|CI:"..rates['country_id'].."|ACCID:"..userinfo['id'];
 
