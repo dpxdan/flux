@@ -64,7 +64,7 @@
 	<X-PRE-PROCESS cmd="set" data="domain_name=$${domain}"/>
 	<X-PRE-PROCESS cmd="set" data="hold_music=local_stream://default"/>
 	<X-PRE-PROCESS cmd="set" data="use_profile=external"/>
-<!--<X-PRE-PROCESS cmd="set" data="dsn=dbname:user:password"/>-->
+    <X-PRE-PROCESS cmd="set" data="dsn=dbname:user:password"/>
 	<X-PRE-PROCESS cmd="set" data="transfer_ringback=$${pt-ring}" />
 	<X-PRE-PROCESS cmd="set" data="ringback=$${pt-ring}" />
   <X-PRE-PROCESS cmd="set" data="rtp_sdes_suites=AEAD_AES_256_GCM_8|AEAD_AES_128_GCM_8|AES_CM_256_HMAC_SHA1_80|AES_CM_192_HMAC_SHA1_80|AES_CM_128_HMAC_SHA1_80|AES_CM_256_HMAC_SHA1_32|AES_CM_192_HMAC_SHA1_32|AES_CM_128_HMAC_SHA1_32|AES_CM_128_NULL_AUTH"/>
@@ -76,8 +76,8 @@
   <X-PRE-PROCESS cmd="set" data="zrtp_secure_media=true"/>
  
  
-  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=PCMA,PCMU,G722"/>
-  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMA,PCMU,G722"/>
+  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=G722,PCMU,PCMA,GSM"/>
+  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM"/>
 
   <!--
       xmpp_client_profile and xmpp_server_profile
