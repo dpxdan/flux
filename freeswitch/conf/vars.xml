@@ -76,8 +76,8 @@
   <X-PRE-PROCESS cmd="set" data="zrtp_secure_media=true"/>
  
  
-  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=G722,PCMU,PCMA,GSM"/>
-  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM"/>
+  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=PCMA,PCMU,GSM,G722"/>
+  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMA,PCMU,GSM,G722"/>
 
   <!--
       xmpp_client_profile and xmpp_server_profile
