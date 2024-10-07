@@ -354,7 +354,7 @@ function doauthorization(field_type,accountcode,call_direction,destination_numbe
 end
 
 function check_local_number(destination_number, callerid_number)
-	if string.len(destination_number) == 8 then
+	if string.len(destination_number) == 8  and callerid_number then
 		Logger.info("[CHECK_LOCAL_NUMBER] Local Call: "..destination_number)
 		local cn_callerid_number = string.sub(callerid_number, 1, 2)
 		Logger.info("[CHECK_LOCAL_NUMBER] CN of Caller Number: "..cn_callerid_number)
@@ -473,7 +473,7 @@ function do_number_translation(number_translation,destination_number)
 end
 
 -- Find Max length
-function get_call_maxlength(userinfo,destination_number,call_direction,number_loop,config,didinfo)     
+function get_call_maxlength(userinfo,destination_number,call_direction,number_loop,config,didinfo,callerid_number)   
     local maxlength = 0
     local rates
     local rate_group
@@ -510,7 +510,7 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 			rates['country_id']=28
 		end
 	else
-        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config)
+        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config,callerid_number)
 			Logger.info("call_direction:::::: "..call_direction)
 		if (rates == nil) then
 			Logger.warning("[FIND_MAXLENGTH] Rates not found!!!")
@@ -624,14 +624,14 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 end
 
 -- Get origination rates 
-function get_rates(userinfo,destination_number,number_loop,call_direction,config)
+function get_rates(userinfo,destination_number,number_loop,call_direction,config,callerid_number)
     
 	local rates_info
     	Logger.debug("[GET_RATES] call_direction :" .. call_direction)
 	if call_direction == "inbound" then
-		rates_info = check_did(destination_number,config)
+		Logger.debug("[GET_RATES] callerid_number :" .. callerid_number)
+		rates_info = check_did(destination_number,config,callerid_number)
 	else 
-    	--local query  = "SELECT "..TBL_CALL_TYPE..".call_type as calltype, "..TBL_ORIGINATION_RATES..".call_type as custom_call_type, "..TBL_ORIGINATION_RATES..".* FROM "..TBL_ORIGINATION_RATES..","..TBL_CALL_TYPE.." WHERE "..TBL_ORIGINATION_RATES..".call_type = "..TBL_CALL_TYPE..".id  AND "..number_loop.." AND "..TBL_ORIGINATION_RATES..".status = 0 AND (pricelist_id = "..userinfo['pricelist_id'].." OR accountid="..userinfo['id']..")  ORDER BY accountid DESC,LENGTH(pattern) DESC,cost DESC LIMIT 1";
 		local query  = "SELECT "..TBL_CALL_TYPE..".call_type as calltype, "..TBL_ORIGINATION_RATES..".call_type as custom_call_type, "..TBL_ORIGINATION_RATES..".* FROM "..TBL_ORIGINATION_RATES..","..TBL_CALL_TYPE.." WHERE ("..TBL_ORIGINATION_RATES..".call_type = "..TBL_CALL_TYPE..".id  OR routes.comment = calltype.call_type) AND "..number_loop.." AND "..TBL_ORIGINATION_RATES..".status = 0 AND (pricelist_id = "..userinfo['pricelist_id'].." OR accountid="..userinfo['id']..")  ORDER BY accountid DESC,LENGTH(pattern) DESC,cost DESC LIMIT 1";
     	
 		Logger.debug("[GET_RATES] Query :" .. query)

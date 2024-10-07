@@ -316,7 +316,7 @@ if (userinfo ~= nil) then
   	number_loop_str = number_loop(destination_number)
 
 	-- Fine max length of call based on origination rates.
-	origination_array = get_call_maxlength(userinfo,destination_number,call_direction,number_loop_str,config,didinfo)
+	origination_array = get_call_maxlength(userinfo,destination_number,call_direction,number_loop_str,config,didinfo,callerid_number)
 	    
 	if( origination_array == 'NO_SUFFICIENT_FUND' or origination_array == 'ORIGNATION_RATE_NOT_FOUND' or origination_array == 'NO_ROUTE_DESTINATION') then
 	    error_xml_without_cdr(destination_number,origination_array,calltype,config['playback_audio_notification'],userinfo['id']) 
@@ -437,7 +437,7 @@ if (userinfo ~= nil) then
 		Logger.info("Type : "..reseller_userinfo['posttoexternal'].." [0:prepaid,1:postpaid]")  
 		Logger.info("Ratecard id : "..reseller_userinfo['pricelist_id'])  
 		
-		origination_array_reseller=get_call_maxlength(reseller_userinfo,destination_number,call_direction,number_loop_str,config,didinfo)
+		origination_array_reseller=get_call_maxlength(reseller_userinfo,destination_number,call_direction,number_loop_str,config,didinfo,callerid_number)
 
         if( origination_array_reseller == 'NO_SUFFICIENT_FUND' or origination_array_reseller == 'ORIGNATION_RATE_NOT_FOUND') then
             error_xml_without_cdr(destination_number,origination_array_reseller,calltype,1,customer_userinfo['id']) 
@@ -585,10 +585,10 @@ if (userinfo ~= nil) then
 --		if(tonumber(config['free_inbound']) == 1)then
 		if(tonumber(config['free_inbound']) == 1 and didinfo['reverse_rate'] ~= nil and didinfo['reverse_rate'] == "0")then
 		Logger.info("[userinfo] Actual origination_array_DID XML DEBUG:")
-			origination_array_DID = get_call_maxlength(customer_userinfo,callerid_number,"outbound",number_loop_str_orig,config,didinfo)
+			origination_array_DID = get_call_maxlength(customer_userinfo,callerid_number,"outbound",number_loop_str_orig,config,didinfo,callerid_number)
 		else
 		Logger.info("[userinfo] Actual destination_array_DID XML DEBUG:")
-		origination_array_DID = get_call_maxlength(customer_userinfo,destination_number,"inbound",number_loop,config,didinfo)		
+		origination_array_DID = get_call_maxlength(customer_userinfo,destination_number,"inbound",number_loop,config,didinfo,callerid_number)		
 		end
 		local actual_userinfo = customer_userinfo
 		Logger.info("[userinfo] Actual CustomerInfo XML DEBUG:" .. actual_userinfo['id'])
@@ -617,7 +617,7 @@ if (userinfo ~= nil) then
 		while (tonumber(customer_userinfo['reseller_id']) > 0  ) do 
 			Logger.info("[WHILE DID CONDITION] FOR CHECKING RESELLER :" .. customer_userinfo['reseller_id']) 
 			customer_userinfo = doauthorization('id',customer_userinfo['reseller_id'],call_direction,destination_number,number_loop,config)	
-			origination_array_DID = get_call_maxlength(customer_userinfo,destination_number,"inbound",number_loop_str,config,didinfo)
+			origination_array_DID = get_call_maxlength(customer_userinfo,destination_number,"inbound",number_loop_str,config,didinfo,callerid_number)
 
 			if(origination_array_DID ~= 'ORIGNATION_RATE_NOT_FOUND' and origination_array_DID ~= 'NO_SUFFICIENT_FUND' and origination_array_DID[3] ~= nil) then 
 				Logger.info("[userinfo] Userinfo XML:" .. customer_userinfo['id']) 
@@ -641,7 +641,7 @@ if (userinfo ~= nil) then
 		Logger.debug("[Dialplan] Generated XML:" .. XML_STRING)  
 	elseif (call_direction == 'local') then
 		local SipDestinationInfo;
-		SipDestinationInfo = check_local_call(destination_number)
+		SipDestinationInfo = check_local_call(destination_number,callerid_number)
 		
 		xml = freeswitch_xml_header(xml,destination_number,accountcode,maxlength,call_direction,accountname,xml_user_rates,customer_userinfo,config,nil,nil,callerid_array,original_destination_number)
 
