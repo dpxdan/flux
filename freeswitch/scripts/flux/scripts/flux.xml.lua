@@ -200,7 +200,7 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 		table.insert(xml, [[<action application="set" data="calltype=BROADCAST"/>]]);
 		table.insert(xml, [[<action application="set" data="sip_user=]]..sip_user..[["/>]]);
 	else
-		table.insert(xml, [[<action application="set" data="calltype=STANDARD"/>]]);        
+		table.insert(xml, [[<action application="set" data="calltype=Padrao"/>]]);        
      end
 	table.insert(xml, [[<action application="set" data="termination_rates=]]..xml_termiantion_rates..[["/>]]);        
 	table.insert(xml, [[<action application="set" data="trunk_id=]]..outbound_info['trunk_id']..[["/>]]);        
@@ -405,7 +405,7 @@ function custom_inbound_3(xml,didinfo,userinfo,config,xml_did_rates,callerid_arr
 	return xml;
 end
 function custom_inbound_4(xml,didinfo,userinfo,config,xml_did_rates,callerid_array,livecall_data)
-	table.insert(xml, [[<action application="set" data="calltype=STANDARD"/>]]);     
+	table.insert(xml, [[<action application="set" data="calltype=Padrao"/>]]);     
 	table.insert(xml, [[<action application="set" data="accountcode=]]..didinfo['account_code']..[["/>]]);
 	table.insert(xml, [[<action application="set" data="caller_did_account_id=]]..userinfo['id']..[["/>]]);
 	if(xml_did_rates ~= nil and xml_did_rates ~= '')then

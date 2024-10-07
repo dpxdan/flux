@@ -417,13 +417,13 @@ install_flux ()
 normalize_flux ()
 {
 	sudo apt-get install -y locales-all
-        #mkdir -p /etc/nginx/ssl
-        #openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
         if [ ${DIST} = "DEBIAN" ]; then
                 /bin/cp /usr/src/ioncube/ioncube_loader_lin_7.3.so /usr/lib/php/20180731/
                 sed -i '2i zend_extension ="/usr/lib/php/20180731/ioncube_loader_lin_7.3.so"' /etc/php/7.3/fpm/php.ini
                 sed -i '2i zend_extension ="/usr/lib/php/20180731/ioncube_loader_lin_7.3.so"' /etc/php/7.3/cli/php.ini
                 cp -rf ${FLUX_SOURCE_DIR}/web_interface/nginx/deb_flux.conf /etc/nginx/conf.d/flux.conf
+                mv /etc/nginx/nginx.conf /etc/nginx/nginx.old
+                cp ${FLUX_SOURCE_DIR}/web_interface/nginx/deb_nginx.conf /etc/nginx/nginx.conf
                 systemctl start nginx
                 systemctl enable nginx
                 systemctl start php7.3-fpm
@@ -561,6 +561,8 @@ install_freeswitch ()
         ln -s ${FLUX_SOURCE_DIR}/freeswitch/scripts ${FS_DIR}
         cp -rf ${FLUX_SOURCE_DIR}/freeswitch/sounds/*.wav ${FS_SOUNDSDIR}/
         cp -rf ${FLUX_SOURCE_DIR}/freeswitch/conf/autoload_configs/* /etc/freeswitch/autoload_configs/
+        cp ${FLUX_SOURCE_DIR}/freeswitch/conf/vars.xml /etc/freeswitch/vars.xml
+        sed -i "s#dbname:user:password#FLUX:fluxuser:${FLUXUSER_MYSQL_PASSWORD}#g" /etc/freeswitch/vars.xml
 }
 
 #Normalize freeswitch installation
