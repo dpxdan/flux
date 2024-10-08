@@ -50,6 +50,42 @@ DELIMITER ;
 
 alter table flux.sip_devices add column `id_sip_external` INT NOT NULL DEFAULT '0';
 
+
+-- ----------------------------
+-- Table structure for sip_device_routing
+-- ----------------------------
+DROP TABLE IF EXISTS `sip_device_routing`;
+CREATE TABLE `sip_device_routing` (
+  `id` int(11) NOT NULL,
+  `sip_device_id` int(11) NOT NULL DEFAULT '0',
+  `call_forwarding_flag` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:Enable,1:Disable',
+  `call_forwarding_destination` varchar(25) DEFAULT NULL,
+  `on_busy_flag` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:Enable,1:Disable',
+  `on_busy_destination` varchar(25) DEFAULT NULL,
+  `no_answer_flag` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:Enable,1:Disable',
+  `no_answer_destination` varchar(25) DEFAULT NULL,
+  `not_register_flag` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0:Enable,1:Disable',
+  `not_register_destination` varchar(25) DEFAULT NULL,
+  `is_recording` tinyint(1) NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+ALTER TABLE `sip_device_routing`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `sip_device_routing`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+INSERT INTO sip_device_routing (`sip_device_id`) SELECT `id` FROM sip_devices;
+
+
+DROP TRIGGER IF EXISTS `add_sip_routing`;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`fluxuser`@`localhost`*/ /*!50003 TRIGGER `add_sip_routing` AFTER INSERT ON `sip_devices` FOR EACH ROW BEGIN
+INSERT INTO sip_device_routing (`sip_device_id`) VALUES (NEW.id);
+END */;;
+DELIMITER ;
+
+
 INSERT INTO `accounts` (`id`, `type`, `number`, `password`, `email`, `permission_id`, `first_name`, `last_name`, `telephone_1`, `telephone_2`, `notification_email`, `reseller_id`, `is_distributor`, `posttoexternal`, `local_call_cost`, `is_recording`, `notify_credit_limit`, `allow_ip_management`, `notify_flag`, `validfordays`, `expiry`, `generate_invoice`, `paypal_permission`, `notifications`, `charge_per_min`, `timezone_id`, `currency_id`, `country_id`, `deleted`, `status`, `creation`, `last_bill_date`, `credit_limit`, `balance`) VALUES ('16', '2', 'api', 'Rhbhzm8TI1YS22IskgMLLA', 'flux@flux.net.br', '3', 'API - IXC', '', '', '', 'flux@flux.net.br', '0', '1', '0', '100', '0', '5.00', '0', '0', '3650', '2033-10-29 20:11:26', '0', '1', '0', '100', '78', '16', '28', '0', '0', '2023-11-01 17:11:26', '2023-11-01 17:11:26', '0', '0');
 
 update `system` set comment='Set Mail Log Path Here' where display_name='Mail Log';

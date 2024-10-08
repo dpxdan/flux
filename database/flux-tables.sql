@@ -615,24 +615,6 @@ CREATE TABLE `sip_authentication`  (
   INDEX `sa_last_nc`(`last_nc`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- ----------------------------
--- Table structure for sip_device_routing
--- ----------------------------
-DROP TABLE IF EXISTS `sip_device_routing`;
-CREATE TABLE `sip_device_routing`  (
-  `id` int(0) NOT NULL AUTO_INCREMENT,
-  `sip_device_id` int(0) NOT NULL DEFAULT 0,
-  `call_forwarding_flag` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0:Enable,1:Disable',
-  `call_forwarding_destination` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `on_busy_flag` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0:Enable,1:Disable',
-  `on_busy_destination` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `no_answer_flag` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0:Enable,1:Disable',
-  `no_answer_destination` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `not_register_flag` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0:Enable,1:Disable',
-  `not_register_destination` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
-  `is_recording` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci;
 
 -- ----------------------------
 -- Table structure for sip_dialogs
