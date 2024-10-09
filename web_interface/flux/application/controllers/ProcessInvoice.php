@@ -35,7 +35,7 @@ class ProcessInvoice extends MX_Controller {
 		$this->load->model("db_model");
 		$this->load->library("flux/common");
 		$this->load->library("flux/order");
-		$this->load->library("Invoice_log");
+		$this->load->library("flux_log");
 		$this->load->model("common_model");
 
 //		error_reporting("E_ALL");
@@ -97,10 +97,6 @@ class ProcessInvoice extends MX_Controller {
 				if ($invoiceid > 0) {
 					$this->bill_calls($accountinfo, $invoiceid);
 					$this->apply_taxes($accountinfo, $invoiceid);
-//					$this->product_renewal_reminder($accountinfo, $invoiceid);
-//     $this->renew_product($accountinfo, $invoiceid);
-
-					
 					$this->db->where("id", $accountinfo['id']);
 					$this->db->update("accounts", array(
 						"last_bill_date" => $this->CurrentDate,
@@ -108,8 +104,27 @@ class ProcessInvoice extends MX_Controller {
 
 				}
 			}
+			break;
+		case 1:
+			if (Strtotime($this->StartDate) > strtotime($this->CurrentDate)) {
+				$this->StartDate = date("Y-m-d 00:00:01", strtotime($this->CurrentDate . " - 7 days"));
+			}
+			$this->EndDate = date("Y-m-d 23:59:59", strtotime($this->CurrentDate . " - 7 days"));
+			if ($this->EndDate != '') {
+				$this->flux_log->write_log('Week_CurrentDate', json_encode($this->CurrentDate));
+				$this->flux_log->write_log('Week_EndDate', json_encode($this->EndDate));
+				$this->flux_log->write_log('Week_StartDate', json_encode($this->StartDate));
+				$invoiceid = $this->create_invoice($accountinfo);
+				if ($invoiceid > 0) {
+					$this->bill_calls($accountinfo, $invoiceid);
+					$this->apply_taxes($accountinfo, $invoiceid);					
+					$this->db->where("id", $accountinfo['id']);
+					$this->db->update("accounts", array(
+						"last_bill_date" => $this->CurrentDate,
+					));
 			
-
+				}
+			}			
 			break;
 		case 2:
 			if (date("d", strtotime($this->CurrentDate)) == $accountinfo['invoice_day']) {
@@ -119,6 +134,8 @@ class ProcessInvoice extends MX_Controller {
 					$this->EndDate = $this->CurrentDate;
 				}
 				$this->EndDate = date("Y-m-d H:i:s", strtotime($this->EndDate . " -2 second"));
+				$this->flux_log->write_log('Month_CurrentDate', json_encode($this->CurrentDate));
+				$this->flux_log->write_log('Month_EndDate', json_encode($this->EndDate));
 				$invoiceid = $this->create_invoice($accountinfo);
 				if ($invoiceid > 0) {
 					$this->bill_calls($accountinfo, $invoiceid);
@@ -142,7 +159,8 @@ class ProcessInvoice extends MX_Controller {
 		if ($invoiceconf != '') {
 			if ($invoiceconf['interval'] > 0) {
 				$DueDate = date("Y-m-d 23:59:59", strtotime($this->CurrentDate . " +" . $invoiceconf['interval'] . " days"));
-			} else {
+			} 
+			else {
 				$DueDate = date("Y-m-d 23:59:59", strtotime($this->CurrentDate . " +7 days"));
 			}
 
@@ -162,7 +180,7 @@ class ProcessInvoice extends MX_Controller {
 			$last_invoice_ID = str_pad($last_invoice_ID, 6, '0', STR_PAD_LEFT);
 			$automatic_flag = self::$global_config['system_config']['automatic_invoice'] == 1 ? '0' : '1';
 			if ($invoiceconf['no_usage_invoice'] == 1) {
-
+			$this->flux_log->write_log('no_usage_invoice', json_encode($invoiceconf));
 				$InvoiceData = array(
 					"accountid" => $accountinfo['id'],
 					"prefix" => $invoiceconf['invoice_prefix'],
@@ -195,7 +213,7 @@ class ProcessInvoice extends MX_Controller {
 					"notes" => $accountinfo['invoice_note'],
 					"is_deleted" => 0,
 				);
-				$this->invoice_log->write_log('create_invoice', json_encode($InvoiceDataLog));
+				$this->flux_log->write_log('create_invoice', json_encode($InvoiceDataLog));
 
 				$InvoiceDetailData = array(
 					"invoiceid" => $invoiceid,
@@ -226,8 +244,8 @@ class ProcessInvoice extends MX_Controller {
 					"function" => "create_invoice",
 					"account_currency" => "BRL",
 				);
-				$this->db->insert("invoice_details", $InvoiceDetailData);
-				$this->invoice_log->write_log('create_detail_invoice', json_encode($InvoiceLogDetailData));
+//				$this->db->insert("invoice_details", $InvoiceDetailData);
+				$this->flux_log->write_log('create_detail_invoice', json_encode($InvoiceLogDetailData));
 				
 
 				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "'";
@@ -244,17 +262,114 @@ class ProcessInvoice extends MX_Controller {
 					$InvoiceData['currency_id'] = $accountinfo['currency_id'];
 					$final_array = array_merge($accountinfo, $InvoiceData);
 					$log_final_array = array_merge($accountinfo, $InvoiceData);
-					$this->invoice_log->write_log('update_invoice_amount', json_encode($log_final_array));
-     $this->InvoiceLogger('create_invoice',$log_final_array);
+					$this->flux_log->write_log('update_invoice_amount', json_encode($log_final_array));
+     $this->PrintLogger('create_invoice',$log_final_array);
      $this->common->mail_to_users("new_invoice", $final_array);
      $this->update_bill_date($accountinfo);
 
 				}
 
 				//LOG
-				//   $this->invoice_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
-				//   $this->invoice_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
-				//   $this->invoice_log->write_log ( 'log_final_array', json_encode($log_final_array) );
+				//   $this->flux_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
+				//   $this->flux_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
+				//   $this->flux_log->write_log ( 'log_final_array', json_encode($log_final_array) );
+				//END LOG
+				return $invoiceid;
+			}
+			else {
+			$this->flux_log->write_log('usage_invoice', json_encode($invoiceconf));
+				$InvoiceData = array(
+					"accountid" => $accountinfo['id'],
+					"prefix" => $invoiceconf['invoice_prefix'],
+					"number" => $last_invoice_ID,
+					"reseller_id" => $accountinfo['reseller_id'],
+					"generate_date" => $this->CurrentDate,
+					"from_date" => $this->StartDate,
+					"to_date" => $this->EndDate,
+					"due_date" => $DueDate,
+					"status" => 0,
+					"confirm" => $automatic_flag,
+					"notes" => $accountinfo['invoice_note'],
+					"is_deleted" => 0,
+				);
+				$this->db->insert("invoices", $InvoiceData);
+				$invoiceid = $this->db->insert_id();
+
+				$InvoiceDataLog = array(
+					"accountid" => $accountinfo['id'],
+					"prefix" => $invoiceconf['invoice_prefix'],
+					"number" => $last_invoice_ID,
+					"reseller_id" => $accountinfo['reseller_id'],
+					"generate_date" => $this->CurrentDate,
+					"from_date" => $this->StartDate,
+					"to_date" => $this->EndDate,
+					"due_date" => $DueDate,
+					"status" => 0,
+					"function" => "create_invoice",
+					"confirm" => $automatic_flag,
+					"notes" => $accountinfo['invoice_note'],
+					"is_deleted" => 0,
+				);
+							$this->flux_log->write_log('create_invoice', json_encode($InvoiceDataLog));
+
+				$InvoiceDetailData = array(
+					"invoiceid" => $invoiceid,
+					"accountid" => $accountinfo['id'],
+					"reseller_id" => $accountinfo['reseller_id'],
+					"created_date" => $this->CurrentDate,
+					"generate_type" => 0,
+					"debit" => 0.00,
+					"credit" => 0.00,
+					"charge_type" => "INV",
+					"before_balance" => 0.00,
+					"after_balance" => 0.00,
+					"quantity" => 1,
+					"description" => "Invoice Criado",
+					"exchange_rate" => "1.00",
+					"account_currency" => "BRL",
+					"base_currency" => "BRL",
+				);
+
+				$InvoiceLogDetailData = array(
+					"invoiceid" => $invoiceid,
+					"accountid" => $accountinfo['id'],
+					"debit" => "0.00",
+					"credit" => "0.00",
+					"reseller_id" => $accountinfo['reseller_id'],
+					"created_date" => $this->CurrentDate,
+					"generate_type" => 0,
+					"function" => "create_invoice",
+					"account_currency" => "BRL",
+				);
+			//				$this->db->insert("invoice_details", $InvoiceDetailData);
+							$this->flux_log->write_log('create_detail_invoice', json_encode($InvoiceLogDetailData));
+				
+
+				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "'";
+//				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "' AND invoiceid = 0";
+				$this->db->query($update_billable_item);
+				$amount = $this->db_model->getSelect("debit,credit", "invoice_details", array(
+					"invoiceid" => $invoiceid,
+				));
+				if ($amount->num_rows > 0) {
+					$amount = $amount->result_array()[0];
+					$InvoiceData['amount'] = ($amount['credit'] - $amount['debit']);
+					$InvoiceData['amount'] = ($InvoiceData['amount'] < 0) ? ($InvoiceData['amount'] * -1) : $InvoiceData['amount'];
+					$InvoiceData['invoice_number'] = $invoiceconf['invoice_prefix'] . $last_invoice_ID;
+					$InvoiceData['currency_id'] = $accountinfo['currency_id'];
+					$final_array = array_merge($accountinfo, $InvoiceData);
+					$log_final_array = array_merge($accountinfo, $InvoiceData);
+								$this->flux_log->write_log('update_invoice_amount', json_encode($log_final_array));
+			     $this->PrintLogger('create_invoice',$log_final_array);
+     $this->common->mail_to_users("new_invoice", $final_array);
+     $this->update_bill_date($accountinfo);
+
+				}
+
+				//LOG
+							//   $this->flux_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
+							//   $this->flux_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
+							//   $this->flux_log->write_log ( 'log_final_array', json_encode($log_final_array) );
 				//END LOG
 				return $invoiceid;
 			}
@@ -341,12 +456,12 @@ class ProcessInvoice extends MX_Controller {
 					"invoiceid" => $invoiceid,
 				);
 				$this->db->insert("invoice_details", $tempArr);
-				$this->invoice_log->write_log('invoice_details', json_encode($logArr));
+				$this->flux_log->write_log('invoice_details', json_encode($logArr));
 
 				$update_cdrs_arr = "update cdrs set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND callstart >='" . $this->StartDate . "' AND callstart <= '" . $this->EndDate . "'";
 				$this->db->query($update_cdrs_arr);
 				$update_log_cdrs_arr = "update cdrs set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND callstart >='" . $this->StartDate . "' AND callstart <= '" . $this->EndDate . "'";
-				$this->invoice_log->write_log('update_cdrs', json_encode($update_log_cdrs_arr));
+				$this->flux_log->write_log('update_cdrs', json_encode($update_log_cdrs_arr));
 
 			}
 		}
@@ -416,7 +531,7 @@ class ProcessInvoice extends MX_Controller {
 
 					);
 					$this->db->insert("invoice_details", $tax_insert_arr);
-					$this->invoice_log->write_log('tax_calculate', json_encode($log_tax_insert_arr));
+					$this->flux_log->write_log('tax_calculate', json_encode($log_tax_insert_arr));
 
 				}
 			}
@@ -581,7 +696,7 @@ else {
 										'function' => 'renew_product',
 										'message' => "Produto removido por falta de saldo",
 									);
-									$this->invoice_log->write_log('no_get_account_product_info', json_encode($no_account_balance_insert_arr));
+									$this->flux_log->write_log('no_get_account_product_info', json_encode($no_account_balance_insert_arr));
 									//LOG
 
 								}
@@ -632,7 +747,7 @@ else {
 									"accountid" => $ordervalue['accountid'],
 									"status" => 0,
 								);
-								$this->invoice_log->write_log('update_counter', json_encode($counter_update_arr));
+								$this->flux_log->write_log('update_counter', json_encode($counter_update_arr));
 								$counters_insert_arr = array(
 									"used_seconds" => 0,
 									"product_id" => $ordervalue['product_id'],
@@ -652,7 +767,7 @@ else {
 									"type" => 1,
 									"status" => 1,
 								);
-								$this->invoice_log->write_log('insert_counter', json_encode($counters_log_insert_arr));
+								$this->flux_log->write_log('insert_counter', json_encode($counters_log_insert_arr));
 								$this->db->update("order_items", $update_order_arr, array(
 									"id" => $ordervalue['id'],
 								));
@@ -664,7 +779,7 @@ else {
 								"order_id" => $ordervalue['id'],
 								'message' => "Produto nao encontrado para a conta.",
 							);
-							$this->invoice_log->write_log('no_get_account_product_info', json_encode($no_acc_product_insert_arr));
+							$this->flux_log->write_log('no_get_account_product_info', json_encode($no_acc_product_insert_arr));
 							/*$update_order_arr = array(
 								                "is_terminated" => '1',
 								                "termination_note" => "Product has been terminated",
@@ -690,8 +805,8 @@ else {
 						'message' => "Produto nao encontrado.",
 
 					);
-					$this->invoice_log->write_log('not_found_product', json_encode($no_product_insert_arr));
-					$this->InvoiceLogger('renew_product', $product_data);
+					$this->flux_log->write_log('not_found_product', json_encode($no_product_insert_arr));
+					$this->PrintLogger('renew_product', $product_data);
 
 				}
 			}
@@ -701,7 +816,7 @@ else {
 				'message' => "Nenhum pedido para renovar.",
 
 			);
-			$this->invoice_log->write_log('no_renew', json_encode($no_renew_insert_arr));
+			$this->flux_log->write_log('no_renew', json_encode($no_renew_insert_arr));
 
 		}
 
@@ -867,7 +982,7 @@ else {
 											"product_total" => $total_amt,
 											'message' => "Produto removido por falta de saldo",
 										);
-										$this->invoice_log->write_log('no_get_account_product_info', json_encode($no_account_balance_insert_arr));
+										$this->flux_log->write_log('no_get_account_product_info', json_encode($no_account_balance_insert_arr));
 										//LOG
 	
 									}
@@ -919,7 +1034,7 @@ else {
 										"accountid" => $ordervalue['accountid'],
 										"status" => 0,
 									);
-									$this->invoice_log->write_log('update_counter', json_encode($counter_update_arr));
+									$this->flux_log->write_log('update_counter', json_encode($counter_update_arr));
 									$counters_insert_arr = array(
 										"used_seconds" => 0,
 										"product_id" => $ordervalue['product_id'],
@@ -939,7 +1054,7 @@ else {
 										"type" => 1,
 										"status" => 1,
 									);
-									$this->invoice_log->write_log('insert_counter', json_encode($counters_log_insert_arr));
+									$this->flux_log->write_log('insert_counter', json_encode($counters_log_insert_arr));
 									$this->db->update("order_items", $update_order_arr, array(
 										"id" => $ordervalue['id'],
 									));
@@ -953,7 +1068,7 @@ else {
 									"order_id" => $ordervalue['id'],
 									'message' => "Produto nao encontrado para a conta.",
 								);
-								$this->invoice_log->write_log('no_get_account_product_info', json_encode($no_acc_product_insert_arr));
+								$this->flux_log->write_log('no_get_account_product_info', json_encode($no_acc_product_insert_arr));
 								/*$update_order_arr = array(
 									                "is_terminated" => '1',
 									                "termination_note" => "Product has been terminated",
@@ -980,8 +1095,8 @@ else {
 							'message' => "Produto nao encontrado.",
 	
 						);
-						$this->invoice_log->write_log('not_found_product', json_encode($no_product_insert_arr));
-						$this->InvoiceLogger('renew_product', $product_data);
+						$this->flux_log->write_log('not_found_product', json_encode($no_product_insert_arr));
+						$this->PrintLogger('renew_product', $product_data);
 	
 					}
 				}
@@ -992,7 +1107,7 @@ else {
 					'message' => "Nenhum pedido para renovar.",
 	
 				);
-				$this->invoice_log->write_log('no_renew', json_encode($no_renew_insert_arr));
+				$this->flux_log->write_log('no_renew', json_encode($no_renew_insert_arr));
 	
 			}
 	
@@ -1059,17 +1174,17 @@ else {
 				foreach ($Message as $MessageKey => $MessageValue) {
 					if (is_array($MessageValue)) {
 						foreach ($MessageValue as $LogKey => $LogValue) {
-						        $this->invoice_log->write_log(''.$LogKey.'', json_encode($LogValue));
+						        $this->flux_log->write_log(''.$LogKey.'', json_encode($LogValue));
 //							fwrite($this->fp, "::::: " . $LogKey . " ::::: " . $LogValue . " :::::\n");
 						}
 					} else {
-					       $this->invoice_log->write_log(''.$MessageKey.'', json_encode($MessageValue));
+					       $this->flux_log->write_log(''.$MessageKey.'', json_encode($MessageValue));
 	//					fwrite($this->fp, "::::: " . $MessageKey . " ::::: " . $MessageValue . " :::::\n");
 					}
 				}
 			} else {
 				if ($this->Error_flag) {
-				         $this->invoice_log->write_log('error_invoice', json_encode($Message));
+				         $this->flux_log->write_log('error_invoice', json_encode($Message));
 	//				fwrite($this->fp, "::::: " . $Message . " :::::\n");
 				}
 			}
