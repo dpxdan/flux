@@ -1,6 +1,6 @@
 <?php
 // ##############################################################################
-// Flux Telecom - Unindo pessoas e neg—cios
+// Flux Telecom - Unindo pessoas e negï¿½cios
 //
 // Copyright (C) 2023 Flux Telecom
 // Daniel Paixao <daniel@flux.net.br>
@@ -44,18 +44,15 @@ class ProcessInvoice extends MX_Controller {
 
 		$this->get_system_config();
 
-	
 		$this->fp = fopen("/var/log/flux/flux-invoice.log", "a+");
 
-  $this->CurrentDate = gmdate("Y-m-d 00:00:01");
-	$this->custom_current_date = gmdate("Y-m-d 23:59:59");
+		$this->CurrentDate = gmdate("Y-m-d 00:00:01");
+		$this->custom_current_date = gmdate("Y-m-d 23:59:59");
 	}
 
 	function ManageServices() {
-
-         $this->product_renewal_reminder();
-		       $this->renew_product_service();
-
+		$this->product_renewal_reminder();
+		$this->renew_product_service();
 	}
 
 	function GenerateInvoice() {
@@ -105,27 +102,6 @@ class ProcessInvoice extends MX_Controller {
 				}
 			}
 			break;
-		case 1:
-			if (Strtotime($this->StartDate) > strtotime($this->CurrentDate)) {
-				$this->StartDate = date("Y-m-d 00:00:01", strtotime($this->CurrentDate . " - 7 days"));
-			}
-			$this->EndDate = date("Y-m-d 23:59:59", strtotime($this->CurrentDate . " - 7 days"));
-			if ($this->EndDate != '') {
-				$this->flux_log->write_log('Week_CurrentDate', json_encode($this->CurrentDate));
-				$this->flux_log->write_log('Week_EndDate', json_encode($this->EndDate));
-				$this->flux_log->write_log('Week_StartDate', json_encode($this->StartDate));
-				$invoiceid = $this->create_invoice($accountinfo);
-				if ($invoiceid > 0) {
-					$this->bill_calls($accountinfo, $invoiceid);
-					$this->apply_taxes($accountinfo, $invoiceid);					
-					$this->db->where("id", $accountinfo['id']);
-					$this->db->update("accounts", array(
-						"last_bill_date" => $this->CurrentDate,
-					));
-			
-				}
-			}			
-			break;
 		case 2:
 			if (date("d", strtotime($this->CurrentDate)) == $accountinfo['invoice_day']) {
 				$this->EndDate = date("Y-m-" . $accountinfo['invoice_day'] . " 23:59:59", strtotime($this->StartDate . " + 1 month"));
@@ -140,9 +116,6 @@ class ProcessInvoice extends MX_Controller {
 				if ($invoiceid > 0) {
 					$this->bill_calls($accountinfo, $invoiceid);
 					$this->apply_taxes($accountinfo, $invoiceid);
-//					$this->product_renewal_reminder($accountinfo, $invoiceid);
-//					$this->renew_product($accountinfo, $invoiceid);
-//					$this->product_renewal_reminder($accountinfo, $invoiceid);
 					$this->db->where("id", $accountinfo['id']);
 					$this->db->update("accounts", array(
 						"last_bill_date" => $this->CurrentDate,
@@ -244,12 +217,9 @@ class ProcessInvoice extends MX_Controller {
 					"function" => "create_invoice",
 					"account_currency" => "BRL",
 				);
-//				$this->db->insert("invoice_details", $InvoiceDetailData);
 				$this->flux_log->write_log('create_detail_invoice', json_encode($InvoiceLogDetailData));
-				
 
 				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "'";
-//				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "' AND invoiceid = 0";
 				$this->db->query($update_billable_item);
 				$amount = $this->db_model->getSelect("debit,credit", "invoice_details", array(
 					"invoiceid" => $invoiceid,
@@ -263,113 +233,16 @@ class ProcessInvoice extends MX_Controller {
 					$final_array = array_merge($accountinfo, $InvoiceData);
 					$log_final_array = array_merge($accountinfo, $InvoiceData);
 					$this->flux_log->write_log('update_invoice_amount', json_encode($log_final_array));
-     $this->PrintLogger('create_invoice',$log_final_array);
-     $this->common->mail_to_users("new_invoice", $final_array);
-     $this->update_bill_date($accountinfo);
+					$this->PrintLogger('create_invoice',$log_final_array);
+					$this->common->mail_to_users("new_invoice", $final_array);
+					$this->update_bill_date($accountinfo);
 
 				}
 
 				//LOG
-				//   $this->flux_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
-				//   $this->flux_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
-				//   $this->flux_log->write_log ( 'log_final_array', json_encode($log_final_array) );
-				//END LOG
-				return $invoiceid;
-			}
-			else {
-			$this->flux_log->write_log('usage_invoice', json_encode($invoiceconf));
-				$InvoiceData = array(
-					"accountid" => $accountinfo['id'],
-					"prefix" => $invoiceconf['invoice_prefix'],
-					"number" => $last_invoice_ID,
-					"reseller_id" => $accountinfo['reseller_id'],
-					"generate_date" => $this->CurrentDate,
-					"from_date" => $this->StartDate,
-					"to_date" => $this->EndDate,
-					"due_date" => $DueDate,
-					"status" => 0,
-					"confirm" => $automatic_flag,
-					"notes" => $accountinfo['invoice_note'],
-					"is_deleted" => 0,
-				);
-				$this->db->insert("invoices", $InvoiceData);
-				$invoiceid = $this->db->insert_id();
-
-				$InvoiceDataLog = array(
-					"accountid" => $accountinfo['id'],
-					"prefix" => $invoiceconf['invoice_prefix'],
-					"number" => $last_invoice_ID,
-					"reseller_id" => $accountinfo['reseller_id'],
-					"generate_date" => $this->CurrentDate,
-					"from_date" => $this->StartDate,
-					"to_date" => $this->EndDate,
-					"due_date" => $DueDate,
-					"status" => 0,
-					"function" => "create_invoice",
-					"confirm" => $automatic_flag,
-					"notes" => $accountinfo['invoice_note'],
-					"is_deleted" => 0,
-				);
-							$this->flux_log->write_log('create_invoice', json_encode($InvoiceDataLog));
-
-				$InvoiceDetailData = array(
-					"invoiceid" => $invoiceid,
-					"accountid" => $accountinfo['id'],
-					"reseller_id" => $accountinfo['reseller_id'],
-					"created_date" => $this->CurrentDate,
-					"generate_type" => 0,
-					"debit" => 0.00,
-					"credit" => 0.00,
-					"charge_type" => "INV",
-					"before_balance" => 0.00,
-					"after_balance" => 0.00,
-					"quantity" => 1,
-					"description" => "Invoice Criado",
-					"exchange_rate" => "1.00",
-					"account_currency" => "BRL",
-					"base_currency" => "BRL",
-				);
-
-				$InvoiceLogDetailData = array(
-					"invoiceid" => $invoiceid,
-					"accountid" => $accountinfo['id'],
-					"debit" => "0.00",
-					"credit" => "0.00",
-					"reseller_id" => $accountinfo['reseller_id'],
-					"created_date" => $this->CurrentDate,
-					"generate_type" => 0,
-					"function" => "create_invoice",
-					"account_currency" => "BRL",
-				);
-			//				$this->db->insert("invoice_details", $InvoiceDetailData);
-							$this->flux_log->write_log('create_detail_invoice', json_encode($InvoiceLogDetailData));
-				
-
-				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "'";
-//				$update_billable_item = "update invoice_details set invoiceid = " . $invoiceid . " where accountid=" . $accountinfo['id'] . " AND created_date >='" . $this->StartDate . "' AND created_date <= '" . $this->EndDate . "' AND invoiceid = 0";
-				$this->db->query($update_billable_item);
-				$amount = $this->db_model->getSelect("debit,credit", "invoice_details", array(
-					"invoiceid" => $invoiceid,
-				));
-				if ($amount->num_rows > 0) {
-					$amount = $amount->result_array()[0];
-					$InvoiceData['amount'] = ($amount['credit'] - $amount['debit']);
-					$InvoiceData['amount'] = ($InvoiceData['amount'] < 0) ? ($InvoiceData['amount'] * -1) : $InvoiceData['amount'];
-					$InvoiceData['invoice_number'] = $invoiceconf['invoice_prefix'] . $last_invoice_ID;
-					$InvoiceData['currency_id'] = $accountinfo['currency_id'];
-					$final_array = array_merge($accountinfo, $InvoiceData);
-					$log_final_array = array_merge($accountinfo, $InvoiceData);
-								$this->flux_log->write_log('update_invoice_amount', json_encode($log_final_array));
-			     $this->PrintLogger('create_invoice',$log_final_array);
-     $this->common->mail_to_users("new_invoice", $final_array);
-     $this->update_bill_date($accountinfo);
-
-				}
-
-				//LOG
-							//   $this->flux_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
-							//   $this->flux_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
-							//   $this->flux_log->write_log ( 'log_final_array', json_encode($log_final_array) );
+					$this->flux_log->write_log ( 'account_insert_invoice', json_encode($InvoiceDataLog) );
+					$this->flux_log->write_log ( 'update_billable_item_log', json_encode($update_billable_item_log) );
+					$this->flux_log->write_log ( 'log_final_array', json_encode($log_final_array) );
 				//END LOG
 				return $invoiceid;
 			}
