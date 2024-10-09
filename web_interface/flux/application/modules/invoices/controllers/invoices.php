@@ -137,9 +137,9 @@ class Invoices extends MX_Controller
                     else {
 
                         if ($value['is_paid'] == 1 && $outstanding > 0) {
-                            $payment = "<a style='padding: 0 8px;' href='" . base_url() . "invoices/invoice_summary/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</i></a>";
+                            // $payment = "<a style='padding: 0 8px;' href='" . base_url() . "invoices/invoice_summary/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</i></a>";
                         } else {
-                            $payment = "<button style='padding: 0 17px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
+                            // $payment = "<button style='padding: 0 17px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
                             $payment_edit = '<a href="' . base_url() . 'invoices/invoice_automatically_edit/' . $value['id'] . '" class="btn btn-royelblue btn-sm"  title="Edit"><i class="fa fa-pencil-square-o fa-fw"></i></a>';
                         }
                         $delete_button = "&nbsp";
@@ -1787,9 +1787,9 @@ class Invoices extends MX_Controller
                     $outstanding = 0;
                 } else {
                     if ($outstanding > 0) {
-                        $payment = "<a style='padding: 0 8px;' href='" . base_url() . "invoices/invoice_summary/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</i></a>";
+                        // $payment = "<a style='padding: 0 8px;' href='" . base_url() . "invoices/invoice_summary/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</i></a>";
                     } else {
-                        $payment = " <button style='padding: 0 8px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
+                        // $payment = " <button style='padding: 0 8px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
                     }
                 }
 
@@ -1894,9 +1894,9 @@ class Invoices extends MX_Controller
             }
             $download = '<a href="' . base_url() . '/user/user_invoice_download/' . $value['id'] . '/00' . $value['invoice_prefix'] . $value['invoiceid'] . '" class="btn btn-royelblue btn-sm"  title="Download Invoice" ><i class="fa fa-cloud-download fa-fw"></i></a>&nbsp';
             if ($outstanding > 0) {
-                $payment = " <a style='padding: 0 8px;' href='" . base_url() . "user/user_invoice_payment/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</a>";
+                // $payment = " <a style='padding: 0 8px;' href='" . base_url() . "user/user_invoice_payment/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</a>";
             } else {
-                $payment = " <button style='padding: 0 8px;' class='btn btn-success' type='button'>".gettext("Paid")."</button>";
+                // $payment = " <button style='padding: 0 8px;' class='btn btn-success' type='button'>".gettext("Paid")."</button>";
             }
             $account_arr = $this->db_model->getSelect('first_name,number,last_name', 'accounts', array(
                 'id' => $value['accountid']
