@@ -623,7 +623,7 @@ install_database ()
         mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${FLUX_DATABASE_NAME} -f < ${FLUX_SOURCE_DIR}/web_interface/flux/addons/plugins/language_portuguese/database/language_portuguese_2.0.0.sql
 }
 
-install_ptbr_language ()
+install_ptbr_language()
 {       
         cd ${FLUX_SOURCE_DIR}/web_interface/flux/language/pt_BR/LC_MESSAGES
         chown www-data:www-data messages.po
@@ -941,6 +941,7 @@ start_installation ()
         install_database
         normalize_freeswitch
         normalize_flux
+        install_ptbr_language
         install_fail2ban
         install_monit
         logrotate_install
