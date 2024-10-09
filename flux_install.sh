@@ -620,8 +620,17 @@ install_database ()
         mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${FLUX_DATABASE_NAME} -f < ${FLUX_SOURCE_DIR}/database/flux-tables.sql
         mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${FLUX_DATABASE_NAME} -f < ${FLUX_SOURCE_DIR}/database/flux-views.sql
         mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${FLUX_DATABASE_NAME} -f < ${FLUX_SOURCE_DIR}/web_interface/flux/addons/plugins/ringgroup/database/ringgroup_1.0.0.sql
+        mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${FLUX_DATABASE_NAME} -f < ${FLUX_SOURCE_DIR}/web_interface/flux/addons/plugins/language_portuguese/database/language_portuguese_2.0.0.sql
 }
 
+install_ptbr_language ()
+{       
+        cd ${FLUX_SOURCE_DIR}/web_interface/flux/language/pt_BR/LC_MESSAGES
+        chown www-data:www-data messages.po
+        chown www-data:www-data messages.mo
+        chmod 077 ${FLUX_SOURCE_DIR}/web_interface/flux/language/pt_BR/LC_MESSAGES
+        msgfmt messages.po -o messages.mo
+}
 
 #Install Fail2ban for security
 install_fail2ban()
