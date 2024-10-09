@@ -1001,7 +1001,7 @@ CREATE TABLE `invoice_conf` (
 
 LOCK TABLES `invoice_conf` WRITE;
 /*!40000 ALTER TABLE `invoice_conf` DISABLE KEYS */;
-INSERT INTO `invoice_conf` VALUES (1,1,'Flux Telecom','R. Joaquim Pedro Soares, 560','Novo Hamburgo','Rio Grande do Sul','28','93510320','08001002500','08001002500','suporte@flux.net.br','flux.net.br','INV_',1,'logo.png','favicon.ico','Invoice Flux',1,1,0,'7',1,'ABC 435 1XX 8XX 3XX','flux.net.br','Flux Telecom - Unindo pessoas e negócios','',0);
+INSERT INTO `invoice_conf` VALUES (1,1,'Flux Telecom','R. Joaquim Pedro Soares, 560','Novo Hamburgo','Rio Grande do Sul','28','93510320','08001002500','08001002500','suporte@flux.net.br','flux.net.br','INV_',1,'logo.png','favicon.ico','Invoice Flux',1,1,1,'7',1,'ABC 435 1XX 8XX 3XX','flux.net.br','Flux Telecom - Unindo pessoas e negócios','',0);
 /*!40000 ALTER TABLE `invoice_conf` ENABLE KEYS */;
 UNLOCK TABLES;
 
