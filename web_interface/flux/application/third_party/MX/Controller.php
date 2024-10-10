@@ -42,6 +42,8 @@ class MX_Controller
 
 	public function __construct()
 	{
+		$this->load->library('session');
+		$current_locale = $this->session->userdata('user_language');
 		$class = str_replace(CI::$APP->config->item('controller_suffix'), '', get_class($this));
 		log_message('debug', $class." MX_Controller Initialized");
 		Modules::$registry[strtolower($class)] = $this;
@@ -53,12 +55,14 @@ class MX_Controller
 		/* autoload module items */
 		$this->load->_autoloader($this->autoload);
 
-		/*Condition added by Manish Bachani(04-20-21) IMP 672 - For Tooltip purpose */
-		if(file_exists(FCPATH."application/modules/".strtolower($class)."/tooltip.php")){
-            include_once(FCPATH."application/modules/".strtolower($class)."/tooltip.php");
-            $this->tooltip_data = $tooltip_data;
+		if (file_exists(FCPATH."application/modules/".strtolower($class)."/tooltip_".$current_locale.".php")){
+			include_once(FCPATH."application/modules/".strtolower($class)."/tooltip_".$current_locale.".php");
+			$this->tooltip_data = $tooltip_data;
+		}else if(file_exists(FCPATH."application/modules/".strtolower($class)."/tooltip.php")){	
+			include_once(FCPATH."application/modules/".strtolower($class)."/tooltip.php");
+			$this->tooltip_data = $tooltip_data;
 		}
-		/*End*/
+		
 	}
 
 	public function __get($class) {

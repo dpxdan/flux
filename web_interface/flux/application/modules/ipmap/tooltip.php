@@ -1,17 +1,17 @@
 <?php
 /*IP map*/
 $tooltip_data = array(
-	"ipmap_form_reseller_id" => "Reseller account to which this IP is assigned",
+	"ipmap_form_reseller_id" => "Conta do revendedor à qual este IP está atribuído.",
 
-	"ipmap_form_accountid" => "Customer account to which this IP is assigned",
+	"ipmap_form_accountid" => "Conta do cliente à qual este IP está atribuído.",
 
-	"ipmap_form_name" => "Name of ip to whitelist for reference",
+	"ipmap_form_name" => "Nome do IP a ser permitido para referência.",
 
-	"ipmap_form_ip" => "IP to whitelist.",
+	"ipmap_form_ip" => "IP a ser permitido.",
 
-	"ipmap_form_prefix" => "If traffic from same IP need to authenticate with multiple accounts, added prefix to dialed number will be configured here",
+	"ipmap_form_prefix" => "Se o tráfego do mesmo IP precisar se autenticar com várias contas, o prefixo adicionado ao número discado será configurado aqui.",
 
-	"ipmap_form_status" => "The status for the added entry",
+	"ipmap_form_status" => "O status da entrada adicionada.",
 )
 /*End*/
 ?>

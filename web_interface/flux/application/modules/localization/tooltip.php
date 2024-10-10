@@ -13,7 +13,7 @@ $tooltip_data = array(
 
 	"localization_add_in_caller_id_originate[0][0]" => "Configuration to localize the inbound caller id origination side",
 
-	"localization_add_out_caller_id_originate[0][0]" => "﻿﻿Configuration to localize the outbound caller id origination side",
+	"localization_add_out_caller_id_originate[0][0]" => "Configuration to localize the outbound caller id origination side",
 	/*End*/
 
 	/*Termination*/
