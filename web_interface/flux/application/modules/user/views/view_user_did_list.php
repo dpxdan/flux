@@ -142,7 +142,7 @@
 	<div class="w-section inverse p-0">
 		<div class="col-12">
 			<div class="text-right pb-4">
-				<input type="button" id="left_panel_add" class="btn btn-info" name="purchase_did" value=<?php echo gettext("Purchase DID")?> id="purchase_did"> 
+				<!-- <input type="button" id="left_panel_add" class="btn btn-info" name="purchase_did" value=<?php echo gettext("Purchase DID")?> id="purchase_did">  -->
 			</div>
 		</div>
 

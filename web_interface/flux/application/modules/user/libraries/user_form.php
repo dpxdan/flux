@@ -1301,7 +1301,7 @@ class User_form extends common
                 'id',
                 'country',
                 'countrycode',
-                'build_dropdown_country_camel',
+                'build_dropdown',
                 '',
                 ''
             ),

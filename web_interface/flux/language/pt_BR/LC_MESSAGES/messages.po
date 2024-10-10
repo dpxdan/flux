@@ -41,7 +41,7 @@ msgid "ACD"
 msgstr "ACD"
 
 msgid "Action"
-msgstr "Ação"
+msgstr "Açao"
 
 msgid "Action Type"
 msgstr "Tipo de acão"
@@ -280,11 +280,14 @@ msgstr "Novas tentativas de cartão"
 msgid "Carriers"
 msgstr "Provedores"
 
+msgid "Forwarding"
+msgstr "Encaminhamento"
+
 msgid "Category"
 msgstr "Categoria"
 
 msgid "CC"
-msgstr "CC"
+msgstr "Canais"
 
 msgid "CDRs Older Than Days"
 msgstr "CDRs anteriores a dias"
@@ -305,7 +308,7 @@ msgid "City"
 msgstr "Cidade"
 
 msgid "Clear"
-msgstr "Limpar"
+msgstr "Claro"
 
 msgid "Client IP"
 msgstr "IP do cliente"
@@ -1195,8 +1198,8 @@ msgstr "Email do Destinatário"
 msgid "Recording Files Older Than Days"
 msgstr "Gravando arquivos com mais de dias"
 
-msgid " Records"
-msgstr ""
+msgid "Records"
+msgstr "Resultados"
 
 msgid "Referer Page"
 msgstr "Página de referência"
@@ -1957,6 +1960,9 @@ msgstr "Nova senha e senha de conformidade não correspondem"
 msgid "Invalid old passwword."
 msgstr "Senha antiga inválida."
 
+msgid "Fail Orders"
+msgstr "Pedidos com Falha"
+
 msgid "Permission Denied!"
 msgstr "Permissão negada!"
 
@@ -2676,6 +2682,15 @@ msgstr "Cliente em lote gerado com sucesso!"
 
 msgid "Recharge successfully!"
 msgstr "Recarregue com sucesso!"
+
+msgid "Recharge"
+msgstr "Recarga"
+
+msgid "Refill Process"
+msgstr "Processo de Recarga"
+
+msgid "​Refill information"
+msgstr "Informações da Recarga"
 
 msgid "Post charge applied successfully."
 msgstr "Pós-cobrança aplicada com sucesso."
@@ -6999,9 +7014,6 @@ msgstr "Importar código de área"
 
 msgid "Back to Area Code List"
 msgstr "Regressar à lista de códigos de área"
-
-msgid "Area Code"
-msgstr "Código de área"
 
 msgid "Support Tickets"
 msgstr "Bilhetes de suporte"
