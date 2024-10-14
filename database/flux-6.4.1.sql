@@ -152,3 +152,9 @@ DELETE FROM `flux`.`menu_modules` WHERE (`id` = '151');
 DELETE FROM `flux`.`menu_modules` WHERE (`id` = '66');
 DELETE FROM `flux`.`menu_modules` WHERE (`id` = '550');
 DELETE FROM `flux`.`menu_modules` WHERE (`id` = '27');
+
+DELETE FROM `flux`.`menu_modules` WHERE (`id` = '555');
+DELETE FROM `flux`.`menu_modules` WHERE (`id` = '398');
+DELETE FROM `flux`.`menu_modules` WHERE (`id` = '397');
+DELETE FROM `flux`.`menu_modules` WHERE (`id` = '33');
+DELETE FROM `flux`.`menu_modules` WHERE (`id` = '11');
