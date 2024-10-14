@@ -296,10 +296,10 @@ msgid "Charge Type"
 msgstr "Tipo de Carga"
 
 msgid "Charges Breakdown"
-msgstr "Discriminação de encargos"
+msgstr "Discriminação de Recargas"
 
 msgid "Charges History"
-msgstr "Histórico de Encargos"
+msgstr "Histórico de Recargas"
 
 msgid "CID"
 msgstr "CID"
@@ -307,8 +307,11 @@ msgstr "CID"
 msgid "City"
 msgstr "Cidade"
 
+msgid "Area Code"
+msgstr "Código de área"
+
 msgid "Clear"
-msgstr "Claro"
+msgstr "Limpar"
 
 msgid "Client IP"
 msgstr "IP do cliente"
@@ -1267,6 +1270,9 @@ msgstr "Permissões de Usuários"
 msgid "Routing Prefix"
 msgstr "Prefixo de roteamento"
 
+msgid "Submit"
+msgstr "Salvar"
+
 msgid "Routing Type"
 msgstr "Tipo de Roteamento"
 
@@ -2146,6 +2152,9 @@ msgstr "conta com O novo saldo será"
 msgid "My Profile"
 msgstr "Meu perfil"
 
+msgid "My Order"
+msgstr "Meus Pedidos"
+
 msgid "My Account"
 msgstr "Minha conta"
 
@@ -2456,7 +2465,7 @@ msgid "LCR"
 msgstr "LCR"
 
 msgid "Percentage"
-msgstr "Percentagem"
+msgstr "Porcentagem"
 
 msgid "Tax removed successfully!"
 msgstr "Imposto removido com sucesso!"
@@ -2468,7 +2477,7 @@ msgid "Tax updated successfully!"
 msgstr "Imposto atualizado com sucesso!"
 
 msgid "Charges List"
-msgstr "Lista de Encargos"
+msgstr "Lista de Recargas"
 
 msgid "Trunk Updated Successfully!"
 msgstr "Gateway atualizado com sucesso!"
@@ -7021,3 +7030,8 @@ msgstr "Bilhetes de suporte"
 msgid "Support Ticket"
 msgstr "Bilhete de Suporte"
 
+msgid "Ring Group"
+msgstr "Grupo de busca"
+
+msgid "Ring Strategy"
+msgstr "Estratégia de toque"
