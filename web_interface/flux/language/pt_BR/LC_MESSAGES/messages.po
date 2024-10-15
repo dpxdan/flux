@@ -1577,7 +1577,10 @@ msgid "Create Reseller"
 msgstr "Criar Revendedor"
 
 msgid "Role Name"
-msgstr "Nome do papel"
+msgstr "Nome do Acesso"
+
+msgid "Permission Type"
+msgstr "Tipo de Permissão"
 
 msgid "Outstanding Amount"
 msgstr "Valor Pendente"

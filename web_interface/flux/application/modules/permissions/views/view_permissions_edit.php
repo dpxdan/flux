@@ -142,7 +142,7 @@ table {
 							<div id="floating-label" class="col-md-12 mb-4">
 								<div class="row">
 									<div class="col-md-3 form-group">
-										<label class="p-0 control-label"><?php echo gettext('Role Name :') ?><span
+										<label class="p-0 control-label"><?php echo gettext('Role Name') ?><span
 											class="text-dark"> *</span></label> <input type="hidden"
 											class="error col-md-12 form-control form-control-lg"
 											value="<?= $id ?>" name="id" id="id"> <input type="text"
