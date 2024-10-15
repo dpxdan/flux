@@ -2588,7 +2588,16 @@ msgid "Mass Customer"
 msgstr "Cliente em lote"
 
 msgid "Daily"
-msgstr "Diariamente"
+msgstr "Diário"
+
+msgid "Weekly"
+msgstr "Semanal"
+
+msgid "Monday"
+msgstr "Segunda"
+
+msgid "Registered SIP Devices"
+msgstr "Dispositivos Registrados"
 
 msgid "Monthly"
 msgstr "Por mês"
