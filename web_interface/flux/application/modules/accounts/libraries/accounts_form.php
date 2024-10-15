@@ -2683,7 +2683,7 @@ class Accounts_form extends common {
 		}
 		$permission = array();
 		$login_type = $this->CI->session->userdata('userlevel_logintype');
-		if ($this->CI->session->userdata('userlevel_logintype') == -1) {
+		if ($this->CI->session->userdata('userlevel_logintype') == -1 || $this->CI->session->userdata('userlevel_logintype') == 2) {
 			$permission = array(
 				gettext('Role'),
 				'permission_id',
