@@ -39,7 +39,7 @@ class New_Invoices_model extends CI_Model {
             //'disposition' => 'NORMAL_CLEARING [16]',
             'debit >' => 0,
             'billseconds >' => 0,
-            'invoiceid' => 0
+            //'invoiceid' => 0
         ));
 
         $cdrs = $query->result_object();
@@ -63,7 +63,9 @@ class New_Invoices_model extends CI_Model {
             $call->destinationPhone = preg_replace("/[^0-9]/", "", $cdr->callednum);
             $call->destinationType = $cdr->calltype;
 
-            $call->date = DateTime::createFromFormat('Y-m-d H:i:s', $cdr->callstart);
+            $call->date = DateTime::createFromFormat('Y-m-d H:i:s', $cdr->callstart, new DateTimeZone('UTC'));
+            $call->date->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+
             $call->date = $call->date->format('d/m/Y H:i:s');
 
             $call->duration = $cdr->billseconds;
