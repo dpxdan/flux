@@ -88,13 +88,14 @@ $(document).ready(function(){
     method: 'GET',
     dataType: 'json',
 	colModel : [
-		{display: 'User', name: 'User', width: 200, sortable: false, align: 'center'},
-		{display: 'Contact', name: 'Contact', width: 200, sortable: false, align: 'center'},
-		{display: 'Client-IP', name: 'network-ip', width: 190, sortable: false, align: 'center'},
-		{display: 'Client Port', name: 'network-port', width: 220, sortable: false, align: 'center'},
-                {display: 'Status', name: 'status', width: 400, sortable: false, align: 'center'},
-		{display: 'User Agent', name: 'agent', width: 195, sortable: false, align: 'center'},
-		],
+		{display: '<?php echo gettext("User"); ?>', name: 'User', width: 200, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("Contact"); ?>', name: 'Contact', width: 200, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("Client-IP"); ?>', name: 'network-ip', width: 190, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("Client-Port"); ?>', name: 'network-port', width: 220, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("Latency (ms)"); ?>', name: 'ping-time', width: 220, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("Status"); ?>', name: 'status', width: 400, sortable: false, align: 'center'},
+		{display: '<?php echo gettext("User Agent"); ?>', name: 'agent', width: 195, sortable: false, align: 'center'},
+	],
 	nowrap: false,
 	showToggleBtn: false,
 	sortname: "call-id",
@@ -110,8 +111,8 @@ $(document).ready(function(){
 	outof: 'of',
 	page:'1',
 	nomsg: 'No items',
-	procmsg: 'Processing, please wait ...',
-	pagestat: 'Displaying {from} to {to} of {total} items',
+	procmsg: '<?php echo gettext("Processing, please wait ..."); ?>',
+	pagestat: '<?php echo sprintf(_("Displaying %s to %s of %s items"), "{from}", "{to}", "{total}"); ?>',
 	onSuccess: function(data){
 	  $('a[rel*=facebox]').facebox({
 		    loadingImage : '<?php echo base_url();?>/images/loading.gif',
@@ -130,8 +131,7 @@ $(document).ready(function(){
 </script>
 <script>
 function myFunction() {
-		document.getElementById("extension").submit();
-    
+	document.getElementById("extension").submit();
 }
 </script>
 <? endblock() ?>
@@ -140,7 +140,7 @@ function myFunction() {
 <? endblock() ?>
 <? startblock('content') ?>
 
-<section class="slice color-three">
+<!-- <section class="slice color-three">
 	<div class="w-section inverse p-0">
 		<div id="floating-label" class="card col-md-12 px-0 pb-4">
 			<h3 class="bg-secondary text-light p-2 rounded-top"> <?php echo gettext("Registered SIP Devices"); ?></h3>
@@ -159,39 +159,44 @@ function myFunction() {
 				</div>
 				<?php } ?>
 				<div class="col-md-5 float-left text-left">
-			   <label class="search_label col-md-5 text-left">Refresh Time:</label>
-				<select class="col-md-6 form-control form-control-lg selectpicker"  name="second_reload" id="second_reload" onchange="this.form.submit()" >
-					<?php
-    		//for($i=5;$i<=300;$i+=5) {
-					if($_POST['second_reload'] == ''){
-						?>
-						<option value="15" <?php if(isset($result['value']) && (15 == $result['value']))echo 'selected';?>>15 Second</option>
-						<option value="30" <?php if(isset($result['value']) && (30 == $result['value']))echo 'selected';?>>30 Second</option>
-						<option value="60" <?php if(isset($result['value']) && (60 == $result['value']))echo 'selected';?>>1 minute</option>
-						<option value="120" <?php if(isset($result['value']) && (120 == $result['value']))echo 'selected';?>>2 Minute</option>
-						<option value="180" <?php if(isset($result['value']) && (180 == $result['value']))echo 'selected';?>>3 Minute</option>
-						<!-- <option value="<?php echo $i; ?>"<?php if(isset($result['value']) && ($i == $result['value']))echo 'selected';?>><?php echo $i; ?> Second</option> -->
+					<label class="search_label col-md-5 text-left"><?php echo gettext("Refresh time"); ?>:</label>
+					<select class="col-md-6 form-control form-control-lg selectpicker"  name="second_reload" id="second_reload" onchange="this.form.submit()" >
 						<?php
-					}
-					else{
-						?>
-						<option value="15" <?php if(isset($_POST['second_reload']) && (15 == $_POST['second_reload']))echo 'selected';?>>15 Second</option>
-						<option value="30" <?php if(isset($_POST['second_reload']) && (30 == $_POST['second_reload']))echo 'selected';?>>30 Second</option>
-						<option value="60" <?php if(isset($_POST['second_reload']) && (60 == $_POST['second_reload']))echo 'selected';?>>1 Minute</option>
-						<option value="120" <?php if(isset($_POST['second_reload']) && (120 == $_POST['second_reload']))echo 'selected';?>>2 Minute</option>
-						<option value="180" <?php if(isset($_POST['second_reload']) && (180 == $_POST['second_reload']))echo 'selected';?>>3 Minute</option>
+						if($_POST['second_reload'] == ''){
+							?>
+							<option value="15" <?php if(isset($result['value']) && (15 == $result['value']))echo 'selected';?>>15 Second</option>
+							<option value="30" <?php if(isset($result['value']) && (30 == $result['value']))echo 'selected';?>>30 Second</option>
+							<option value="60" <?php if(isset($result['value']) && (60 == $result['value']))echo 'selected';?>>1 minute</option>
+							<option value="120" <?php if(isset($result['value']) && (120 == $result['value']))echo 'selected';?>>2 Minute</option>
+							<option value="180" <?php if(isset($result['value']) && (180 == $result['value']))echo 'selected';?>>3 Minute</option>
+							<?php
+						}else{
+							?>
+							<option value="15" <?php if(isset($_POST['second_reload']) && (15 == $_POST['second_reload']))echo 'selected';?>>15 Second</option>
+							<option value="30" <?php if(isset($_POST['second_reload']) && (30 == $_POST['second_reload']))echo 'selected';?>>30 Second</option>
+							<option value="60" <?php if(isset($_POST['second_reload']) && (60 == $_POST['second_reload']))echo 'selected';?>>1 Minute</option>
+							<option value="120" <?php if(isset($_POST['second_reload']) && (120 == $_POST['second_reload']))echo 'selected';?>>2 Minute</option>
+							<option value="180" <?php if(isset($_POST['second_reload']) && (180 == $_POST['second_reload']))echo 'selected';?>>3 Minute</option>
 
-						<?php
-					} ?>
-    	  </select>
-    	</div>
-    </form>
-    <br/>
+							<?php
+						} ?>
+					</select>
+    			</div>
+    		</form>
+			<br/>
+		</div>
+		<br/>
+	</div>
+</section> -->
 
-</div>
-<br/>
-</div>
-</section>
+<script type="text/javascript">
+setInterval( "refreshAjax();", 30000 ); 
+
+$(function() {
+	refreshAjax = function(){$("#fs_extension").flexReload();
+}
+});
+</script>
 
 <section class="slice color-three pb-4">
 	<div class="w-section inverse p-0">

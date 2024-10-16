@@ -25,6 +25,7 @@ class Fsmonitor extends CI_Controller {
         $this->load->library("fsmonitor_form");
         $this->load->library('freeswitch_lib');
         $this->load->library('flux/form');
+        $this->load->library('flux_log');
         $this->load->helper('xml');
         $this->load->model('fsmonitor_model');
         $db_config = Common_model::$global_config['system_config'];
@@ -81,13 +82,12 @@ class Fsmonitor extends CI_Controller {
 
        }
       }
-       if(isset($json_data['rows'])){
-            $count = count ($json_data['rows']);
-            $json_data['total'] = $count;
-       }
-	else{
+	if(isset($json_data['rows'])){
+		$count = count ($json_data['rows']);
+		$json_data['total'] = $count;
+	}else{
 	   $count = 0;
-            $json_data['row'] = '';
+		$json_data['row'] = '';
 	}
        echo json_encode($json_data);
     }
@@ -95,49 +95,45 @@ class Fsmonitor extends CI_Controller {
         $command = "api sofia xmlstatus profile default reg";  
         $response = $this->fsmonitor_model->reload_freeswitch($command,$id);
         $json_data = array();
-	$json_data['total']='';
-	if($response != ''){
-	foreach($response as $response1){
-          $response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
-	  $json_data['page'] = 1;
-	  if(array_key_exists("registration",$response_arr["registrations"])){
-            if(!array_key_exists("0",$response_arr["registrations"])){
-              $response_final_arr = $response_arr["registrations"];
-            	if(array_key_exists("0",$response_final_arr["registration"])){
-
-            		// echo "<pre>";
-            		// print_r($response_final_arr);die();
-
-                    foreach($response_final_arr as $device_val){
-                   	foreach($device_val as $response_value) {
-
-                      	   $json_data['rows'][] = array('cell'=>array(
-                                 $response_value["sip-auth-user"],
-                                 htmlentities($response_value['contact']),
-                                 $response_value["network-ip"],
-                                 $response_value["network-port"],
-                                 $response_value["status"],
-                                 $response_value["agent"],
-                            ));
-            		}
-                     }
-		}
-		else{
-		  foreach($response_final_arr as $response_value){
-					$json_data['rows'][] = array('cell'=>array(
-						$response_value["sip-auth-user"],
-						htmlentities($response_value['contact']),
-						$response_value["network-ip"],
-						$response_value["network-port"],
-						$response_value["status"],
-						$response_value["agent"],
-					));
-		 }
-	      }
-	   }
-	 }
-       }
-      }
+		$json_data['total']='';
+		if($response != ''){
+			foreach($response as $response1){
+				$response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
+				$json_data['page'] = 1;
+				if(array_key_exists("registration",$response_arr["registrations"])){
+					if(!array_key_exists("0",$response_arr["registrations"])){
+					$response_final_arr = $response_arr["registrations"];
+						if(array_key_exists("0",$response_final_arr["registration"])){
+							foreach($response_final_arr as $device_val){
+								foreach($device_val as $response_value) {
+									$json_data['rows'][] = array('cell'=>array(
+											$response_value["sip-auth-user"],
+											htmlentities($response_value['contact']),
+											$response_value["network-ip"],
+											$response_value["network-port"],
+											$response_value["ping-time"],
+											$response_value["status"],
+											$response_value["agent"],
+										));
+								}
+							}
+						}else{
+							foreach($response_final_arr as $response_value){
+								$json_data['rows'][] = array('cell'=>array(
+									$response_value["sip-auth-user"],
+									htmlentities($response_value['contact']),
+									$response_value["network-ip"],
+									$response_value["network-port"],
+									$response_value["ping-time"],
+									$response_value["status"],
+									$response_value["agent"],
+								));
+							}
+						}
+					}
+				}
+			}
+      	}
        if(isset($json_data['rows'])){
             $count = count ($json_data['rows']);
             $json_data['total'] = $count;
@@ -149,171 +145,150 @@ class Fsmonitor extends CI_Controller {
        echo json_encode($json_data);
     }
     function sip_devices() {
-
-    	// echo "string";die();
 		$data['username']   = $this->session->userdata('user_name');
-		 $account_data = $this->session->userdata("accountinfo");
+		$account_data = $this->session->userdata("accountinfo");
 		$data['page_title'] = gettext('SIP Devices');
-//		$data['page_title'] = "SIP Devices";
-		$query              = $this->db_model->getSelect("*", "freeswich_servers", "");
+		$query = $this->db_model->getSelect("*", "freeswich_servers", "");
 	    $data['fs_data']    = $query->result_array();
-	    //$this->load->view('registered_extension_report',$data);
 		if ($account_data['type'] == '-1' || $account_data['type'] == '2') {
-		$this->load->view('registered_extension_report',$data);
+			$this->load->view('registered_extension_report',$data);
 		} elseif ($account_data['type'] == '1') {
-		$this->load->view('reseller_registered_extension_report',$data);
-				} else {
-		$this->load->view('customer_registered_extension_report',$data);
+			$this->load->view('reseller_registered_extension_report',$data);
+		} else {
+			$this->load->view('customer_registered_extension_report',$data);
 		}
     }
     function customer_sip_devices_json($id=''){
-   $account_info = $accountinfo = $this->session->userdata('accountinfo');
-        $command = "api sofia xmlstatus profile default reg";  
-        $response = $this->fsmonitor_model->reload_freeswitch($command,$id);
-        $json_data = array();
-	$json_data['total']='';
-	if($response != ''){
-	foreach($response as $response1){
-          $response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
-	  $json_data['page'] = 1;
-	  if(array_key_exists("registration",$response_arr["registrations"])){
-            if(!array_key_exists("0",$response_arr["registrations"])){
-              $response_final_arr = $response_arr["registrations"];
-            	if(array_key_exists("0",$response_final_arr["registration"])){
-
-            		// echo "<pre>";
-            		// print_r($response_final_arr);die();
-
-                    foreach($response_final_arr as $device_val){
-                   	foreach($device_val as $response_value){
-$account_id=$this->common->get_field_name('accountid', 'sip_devices',array('username'=>@$response_value['sip-auth-user']));
- $acc_id= ($account_id==0)?1:$account_id;
- if($acc_id == $account_info['id'])
- {
-						$json_data['rows'][] = array('cell'=>array(
-							$response_value["sip-auth-user"],
-							htmlentities($response_value['contact']),
-							$response_value["network-ip"],
-							$response_value["network-port"],
-							$response_value["status"],
-							$response_value["agent"],
-						));
+		$account_info = $accountinfo = $this->session->userdata('accountinfo');
+		$command = "api sofia xmlstatus profile default reg";  
+		$response = $this->fsmonitor_model->reload_freeswitch($command,$id);
+		$json_data = array();
+		$json_data['total']='';
+		if($response != ''){
+			foreach($response as $response1){
+				$response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
+				$json_data['page'] = 1;
+				if(array_key_exists("registration",$response_arr["registrations"])){
+					if(!array_key_exists("0",$response_arr["registrations"])){
+						$response_final_arr = $response_arr["registrations"];
+						if(array_key_exists("0",$response_final_arr["registration"])){
+							foreach($response_final_arr as $device_val){
+								foreach($device_val as $response_value){
+									$account_id=$this->common->get_field_name('accountid', 'sip_devices',array('username'=>@$response_value['sip-auth-user']));
+									$acc_id= ($account_id==0)?1:$account_id;
+									if($acc_id == $account_info['id']){
+										$json_data['rows'][] = array('cell'=>array(
+										$response_value["sip-auth-user"],
+										htmlentities($response_value['contact']),
+										$response_value["network-ip"],
+										$response_value["network-port"],
+										$response_value["status"],
+										$response_value["ping-time"],
+										$response_value["agent"],
+										));
+									}
+							}
+								}
+						}else{
+							$account_id=$this->common->get_field_name('accountid', 'sip_devices',array('username'=>@$response_value['sip-auth-user']));
+							$acc_id= ($account_id==0)?1:$account_id;
+							if($acc_id == $account_info['id']){
+								foreach($response_final_arr as $response_value){
+									$json_data['rows'][] = array('cell'=>array(
+									$response_value["sip-auth-user"],
+									htmlentities($response_value['contact']),
+									$response_value["network-ip"],
+									$response_value["network-port"],
+									$response_value["status"],
+									$response_value["agent"],
+									));
+								}
+							}
+						}
 					}
 				}
-            		}
-                    }
-		else{
-$account_id=$this->common->get_field_name('accountid', 'sip_devices',array('username'=>@$response_value['sip-auth-user']));
- $acc_id= ($account_id==0)?1:$account_id;
- if($acc_id == $account_info['id'])
- {
-		  foreach($response_final_arr as $response_value){
-		      $json_data['rows'][] = array('cell'=>array(
-			   $response_value["sip-auth-user"],
-			   htmlentities($response_value['contact']),
-			   $response_value["network-ip"],
-			   $response_value["network-port"],
-			   $response_value["status"],
-		  	   $response_value["agent"],
-		      ));
-		 }
+			}
 		}
-	      }
-	   }
-	 }
-       }
-      }
-       if(isset($json_data['rows'])){
-            $count = count ($json_data['rows']);
-            $json_data['total'] = $count;
-       }
-	else{
-	   $count = 0;
-            $json_data['row'] = '';
-	}
-       echo json_encode($json_data);
+		if(isset($json_data['rows'])){
+			$count = count ($json_data['rows']);
+			$json_data['total'] = $count;
+		}else{
+			$count = 0;
+			$json_data['row'] = '';
+		}
+		echo json_encode($json_data);
     }
     function customer_sip_devices() {
-
-    	// echo "string";die();
 		$data['username']   = $this->session->userdata('user_name');
 		$data['page_title'] = gettext('SIP Devices');
-		//$data['page_title'] = "Sip Devices";
 		$query              = $this->db_model->getSelect("*", "freeswich_servers", "");
 	    $data['fs_data']    = $query->result_array();
 		$this->load->view('customer_registered_extension_report',$data);
     }
   
-  
      function reseller_sip_devices_json($id=0){
-$account_info = $accountinfo = $this->session->userdata('accountinfo');
+		$account_info = $accountinfo = $this->session->userdata('accountinfo');
         $command = "api sofia xmlstatus profile default reg";  
         $response = $this->fsmonitor_model->reload_freeswitch($command,$id);
         $json_data = array();
-	$json_data['total']='';
-	if($response != ''){
-	foreach($response as $response1){
-          $response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
-	  $json_data['page'] = 1;
-	  if(array_key_exists("registration",$response_arr["registrations"])){
-            if(!array_key_exists("0",$response_arr["registrations"])){
-            $response_final_arr = $response_arr["registrations"];
-            if(array_key_exists("0",$response_final_arr["registration"])){
+		$json_data['total']='';
+		if($response != ''){
+			foreach($response as $response1){
+				$response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response1))),1);
+				$json_data['page'] = 1;
+				if(array_key_exists("registration",$response_arr["registrations"])){
+					if(!array_key_exists("0",$response_arr["registrations"])){
+						$response_final_arr = $response_arr["registrations"];
+						if(array_key_exists("0",$response_final_arr["registration"])){
 
-            		// echo "<pre>";
-            		// print_r($response_final_arr);die();
-
-                    foreach($response_final_arr as $device_val){
-                   	foreach($device_val as $response_value){
-$reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('username'=>@$response_value["sip-auth-user"]));
-					$res_id= ($reseller_id==0)?1:$reseller_id;
-					if($res_id == $account_info['id'])
-                     {
-                      	   $json_data['rows'][] = array('cell'=>array(
-                                 $response_value["sip-auth-user"],
-                                 htmlentities($response_value['contact']),
-                                 $response_value["network-ip"],
-                                 $response_value["network-port"],
-                                 $response_value["status"],
-                                 $response_value["agent"],
-                            ));
-            		}
-                     }
+							foreach($response_final_arr as $device_val){
+								foreach($device_val as $response_value){
+									$reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('username'=>@$response_value["sip-auth-user"]));
+									$res_id= ($reseller_id==0)?1:$reseller_id;
+									if($res_id == $account_info['id']){
+											$json_data['rows'][] = array('cell'=>array(
+											$response_value["sip-auth-user"],
+											htmlentities($response_value['contact']),
+											$response_value["network-ip"],
+											$response_value["network-port"],
+											$response_value["ping-time"],
+											$response_value["status"],
+											$response_value["agent"],
+										));
+									}
+								}
+							}
+						}else{
+							$reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('username'=>@$response_value["sip-auth-user"]));
+							$res_id= ($reseller_id==0)?1:$reseller_id;
+							if($res_id == $account_info['id']){
+								foreach($response_final_arr as $response_value){
+									$json_data['rows'][] = array('cell'=>array(
+									$response_value["sip-auth-user"],
+									htmlentities($response_value['contact']),
+									$response_value["network-ip"],
+									$response_value["network-port"],
+									$response_value["ping-time"],
+									$response_value["status"],
+									$response_value["agent"],
+									));
+								}
+							}
+						}
+					}
+				}
+			}
+      	}
+		if(isset($json_data['rows'])){
+			$count = count ($json_data['rows']);
+			$json_data['total'] = $count;
+		}else{
+			$count = 0;
+			$json_data['row'] = '';
 		}
-		}
-		else{
-					$reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('username'=>@$response_value["sip-auth-user"]));
-					$res_id= ($reseller_id==0)?1:$reseller_id;
-					if($res_id == $account_info['id']){
-		  foreach($response_final_arr as $response_value){
-		      $json_data['rows'][] = array('cell'=>array(
-			   $response_value["sip-auth-user"],
-			   htmlentities($response_value['contact']),
-			   $response_value["network-ip"],
-			   $response_value["network-port"],
-			   $response_value["status"],
-		  	   $response_value["agent"],
-		      ));
-		 }
-	      }
-	      }
-	 }
-       }
-      }
-      }
-       if(isset($json_data['rows'])){
-            $count = count ($json_data['rows']);
-            $json_data['total'] = $count;
-       }
-	else{
-	   $count = 0;
-            $json_data['row'] = '';
-	}
-       echo json_encode($json_data);
+		echo json_encode($json_data);
     }
     function reseller_sip_devices() {
-
-    	// echo "string";die();
 		$data['username']   = $this->session->userdata('user_name');
 		$data['page_title'] = "SIP Devices";
 		$query              = $this->db_model->getSelect("*", "freeswich_servers", "");
@@ -321,13 +296,12 @@ $reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('u
 		$this->load->view('reseller_registered_extension_report',$data);
     }
   
-  
     function fs_cli_authentication(){
         $data['username'] = $this->session->userdata('user_name');
         $data['page_title'] = 'Authentication';
-	$data['type'] = "fs_cli";
-	$this->load->view('view_authentication_key',$data);
-   }
+		$data['type'] = "fs_cli";
+		$this->load->view('view_authentication_key',$data);
+   	}
     function fs_cli() {
 		$data['username']   = $this->session->userdata('user_name');
 		$data['page_title'] = 'Flux CLI';
@@ -339,16 +313,16 @@ $reseller_id=$this->common->get_field_name('reseller_id', 'sip_devices',array('u
     }
     function fs_cli_command(){
         $freeswitch_data = $this->input->post();
-	$command ='api '.$freeswitch_data['freeswitch_command'];
-	$host_id =$freeswitch_data['host_id'];
-	$data['host_id']=$host_id;
+		$command ='api '.$freeswitch_data['freeswitch_command'];
+		$host_id =$freeswitch_data['host_id'];
+		$data['host_id']=$host_id;
         $new_arr = $this->fsmonitor_model->reload_live_freeswitch_show($command,$host_id);
-	$data['username'] = $this->session->userdata('user_name');
+		$data['username'] = $this->session->userdata('user_name');
         $data['page_title'] = 'Flux Cli';
-	$data['response']=$new_arr;
-	$query = $this->db_model->getSelect("*", "freeswich_servers", "");
+		$data['response']=$new_arr;
+		$query = $this->db_model->getSelect("*", "freeswich_servers", "");
         $data['fs_data'] = $query->result_array();
-	$data['command']=$command;
+		$data['command']=$command;
         $this->load->view('view_fs_fsmonitor_execute', $data);
     }
     function gateways_authentication(){
