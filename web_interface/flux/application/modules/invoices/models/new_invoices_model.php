@@ -116,7 +116,8 @@ class New_Invoices_model extends CI_Model {
                 $call->destinationType = $cdr->calltype;
                 
     
-                $call->date = DateTime::createFromFormat('Y-m-d H:i:s', $cdr->callstart);
+                $call->date = DateTime::createFromFormat('Y-m-d H:i:s', $cdr->callstart, new DateTimeZone('UTC'));
+                $call->date->setTimezone(new DateTimeZone('America/Sao_Paulo'));
                 $call->date = $call->date->format('d/m/Y H:i:s');
     
                 $call->duration = $cdr->billseconds;
@@ -124,8 +125,8 @@ class New_Invoices_model extends CI_Model {
     
                 $call->value = $cdr->debit;
                 if($call->destinationType == "Gratuita" || $call->destinationType == "FREE" || $call->destinationType == "Chamada Gratuita" ) {
-                $call->destinationType = $cdr->notes;                
-                $call->value = "0.00";
+                    $call->destinationType = $cdr->notes;                
+                    $call->value = "0.00";
                 }
     
                 $numbers[$number]->calls[] = $call;
