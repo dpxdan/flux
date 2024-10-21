@@ -2,23 +2,25 @@
 <? startblock('extra_head') ?>
 
 <script type="text/javascript" language="javascript">
-	function invoice_delete(inv_id){
-				$.ajax({
-			type: "POST",
-			url: "<?= base_url()?>/invoices/invoice_delete_statically/"+inv_id,
-			data:'',
-			success:function(alt) {
-				   var confirm_string = "Are you sure want to delete record.";
-				var answer = confirm(confirm_string);
-				if(answer){
-					window.location.href="<?= base_url()?>/invoices/invoice_delete_massege/";
+	function invoice_delete(inv_id, accountid){
+		var confirm_string = "Are you sure you want to delete this record?";
+		var answer = confirm(confirm_string);
+    
+		if(answer){
+			$.ajax({
+				type: "POST",
+				url: "<?= base_url()?>/invoices/invoice_delete_statically/"+inv_id,
+				data: '',
+				success:function(alt) {
+					window.location.href = "<?= base_url()?>/invoices/invoice_delete_massege/";
+				},
+				error: function(){
+					alert("Error while deleting the invoice.");
 				}
-				else{
-					return false;
-				}
-			}
-		});
-				
+			});
+		} else {
+			return false;
+		}		
 	}
 	function validateForm(){
 		  if(document.getElementById('from_date').value == ""){

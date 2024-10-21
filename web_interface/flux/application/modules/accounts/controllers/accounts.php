@@ -33,6 +33,7 @@ class Accounts extends MX_Controller {
 		$this->load->library('flux/invoice');
 		$this->load->library('session');
 		$this->load->helper('form');
+		$this->load->library("flux_log");
 		$this->load->library('flux/order');
 		$this->load->model('accounts_model');
 		$this->load->model('Flux_common');
@@ -1464,12 +1465,13 @@ class Accounts extends MX_Controller {
 				$response                       = $this->accounts_model->account_process_payment($post_array);
 				$customer_info['refill_amount'] = $post_array['credit'];
 				if ($post_array['payment_type'] == 1) {
-					$customer_info['balance'] = $customer_info['balance']-$customer_info['refill_amount'];
+					$customer_info['balance'] = $customer_info['balance'] - $customer_info['refill_amount'];
 					$this->common->mail_to_users('account_postcharge', $customer_info);
 				} else {
-					$customer_info['balance'] = $customer_info['balance']+$customer_info['refill_amount'];
+					$customer_info['balance'] = $customer_info['balance'] + $customer_info['refill_amount'];
 					$this->common->mail_to_users('account_refilled', $customer_info);
 				}
+				// $this->flux_log->write_log('charge', json_encode($customer_info));	
 				$message = $post_array['payment_type'] == 0?gettext("Recharge successfully!"):gettext("Post charge applied successfully.");
 				echo json_encode(array(
 						"SUCCESS" => gettext($message),

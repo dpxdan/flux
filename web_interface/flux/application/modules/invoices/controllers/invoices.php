@@ -34,6 +34,7 @@ class Invoices extends MX_Controller
         $this->load->library('flux/permission');
         $this->load->library('flux/payment');
         $this->load->library ( 'Invoice_log' );
+        $this->load->library ( 'flux_log' );
         $this->load->model('invoices_model');
         $this->load->model('Flux_common');
         $this->load->model('common_model');
@@ -107,23 +108,23 @@ class Invoices extends MX_Controller
                 $outstanding = ($value['is_paid'] == 1) ? $value['debit'] - $value['credit'] : "0.00";
                 $invoice_total = '';
                 $accountinfo = $this->session->userdata('accountinfo');
-                $id = $accountinfo['id'];
+                $acc_id = $accountinfo['id'];
+
                 $charge_type = $this->common->get_field_name("charge_type", "invoice_details", array(
                     "invoiceid" => $value['id']
                 ));
 
                 
                 if ($value['generate_type'] == 1) {
-                $download = "<a  href=" . '/invoices/invoice_flux/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
-                } 
-                else {
-                
-                $download = "<a  href=" . '/invoices/invoice_download_flux/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
-                
+                    $download = "<a  href=" . '/invoices/invoice_flux/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
+                } else {
+                    $download = "<a  href=" . '/invoices/invoice_download_flux/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
                 }
+                $download3 = "<a  href=" . '/invoices/invoice_download_cdrs/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download CDR' ><i class='fa fa-money fa-fw'></i></a>&nbsp";
                 
-                //$download2 = "<a  href=" . $url2 . $value['id'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
-                $download3 = "<a  href=" . '/invoices/invoice_download_cdrs/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download CDR' ><i class='fa fa-clipboard fa-fw'></i></a>&nbsp";
+                $id = $value['id'];
+                $delete_button = "<a onclick='invoice_delete($id)' class='btn btn-royelblue btn-sm'  title='Delete' ><i class='fa fa-trash fa-fw'></i></a>&nbsp";
+
                 if ($value['type'] == 'I') {
                     if ($value['confirm'] == 0) {
                         if ($value['generate_type'] == 1) {
@@ -131,8 +132,6 @@ class Invoices extends MX_Controller
                         } else {
                             $payment = '<a href="' . base_url() . 'invoices/invoice_automatically_edit/' . $value['id'] . '" class="btn btn-royelblue btn-sm"  title="Edit"><i class="fa fa-pencil-square-o fa-fw"></i></a>';
                         }
-                        $id = $value['id'];
-                        $delete_button = "<a onclick='invoice_delete($id)' class='btn btn-royelblue btn-sm'  title='Delete' ><i class='fa fa-trash fa-fw'></i></a>&nbsp";
                     } 
                     else {
 
@@ -142,7 +141,7 @@ class Invoices extends MX_Controller
                             // $payment = "<button style='padding: 0 17px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
                             $payment_edit = '<a href="' . base_url() . 'invoices/invoice_automatically_edit/' . $value['id'] . '" class="btn btn-royelblue btn-sm"  title="Edit"><i class="fa fa-pencil-square-o fa-fw"></i></a>';
                         }
-                        $delete_button = "&nbsp";
+                        // $delete_button = "&nbsp";
                     }
                 } else {
                     $payment = '';
@@ -225,7 +224,7 @@ class Invoices extends MX_Controller
                         $this->common->currency_decimal($amount),
 //                        $this->common->currency_decimal($outstanding),
                         $this->common->reseller_select_value("first_name,last_name,number,company_name", "accounts", $value['reseller_id']),
-                        $download . ' ' . $download3 
+                        $download . ' ' . $download3  . ' ' . $delete_button
 //                        $download . ' ' .$payment_edit . ' ' . $payment . ' ' . $download2
                     )
                 );
@@ -1115,32 +1114,6 @@ class Invoices extends MX_Controller
     function invoice_list_responce()
     {
         $response_arr = $_POST;
-        /*
-         * $response_arr = array(
-         * 'payer_email' => 'hard_patel09@yahoo.com',
-         * 'payer_id' => 'B329Y9JFAJUMJ',
-         * 'payer_status' => 'Pending',
-         * 'first_name' => 'Rodney',
-         * 'last_name' => 'Carmichael',
-         * 'txn_id' => '6PG83205H56085047',
-         * 'mc_currency' => 'USD',
-         * 'mc_gross' => '5.00',
-         * 'protection_eligibility' => 'INELIGIBLE',
-         * 'payment_gross' => '5.00',
-         * 'payment_status' => 'Pending',
-         * 'pending_reason' => 'unilateral',
-         * 'payment_type' => 'instant',
-         * 'item_name' => 'asdsasdads',
-         * 'item_number' => '4',
-         * 'quantity' => '1',
-         * 'txn_type' => 'web_accept',
-         * 'payment_date' => '2019-04-24T06:14:13Z',
-         * 'business' => 'your@paypal.com',
-         * 'notify_version' => 'UNVERSIONED',
-         * 'custom' => '7',
-         * 'verify_sign' => 'A76bwlv2Z01mOclk1JxeCgsePvJ8ARjvcfASrPU3Mwwb6Cqm.77RpV4-',
-         * );
-         */
         $logintype = $this->session->userdata('logintype');
         if (($response_arr["payment_status"] == "Pending" || $response_arr["payment_status"] == "Complete" || $response_arr["payment_status"] == "Completed")) {
             $invoice_id = $response_arr['item_number'];
@@ -1383,13 +1356,13 @@ class Invoices extends MX_Controller
         exit();
     }
 
-    function invoice_delete()
-    {
-        $ids = $this->input->post("selected_ids", true);
-        $where = "id IN ($ids)";
-        $this->db->where($where);
-        echo $this->db->delete("invoices");
-    }
+    // public function invoice_delete()
+    // {
+    //     $ids = $this->input->post("selected_ids", true);
+    //     $where = "id IN ($ids)";
+    //     $this->db->where($where);
+    //     echo $this->db->delete("invoices");
+    // }
 
     function invoice_conf()
     {
@@ -1685,16 +1658,20 @@ class Invoices extends MX_Controller
         $instant_search = $this->session->userdata('left_panel_search_' . $accounttype . '_invoices');
 
         if (isset($instant_search) && $instant_search != "") {
-            $like_str = isset($instant_search) ? "(`number` like '%$instant_search%'  
+            $like_str = isset($instant_search) ? "(
+                                            (`number` like '%$instant_search%'  
 		                                    OR IF(`generate_type`=0, 'Automatically', 'Manually') like '%$instant_search%'
-		                                    OR `credit` like '%$instant_search%'
+		                                    OR `credit` like '%$instant_search%')
 						    AND (`accountid` like '%$accountid%'
-						    AND `confirm` like '%1%'))" : null;
+						    AND `confirm` like '%1%'
+						    AND `is_deleted` = 0)
+                            )" : null;
         }
 
         $where = array(
             'accountid' => $accountid,
-            'confirm' => 1
+            'confirm' => 1,
+            "is_deleted" => '0'
         );
         if ($instant_search == "") {
             $count_all = $this->db_model->countQuery("*", "invoices", $where);
@@ -1782,17 +1759,9 @@ class Invoices extends MX_Controller
 
                 $download = "<a href=" . $url . $value['id'] . " class='btn btn-royelblue btn-sm'  title='Download Invoice' ><i class='fa fa-cloud-download fa-fw'></i></a>&nbsp";
                 $download3 = "<a  href=" . '/invoices/invoice_download_cdrs/' . $value['id'] . '/00_' . $value['number'] . " class='btn btn-royelblue btn-sm'  title='Download CDR' ><i class='fa fa-clipboard fa-fw'></i></a>&nbsp";
-                if ($value['type'] == 'R') {
-                    $payment = '';
-                    $payment_last = $invoice_date;
-                    $outstanding = 0;
-                } else {
-                    if ($outstanding > 0) {
-                        // $payment = "<a style='padding: 0 8px;' href='" . base_url() . "invoices/invoice_summary/" . $value["id"] . "' class='btn btn-warning'  title='Payment'>".gettext("Unpaid")."</i></a>";
-                    } else {
-                        // $payment = " <button style='padding: 0 8px;' type='button'  class='btn btn-success'>".gettext("Paid")."</button>";
-                    }
-                }
+
+                $id = $value['id'];
+                $delete_button = "<a onclick='invoice_delete($id, $accountid)' class='btn btn-royelblue btn-sm'  title='Delete' ><i class='fa fa-trash fa-fw'></i></a>&nbsp";
 
                 $account_arr = $this->db_model->getSelect('first_name,number,last_name', 'accounts', array(
                     'id' => $value['accountid']
@@ -1822,7 +1791,7 @@ class Invoices extends MX_Controller
                         $payment_last,
                         $this->common->currency_decimal($amount),
                         $this->common->currency_decimal($outstanding),
-                        $download . '' . $download3
+                        $download . '' . $download3 . '' . $delete_button
                     )
                 );
                 $total_value = $total_value + $value['credit'];

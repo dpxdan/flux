@@ -36,7 +36,12 @@ class Invoices_model extends CI_Model
         $where = '';
         if ($account_data['type'] == 1) {
             $where = array(
-                "reseller_id" => $account_data['id']
+                "reseller_id" => $account_data['id'],
+                "is_deleted" => '0'
+            );
+        }else{
+            $where = array(
+                "is_deleted" => '0'
             );
         }
         if ($flag) {
@@ -79,7 +84,7 @@ class Invoices_model extends CI_Model
         $accountinfo = $this->session->userdata('accountinfo');
         $where = array(
             "accountid" => $accountinfo['id'],
-            'confirm' => 1
+            'confirm' => 1,
         );
         if ($flag) {
             $query = $this->db_model->select("*", "invoices", $where, "", "", $limit, $start);

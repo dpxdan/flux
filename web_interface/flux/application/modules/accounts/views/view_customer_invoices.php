@@ -1,6 +1,26 @@
 <? extend('left_panel_master.php') ?>
 <? startblock('extra_head') ?>
 <script type="text/javascript" language="javascript">
+	function invoice_delete(inv_id, accountid){
+		var confirm_string = "Are you sure you want to delete this record?";
+		var answer = confirm(confirm_string);
+		console.log("acc_id", accountid);
+		if(answer){
+			$.ajax({
+				type: "POST",
+				url: "<?= base_url()?>/invoices/invoice_delete_statically/"+inv_id,
+				data: '',
+				success:function(alt) {
+					window.location.href = "<?= base_url()?>/accounts/customer_invoices/" + accountid;
+				},
+				error: function(){
+					alert("Error while deleting the invoice.");
+				}
+			});
+		} else {
+			return false;
+		}		
+	}
   $(document).ready(function() {
     build_grid("invoices_list","<?php echo base_url()."accounts/customer_details_json/invoices/$edit_id/"; ?>",<? echo $grid_fields; ?>,"");
     $("#left_panel_quick_search").keyup(function(){
