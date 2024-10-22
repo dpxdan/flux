@@ -32,6 +32,7 @@ class Freeswitch extends MX_Controller
         $this->load->library("freeswitch_form");
         $this->load->library('flux/form', 'freeswitch_form');
         $this->load->library('flux/permission');
+        $this->load->library('flux_log');
         $this->load->library('freeswitch_lib');
         $this->load->library('FLUX_Sms');
         $this->load->model('freeswitch_model');
@@ -588,46 +589,56 @@ class Freeswitch extends MX_Controller
 
         // Defined color
         $status_color = array(
-            "Answered" => "#28A745",
-            "Connecting" => "#E40B80",
-            "Unknown" => "#DC3545"
+            gettext('Answered') => "#28A745",
+            gettext('Connecting') => "#E40B80",
+            gettext('Unknown') => "#DC3545"
         );
         $org_color = "#D6D8D9";
         $term_color = "#3B3280";
-
+        $this->flux_log->write_log("LIVECALL", json_encode($calls));
         foreach ($calls as $key => $value) {
             if (isset($value['state']) && ($value['state'] == 'CS_EXCHANGE_MEDIA' || $value['state'] == 'CS_CONSUME_MEDIA')) {
-                $calls[$i]['presence_data'] = @$calls_final[$value['call_uuid']]['presence_data'];
-                $livecall_data = explode("|||", $calls[$i]['presence_data']);
-
+                $logdata = @$calls_final[$value['call_uuid']]['direction'];
+                $livecall_data = explode("|||", $value['presence_data']);
+                if ($livecall_data[4] == "DID"){
+                    $direction_call = gettext("Inbound");
+                    $account = @$livecall_data[1];
+                }else{
+                    $direction_call = gettext("Outbound");
+                    $account = @$calls_final[$value['call_uuid']]['accountcode'];
+                }
+                $this->flux_log->write_log("LIVECALL", json_encode($logdata));
                 $org_data = explode("//", @$livecall_data[2]);
-                $term_data = explode("//", @$livecall_data[3]);
-
+                $term_data = explode("//", @$livecall_data[1]);
+                $this->flux_log->write_log("type_call", json_encode($livecall_data[4]));
                 $trunk = $term_data[4];
                 $trunk = explode("=",$trunk);
                 $gateway = $this->common->get_field_name('name', 'trunks', array("id" => $trunk[1]));
 
-                $value['callstate'] = ($value['state'] == 'CS_EXCHANGE_MEDIA') ? "Answered" : (($value['state'] == 'CS_CONSUME_MEDIA') ? "Connecting" : "Unknown");
+                $value['callstate'] = ($value['state'] == 'CS_EXCHANGE_MEDIA') ? gettext('Answered') : (($value['state'] == 'CS_CONSUME_MEDIA') ? gettext('Connecting') : gettext('Unknown'));
+                $timeDifference = strtotime(date("Y-m-d H:i:s")) - strtotime($value['created']);
+                // $this->flux_log->write_log("timeDifference", json_encode($timeDifference));
                 $amount = isset($term_data[3]) ? $term_data[3] : 0;
                 $json_data['rows'][] = array(
                     'cell' => array(
-                        "<a href='" . base_url() . "freeswitch/livecall_hangup?uuid=" . $value['uuid'] . "' class='btn btn-warning'> Hang Up </button>",
+                        "<a href='" . base_url() . "freeswitch/livecall_hangup?uuid=" . $value['uuid'] . "' class='btn btn-warning'> ". gettext('Hang Up')." </button>",
                         // Ashish FLUXUPDATE-752
-                        $this->common->convert_GMT_to('', '', $value['created']),
+                        $value['created'],
                         // Ashish 752 End
                         $value['cid_name'] . " " . $value['cid_num'],
                         $value['ip_addr'],
-                        @$livecall_data[1],
-                        "<span style='color:" . $org_color . "'><b>" . @rtrim(ltrim($org_data[0], "^"), ".* ") . "</b></span>",
-                        "<span style='color:" . $org_color . "'><b>" . @$org_data[1] . "</b></span>",
-                        "<span style='color:" . $org_color . "'><b>" . @$org_data[2] . "</b></span>",
+                        $account,
+                        // "<span style='color:" . $org_color . "'><b>" . @rtrim(ltrim($org_data[0], "^"), ".* ") . "</b></span>",
+                        // "<span style='color:" . $org_color . "'><b>" . @$org_data[1] . "</b></span>",
+                        // "<span style='color:" . $org_color . "'><b>" . @$org_data[2] . "</b></span>",
                         "<span style='color:" . $term_color . "'><b>" . @$gateway . "</b></span>",
                         "<span style='color:" . $term_color . "'><b>" . @rtrim(ltrim($term_data[1], " ^"), ".* ") . "</b></span>",
                         "<span style='color:" . $term_color . "'><b>" . @$term_data[2] . "</b></span>",
                         isset($term_data[3]) ? "<span style='color:" . $term_color . "'><b>" . $this->common_model->calculate_currency_customer(@trim($amount)) . "</b></span>" : "",
                         $value['dest'],
-                        date("H:i:s", strtotime(date("Y-m-d H:i:s")) - $value['created_epoch']),
-                        @$livecall_data[4],
+                        gmdate("H:i:s", $timeDifference),
+                        // @$livecall_data[4],
+                        $direction_call,
                         "<span style='color:#fff;background-color:" . $status_color[$value['callstate']] . "'><b>" . $value['callstate'] . "</b></span>",
                         $value['read_codec'] . " / " . $value['write_codec']
                     )
@@ -642,30 +653,28 @@ class Freeswitch extends MX_Controller
         echo json_encode($json_data);
     }
 
-    function livecall_hangup()
-    {
-
+    function livecall_hangup(){
         $get_uuid = $_GET['uuid'];	
-	$value = strip_slashes ( trim ( $get_uuid ) );
-	$value = preg_replace ( '#<script.*</script>#is', '', $value );
-	$value = strip_tags ( filter_var ( $value, FILTER_SANITIZE_STRING ) );
-	$value=$this->security->xss_clean ( $value );
-	$value_array = explode("-",$value);
-	$segment_1=strlen($value_array['1']);
-	$segment_2=strlen($value_array['2']);
-	$segment_3=strlen($value_array['3']);
-	$uuid = "";
-	if(($segment_1 == 4) && ($segment_2 == 4) && ($segment_3 == 4)){
-		$segment_0 = substr($value_array[0], -8);
-		$segment_4 = substr($value_array[4], 0, 12);
-		if(ctype_xdigit($segment_0) && ctype_xdigit($value_array['1']) && ctype_xdigit($value_array['2']) && ctype_xdigit($value_array['3']) && ctype_xdigit($segment_4)) {
-			$uuid=$segment_0.'-'.$value_array['1'].'-'.$value_array['2'].'-'.$value_array['3'].'-'.$segment_4;
-		}
-	}
-	if(!empty($uuid)){
-		$command = "api uuid_kill " . $uuid;
-		$response = $this->freeswitch_model->reload_live_freeswitch($command);
-	}
+        $value = strip_slashes ( trim ( $get_uuid ) );
+        $value = preg_replace ( '#<script.*</script>#is', '', $value );
+        $value = strip_tags ( filter_var ( $value, FILTER_SANITIZE_STRING ) );
+        $value=$this->security->xss_clean ( $value );
+        $value_array = explode("-",$value);
+        $segment_1=strlen($value_array['1']);
+        $segment_2=strlen($value_array['2']);
+        $segment_3=strlen($value_array['3']);
+        $uuid = "";
+        if(($segment_1 == 4) && ($segment_2 == 4) && ($segment_3 == 4)){
+            $segment_0 = substr($value_array[0], -8);
+            $segment_4 = substr($value_array[4], 0, 12);
+            if(ctype_xdigit($segment_0) && ctype_xdigit($value_array['1']) && ctype_xdigit($value_array['2']) && ctype_xdigit($value_array['3']) && ctype_xdigit($segment_4)) {
+                $uuid=$segment_0.'-'.$value_array['1'].'-'.$value_array['2'].'-'.$value_array['3'].'-'.$segment_4;
+            }
+        }
+        if(!empty($uuid)){
+            $command = "api uuid_kill " . $uuid;
+            $response = $this->freeswitch_model->reload_live_freeswitch($command);
+        }
         redirect(base_url() . 'freeswitch/livecall_report/');
     }
 

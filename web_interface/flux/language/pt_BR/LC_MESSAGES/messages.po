@@ -10,6 +10,12 @@ msgstr "Conta"
 msgid "Account Type"
 msgstr "Tipo de Conta"
 
+msgid "Processing, please wait ..."
+msgstr "Processando, aguarde..."
+
+msgid "Displaying %s to %s of %s items"
+msgstr "Mostrando %s a %s de %s itens"
+
 msgid "Reverse Rate"
 msgstr "Tarifação Reversa"
 
@@ -29,7 +35,7 @@ msgid "ACD"
 msgstr "ACD"
 
 msgid "Action"
-msgstr "Açao"
+msgstr "Ação"
 
 msgid "Action Type"
 msgstr "Tipo de acão"
@@ -99,6 +105,15 @@ msgstr "Valor INR"
 
 msgid "Answered Calls"
 msgstr "Chamadas Atendidas"
+
+msgid "Answered"
+msgstr "Em Curso"
+
+msgid "Connecting"
+msgstr "Conectando"
+
+msgid "Unknown"
+msgstr "Desconhecido"
 
 msgid "Applicable For"
 msgstr "Aplicável para"
@@ -1033,7 +1048,7 @@ msgstr "Envio de Fax"
 msgid "Outstanding Amount INR"
 msgstr "Valor Pendente INR"
 
-msgid "Page "
+msgid "Page"
 msgstr "Página"
 
 msgid "Password"
@@ -1938,6 +1953,9 @@ msgstr "Editar Moeda"
 
 msgid "Is Distributor"
 msgstr "É distribuidor"
+
+msgid "Hang Up"
+msgstr "Desligar"
 
 msgid "Package created successfully!"
 msgstr "Pacote criado com sucesso!"
