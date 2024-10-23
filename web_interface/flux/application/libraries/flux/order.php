@@ -217,8 +217,8 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 					$product_info->description= $product_info->charge_type." (".$product_info->name." X ".$product_info->quantity.") has been added.";
 					$product_info->is_apply_tax =($product_info->payment_by == "Account Balance")?"false":"true";
 
-					$last_payment_id=$this->CI->payment->add_payments_transcation((array)$product_info,(array)$accountdata,$account_currency_info);
-					$orderobjArr['accounts'][$key]->invoiceid=$last_payment_id;
+					// $last_payment_id=$this->CI->payment->add_payments_transcation((array)$product_info,(array)$accountdata,$account_currency_info);
+					// $orderobjArr['accounts'][$key]->invoiceid=$last_payment_id;
 					if($accountdata->type == 1 && !empty($parent_array)){ 
 
 						if($accountdata->reseller_id > 0){
@@ -237,29 +237,11 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 						$parent_array[$accountdata->id]->order_item_id= $parent_order_id;
 						$parent_array[$accountdata->id]->product_id= $product_info->product_id;
 						$parent_array[$accountdata->id]->description= "Product (".$product_info->name.") commission has been credited";
-// print_r($product_info); 
 					}
 					if(isset($product_info->is_optin)){
 						if($product_info->is_optin == '0' && $accountdata->type == 0 && $product_info->product_category != '4'){
 							$parent_commission = true;
 						}
-					/*if($product_info->is_optin == '0' && $key > 0 && $product_info->product_category != '4' && $accountdata->is_distributor == 0){
-						$parent_distributor_arr = $orderobjArr['accounts'][$key-1];
-						$parent_distributor_product = $parent_distributor_arr->product_info;
-
-						$parent_distributor_product->price =$product_info->price- $parent_distributor_product->price;
-
-						$parent_distributor_product->INV_DIRECT_PAY = "true";
-						$parent_distributor_product->is_update_balance = "true";
-						$parent_distributor_product->payment_by = "Manual";
-						$parent_distributor_product->invoiceid = $parent_distributor_arr->invoiceid;
-
-//echo "<pre> ACCOUNT ARR ::::"; print_r($orderobjArr);
-						$invoiceid=$this->CI->payment->add_payments_transcation((array)$parent_distributor_product,(array)$parent_distributor_arr,$parent_distributor_arr->currency_info);
-						
-						//echo "<pre> Produyct ARR ::::".$invoiceid; print_r($product_info);
-						//echo "<pre> ACCOUNT ARR ::::"; print_r($parent_distributor_arr);
-					}*/
 				     }
 				}
 			}
@@ -309,8 +291,6 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 		$this->CI->common->mail_to_users('product_commission',(array)$parent_data);
 	}
 	function generate_order($product_info,$account_info,$created_by_accountinfo,$parent_order_id,$account_currency_info){
-
-
 		$product_info->quantity = (isset($product_info->quantity) && $product_info->quantity !='' )?$product_info->quantity:1;
 		$system_config = common_model::$global_config ['system_config'];
 		$from_currency = Common_model::$global_config ['system_config'] ['base_currency'];
@@ -320,95 +300,95 @@ $product_info = $this->CI->db_model->getJionQuery('products', 'products.id,produ
 		$order_insert_array_log = array(
 		    "library" => 'order',
 		    "function" => 'generate_order',
-				"order_id" =>crc32(uniqid()),
-				"parent_order_id" => $parent_order_id,
-				"order_date"=>gmdate("Y-m-d H:i:s"),
-				"order_generated_by"=>$created_by_accountinfo['id'],
-				"payment_gateway"=>$product_info->payment_by,
-				"payment_status"=>$product_info->payment_status,
-				"accountid"=>$account_info->id,
-				"reseller_id"=>$account_info->reseller_id,
-				"ip"=>$this->getRealIpAddr()
-				);
+			"order_id" =>crc32(uniqid()),
+			"parent_order_id" => $parent_order_id,
+			"order_date"=>gmdate("Y-m-d H:i:s"),
+			"order_generated_by"=>$created_by_accountinfo['id'],
+			"payment_gateway"=>$product_info->payment_by,
+			"payment_status"=>$product_info->payment_status,
+			"accountid"=>$account_info->id,
+			"reseller_id"=>$account_info->reseller_id,
+			"ip"=>$this->getRealIpAddr()
+			);
 				
 		$this->CI->flux_log->write_log('generate_order', json_encode($order_insert_array_log));		
 		$order_insert_array = array(
-				"order_id" =>crc32(uniqid()),
-				"parent_order_id" => $parent_order_id,
-				"order_date"=>gmdate("Y-m-d H:i:s"),
-				"order_generated_by"=>$created_by_accountinfo['id'],
-				"payment_gateway"=>$product_info->payment_by,
-				"payment_status"=>$product_info->payment_status,
-				"accountid"=>$account_info->id,
-				"reseller_id"=>$account_info->reseller_id,
-				"ip"=>$this->getRealIpAddr()
-				);
+			"order_id" =>crc32(uniqid()),
+			"parent_order_id" => $parent_order_id,
+			"order_date"=>gmdate("Y-m-d H:i:s"),
+			"order_generated_by"=>$created_by_accountinfo['id'],
+			"payment_gateway"=>$product_info->payment_by,
+			"payment_status"=>$product_info->payment_status,
+			"accountid"=>$account_info->id,
+			"reseller_id"=>$account_info->reseller_id,
+			"ip"=>$this->getRealIpAddr()
+		);
 
 		$this->CI->db->insert("orders",$order_insert_array);
 		$last_id = $this->CI->db->insert_id();
 
 		$counters_insert_array = array(
-				"product_id" =>$product_info->id,
-				"package_id" => $last_id,
-				"accountid"=>$account_info->id,
-				"type"=>$created_by_accountinfo['id']
-				);		
+			"product_id" =>$product_info->id,
+			"package_id" => $last_id,
+			"accountid"=>$account_info->id,
+			"type"=>$created_by_accountinfo['id']
+		);		
 		
 		$this->CI->db->insert("counters",$counters_insert_array);
 		$counter_id = $this->CI->db->insert_id();
 		
 
         $counters_insert_array_log = array(
-                "id" => $counter_id,
-				"product_id" =>$product_info->id,
-				"package_id" => $last_id,
-				"accountid"=>$account_info->id,
-				"type"=>$created_by_accountinfo['id']
-				);		
+			"id" => $counter_id,
+			"product_id" =>$product_info->id,
+			"package_id" => $last_id,
+			"accountid"=>$account_info->id,
+			"type"=>$created_by_accountinfo['id']
+			);		
 		$this->CI->flux_log->write_log('counters_insert_array_log', json_encode($counters_insert_array_log));
 		
 		 $order_item_array_log = array(
-							"order_id" =>$last_id,
-							"product_category" =>$product_info->product_category,
-							"product_id" =>$product_info->id,
-							"quantity"=>$product_info->quantity,
-							"price"=>($product_info->quantity*$product_info->price),
-							"setup_fee"=>($product_info->quantity*$product_info->setup_fee),
-							"billing_type"=>$product_info->billing_type,
-							"billing_days"=>$product_info->billing_days,
-							"free_minutes"=>$product_info->free_minutes,
-							"accountid"=>$account_info->id,
-							"reseller_id"=>$account_info->reseller_id,
-							"billing_date"=>gmdate("Y-m-d 00:00:01"),
-							"next_billing_date"=>($product_info->billing_days == 0)?gmdate('Y-m-'.$account_info->invoice_day.' 23:59:59', strtotime('+1 month')):gmdate("Y-m-".$account_info->invoice_day." 23:59:59",strtotime("+".($product_info->billing_days-1)." days")),
-							"is_terminated"=>0,
-							"termination_date"=>"",
-							"from_currency"=>$from_currency,
-							"exchange_rate"=>$account_currency_info['currencyrate'],
-							"to_currency"=>$account_currency_info['currency']
-							);
+			"order_id" =>$last_id,
+			"product_category" =>$product_info->product_category,
+			"product_id" =>$product_info->id,
+			"quantity"=>$product_info->quantity,
+			"price"=>($product_info->quantity*$product_info->price),
+			"setup_fee"=>($product_info->quantity*$product_info->setup_fee),
+			"billing_type"=>$product_info->billing_type,
+			"billing_days"=>$product_info->billing_days,
+			"free_minutes"=>$product_info->free_minutes,
+			"accountid"=>$account_info->id,
+			"reseller_id"=>$account_info->reseller_id,
+			"billing_date"=>gmdate("Y-m-d 00:00:01"),
+			"next_billing_date"=>($product_info->billing_days == 0)?gmdate('Y-m-'.$account_info->invoice_day.' 23:59:59', strtotime('+1 month')):gmdate("Y-m-".$account_info->invoice_day." 23:59:59",strtotime("+".($product_info->billing_days-1)." days")),
+			"is_terminated"=>0,
+			"termination_date"=>"",
+			"from_currency"=>$from_currency,
+			"exchange_rate"=>$account_currency_info['currencyrate'],
+			"to_currency"=>$account_currency_info['currency']
+		);
 		$this->CI->flux_log->write_log('create_order_item', json_encode($order_item_array_log));
 			
-		  $order_item_array = array(
-					"order_id" =>$last_id,
-					"product_category" =>$product_info->product_category,
-					"product_id" =>$product_info->id,
-					"quantity"=>$product_info->quantity,
-					"price"=>($product_info->quantity*$product_info->price),
-					"setup_fee"=>($product_info->quantity*$product_info->setup_fee),
-					"billing_type"=>$product_info->billing_type,
-					"billing_days"=>$product_info->billing_days,
-					"free_minutes"=>$product_info->free_minutes,
-					"accountid"=>$account_info->id,
-					"reseller_id"=>$account_info->reseller_id,
-					"billing_date"=>gmdate("Y-m-d 00:00:01"),
-					"next_billing_date"=>($product_info->billing_days == 0)?gmdate('Y-m-'.$account_info->invoice_day.' 23:59:59', strtotime('+1 month')):gmdate("Y-m-".$account_info->invoice_day." 23:59:59",strtotime("+".($product_info->billing_days-1)." days")),
-					"is_terminated"=>0,
-					"termination_date"=>"",
-					"from_currency"=>$from_currency,
-					"exchange_rate"=>$account_currency_info['currencyrate'],
-					"to_currency"=>$account_currency_info['currency']
-					);
+		$order_item_array = array(
+			"order_id" =>$last_id,
+			"product_category" =>$product_info->product_category,
+			"product_id" =>$product_info->id,
+			"quantity"=>$product_info->quantity,
+			"price"=>($product_info->quantity*$product_info->price),
+			"setup_fee"=>($product_info->quantity*$product_info->setup_fee),
+			"billing_type"=>$product_info->billing_type,
+			"billing_days"=>$product_info->billing_days,
+			"free_minutes"=>$product_info->free_minutes,
+			"accountid"=>$account_info->id,
+			"reseller_id"=>$account_info->reseller_id,
+			"billing_date"=>gmdate("Y-m-d 00:00:01"),
+			"next_billing_date"=>($product_info->billing_days == 0)?gmdate('Y-m-'.$account_info->invoice_day.' 23:59:59', strtotime('+1 month')):gmdate("Y-m-".$account_info->invoice_day." 23:59:59",strtotime("+".($product_info->billing_days-1)." days")),
+			"is_terminated"=>0,
+			"termination_date"=>"",
+			"from_currency"=>$from_currency,
+			"exchange_rate"=>$account_currency_info['currencyrate'],
+			"to_currency"=>$account_currency_info['currency']
+		);
 					
 	    $this->CI->db->insert("order_items",$order_item_array);
 	    $order_item_id = $this->CI->db->insert_id();
