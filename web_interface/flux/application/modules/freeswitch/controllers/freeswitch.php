@@ -313,21 +313,29 @@ class Freeswitch extends MX_Controller
         $json_data = $paging_data["json_paging"];
         $query = $this->freeswitch_model->fs_retrieve_sip_user(true, $paging_data["paging"]["start"], $paging_data["paging"]["page_no"]);
         $permissioninfo = $this->session->userdata('permissioninfo');
+        $profiles = $this->db->query("SELECT name FROM sip_profiles where status = 0")->result_array();
+        // $this->flux_log->write_log("FSSIPDEVICES", json_encode($profiles));
         // FLUXUPDATE-943 Kinjal Start
-        $command = "api sofia xmlstatus profile default reg";  
         $new_array = array();
-        $id= 0;
-        $response = $this->freeswitch_model->reload_freeswitch($command,$id);
-        if($response != ""){
-            $response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response))),1);
-            if(array_key_exists("registration",$response_arr["registrations"])){
-                if(!array_key_exists("0",$response_arr["registrations"]['registration'])){
-                    if($response_arr['registrations']['registration']['sip-auth-user'] != ''){
-                        array_push($new_array, $response_arr['registrations']['registration']['sip-auth-user']);
-                    }
-                }else{
-                    foreach ($response_arr['registrations']['registration'] as $key => $value) {
-                        array_push($new_array, $value['sip-auth-user']);
+        foreach ($profiles as $profile) {
+            $profile_name = $profile['name'];
+            $command = "api sofia xmlstatus profile " . $profile_name . " reg";
+        
+            $id = 0;
+            $response = $this->freeswitch_model->reload_freeswitch($command, $id);
+        
+            if ($response != "") {
+                $response_arr = json_decode(json_encode((array) simplexml_load_string(trim($response))), 1);
+        
+                if (array_key_exists("registration", $response_arr["registrations"])) {
+                    if (!array_key_exists("0", $response_arr["registrations"]['registration'])) {
+                        if ($response_arr['registrations']['registration']['sip-auth-user'] != '') {
+                            array_push($new_array, $response_arr['registrations']['registration']['sip-auth-user']);
+                        }
+                    } else {
+                        foreach ($response_arr['registrations']['registration'] as $key => $value) {
+                            array_push($new_array, $value['sip-auth-user']);
+                        }
                     }
                 }
             }
