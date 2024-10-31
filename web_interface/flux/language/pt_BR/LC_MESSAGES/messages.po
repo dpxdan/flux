@@ -1528,6 +1528,27 @@ msgstr "Configurações de faturamento"
 msgid "Pin"
 msgstr "Número Pin"
 
+msgid "Advance"
+msgstr "Avançado"
+
+msgid "On Busy"
+msgstr "Ocupado"
+
+msgid "Updates"
+msgstr "Atualizações"
+
+msgid "Check Update"
+msgstr "Buscar atualizações"
+
+msgid "Rollback"
+msgstr "Reverter Atualização"
+
+msgid "Last Update"
+msgstr "Última atualização"
+
+msgid "Tittle"
+msgstr "Título"
+
 msgid "Account Settings"
 msgstr "Configurações da conta"
 
@@ -1683,6 +1704,12 @@ msgstr "Se o SIP não estiver registrado"
 
 msgid "If No Answer"
 msgstr "Se não houver resposta"
+
+msgid "No Answer"
+msgstr "Sem Resposta"
+
+msgid "Not Registered"
+msgstr "Sem Registro"
 
 msgid "New Rate Group Name"
 msgstr "Novo nome do grupo de tarifas"
