@@ -28,6 +28,8 @@ $config ['argv'] = array (
 		"Purge" => "purge/ProcessPurge",
 		"BroadcastEmail" => "broadcastemail/broadcast_email",
 		"crons" => "crons/index",
+		"gitUpdate" => "GitUpdate/executeUpdate",
+		"gitRollback" => "GitUpdate/executeRollback"
 );
 $config ['CRON_BETA_MODE'] = false; // Beta Mode (useful for blocking submissions for testing)
 ?>

@@ -34,6 +34,7 @@ class Systems extends MX_Controller
         $this->load->library('flux/form', "system_form");
         $this->load->library('form_validation');
         $this->load->library('FLUX_Sms');
+        $this->load->library('flux_log');
         $this->load->model('system_model');
         $this->load->model('Flux_common');
         $this->load->dbutil();
@@ -334,6 +335,45 @@ class Systems extends MX_Controller
         $where = "id IN ($ids)";
         $this->db->where($where);
         echo $this->db->delete("timezone");
+    }
+
+    function update()
+    {
+        $data['username'] = $this->session->userdata('user_name');
+        $data['page_title'] = gettext('Updates');
+        $data['search_flag'] = true;
+        $this->session->set_userdata('advance_search', 0);
+        $data['grid_fields'] = $this->system_form->build_update_list_for_admin();
+        $data["grid_buttons"] = $this->system_form->build_grid_buttons();
+        $data['form_search'] = $this->form->build_serach_form($this->system_form->get_update_search_form());
+        $this->load->view('view_update_list', $data);
+    }
+
+    function update_json()
+    {
+        $json_data = array();
+        $count_all = $this->system_model->getupdate_list(false, "", "");
+        $paging_data = $this->form->load_grid_config($count_all, $_GET['rp'], $_GET['page']);
+        $json_data = $paging_data["json_paging"];
+
+        $query = $this->system_model->getupdate_list(true, $paging_data["paging"]["start"], $paging_data["paging"]["page_no"]);
+        $grid_fields = json_decode($this->system_form->build_update_list_for_admin());
+        $json_data['rows'] = $this->form->build_grid($query, $grid_fields);
+
+        foreach ($json_data['rows'] as &$row) {
+            foreach ($row['cell'] as &$cell) {
+                if ($cell == 'Ativo/Atual') {
+                    $cell = "<span style='color:#fff;background-color:#28a745; padding:2px; border-radius:3px;'><b>Ativo/Atual</b></span>";
+                } elseif ($cell == 'Inativo') {
+                    $cell = "<span style='color:#fff;background-color:#dc3545; padding:2px; border-radius:3px;'><b>Inativo</b></span>";
+                }
+            }
+        }
+        unset($row, $cell);
+
+        $this->flux_log->write_log("SYSTEM_UPDATE", json_encode($json_data['rows']));
+
+        echo json_encode($json_data);
     }
 
     function template()

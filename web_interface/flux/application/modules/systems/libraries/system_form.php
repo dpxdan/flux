@@ -399,6 +399,58 @@ class System_form extends common
         return $form;
     }
 
+    function get_update_search_form()
+    {
+        $form['forms'] = array(
+            "",
+            array(
+                'id' => "template_search"
+            )
+        );
+        $accountinfo = $this->CI->session->userdata('accountinfo');
+
+        $form[gettext('Search')] = array(
+
+            array(
+                gettext('Hash'),
+                'INPUT',
+                array(
+                    'hash' => 'hash[hash]',
+                    '',
+                    'size' => '20',
+                    'class' => "text field "
+                ),
+                '',
+                'tOOL TIP',
+                '1',
+                'hash[name-string]',
+                '',
+                '',
+                '',
+                'search_string_type',
+                ''
+            )
+        );
+        
+        $form['button_search'] = array(
+            'name' => 'action',
+            'id' => "template_search_btn",
+            'content' => gettext('Search'),
+            'value' => 'save',
+            'type' => 'button',
+            'class' => 'btn btn-success float-right'
+        );
+        $form['button_reset'] = array(
+            'name' => 'action',
+            'id' => "id_reset",
+            'content' => gettext('Clear'),
+            'value' => 'cancel',
+            'type' => 'reset',
+            'class' => 'btn btn-secondary float-right mx-2'
+        );
+        return $form;
+    }
+
     function build_timezone_list_for_admin()
     {
         $action = 'systems/timezone_list_edit/';
@@ -977,6 +1029,68 @@ class System_form extends common
                     )
                 ),
                 "false"
+            )
+        ));
+        return $grid_field_arr;
+    }
+
+    function build_update_list_for_admin()
+    {
+        $grid_field_arr = json_encode(array(
+            array(
+                gettext("Hash"),
+                "150",
+                "commit_hash",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "left"
+            ),
+            array(
+                gettext("Tittle"),
+                "250",
+                "tittle",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "left"
+            ),
+            array(
+                gettext("Description"),
+                "250",
+                "description",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "left"
+            ),
+            array(
+                gettext("Last Update"),
+                "250",
+                "updated_at",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "left"
+            ),
+            array(
+                gettext("Status"),
+                "250",
+                "is_current",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "left"
             )
         ));
         return $grid_field_arr;

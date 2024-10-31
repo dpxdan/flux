@@ -92,6 +92,56 @@ class System_model extends CI_Model
         return $query;
     }
 
+    function getupdate_list($flag = "", $start, $limit = "")
+    {
+        if ($this->session->userdata('logintype') == 1 || $this->session->userdata('logintype') == 5) {
+            $account_data = $this->session->userdata("accountinfo");
+            $reseller = $account_data['id'];
+            $this->db->where('reseller_id', $reseller);
+            $query = $this->db_model->select("*", "view_git_version", "", "", "", "", "");
+
+            if ($query->num_rows() > 0) {
+                $result = $query->result_array();
+                $match_array = array();
+                $unmatch_array = array();
+                $i = 0;
+                $str = 0;
+                foreach ($result as $value) {
+                    $this->db->where('name', $value['name']);
+                    $this->db->where('reseller_id', 0);
+                    $query = $this->db_model->select("id", "view_git_version", "", "id", "ASC", $limit, $start);
+                    $innerresult = $query->result_array();
+                    foreach ($innerresult as $value) {
+                        $str .= $value['id'] . ",";
+                    }
+                }
+                $str = rtrim($str, ',');
+
+                $where = "id NOT IN ($str)";
+                $this->db->where('reseller_id', $reseller);
+                $this->db->or_where('reseller_id', 0);
+                $this->db->where($where);
+            } else {
+                $this->db->where('reseller_id', 0);
+            }
+            $this->db_model->build_search('template_search');
+            if ($flag) {
+                $query = $this->db_model->select("*", "view_git_version", "", "id", "ASC", $limit, $start);
+            } else {
+
+                $query = $this->db_model->countQuery("*", "view_git_version", "");
+            }
+        } else {
+            $this->db_model->build_search('template_search');
+            if ($flag) {
+                $query = $this->db_model->select("*", "view_git_version", "", "id", "ASC", $limit, $start);
+            } else {
+                $query = $this->db_model->countQuery("*", "view_git_version", "");
+            }
+        }
+        return $query;
+    }
+
     function edit_configuration($add_array, $name)
     {
         if ($this->session->userdata('logintype') == 1) {
