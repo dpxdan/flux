@@ -404,7 +404,7 @@ class System_form extends common
         $form['forms'] = array(
             "",
             array(
-                'id' => "template_search"
+                'id' => "update_search"
             )
         );
         $accountinfo = $this->CI->session->userdata('accountinfo');
@@ -415,7 +415,7 @@ class System_form extends common
                 gettext('Hash'),
                 'INPUT',
                 array(
-                    'hash' => 'hash[hash]',
+                    'name' => 'commit_hash[commit_hash]',
                     '',
                     'size' => '20',
                     'class' => "text field "
@@ -423,18 +423,74 @@ class System_form extends common
                 '',
                 'tOOL TIP',
                 '1',
-                'hash[name-string]',
+                'commit_hash[commit_hash-string]',
                 '',
                 '',
                 '',
                 'search_string_type',
+                ''
+            ),
+            array(
+                gettext('Tittle'),
+                'INPUT',
+                array(
+                    'name' => 'title[title]',
+                    '',
+                    'size' => '20',
+                    'class' => "text field "
+                ),
+                '',
+                'tOOL TIP',
+                '1',
+                'title[title-string]',
+                '',
+                '',
+                '',
+                'search_string_type',
+                ''
+            ),
+            array(
+                gettext('Description'),
+                'INPUT',
+                array(
+                    'name' => 'description[description]',
+                    '',
+                    'size' => '20',
+                    'class' => "text field "
+                ),
+                '',
+                'tOOL TIP',
+                '1',
+                'description[description-string]',
+                '',
+                '',
+                '',
+                'search_string_type',
+                ''
+            ),
+            array(
+                '',
+                'HIDDEN',
+                'ajax_search',
+                '1',
+                '',
+                '',
+                ''
+            ),
+            array(
+                '',
+                'HIDDEN',
+                'advance_search',
+                '1',
+                '',
+                '',
                 ''
             )
         );
         
         $form['button_search'] = array(
             'name' => 'action',
-            'id' => "template_search_btn",
+            'id' => "update_search_btn",
             'content' => gettext('Search'),
             'value' => 'save',
             'type' => 'button',

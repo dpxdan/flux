@@ -13,8 +13,8 @@
 
         build_grid("configuration_grid","",<? echo $grid_fields; ?>,<? echo $grid_buttons; ?>);
        
-        $("#template_search_btn").click(function(){
-            post_request_for_search("configuration_grid","","template_search");
+        $("#update_search_btn").click(function(){
+            post_request_for_search("configuration_grid","","update_search");
         });        
         $("#id_reset").click(function(){
             clear_search_request("configuration_grid","");

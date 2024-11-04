@@ -376,6 +376,23 @@ class Systems extends MX_Controller
         echo json_encode($json_data);
     }
 
+    function update_search()
+    {
+        $ajax_search = $this->input->post('ajax_search', 0);
+
+        if ($this->input->post('advance_search', TRUE) == 1) {
+            $this->session->set_userdata('advance_search', $this->input->post('advance_search'));
+            $action = $this->input->post();
+            $this->flux_log->write_log("UPDATE_SEARCH", json_encode($action));
+            unset($action['action']);
+            unset($action['advance_search']);
+            $this->session->set_userdata('update_search', $action);
+        }
+        if (@$ajax_search != 1) {
+            redirect(base_url() . 'systems/update/');
+        }
+    }
+
     function template()
     {
         $data['username'] = $this->session->userdata('user_name');

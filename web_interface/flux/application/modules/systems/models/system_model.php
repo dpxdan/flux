@@ -124,7 +124,7 @@ class System_model extends CI_Model
             } else {
                 $this->db->where('reseller_id', 0);
             }
-            $this->db_model->build_search('template_search');
+            $this->db_model->build_search('update_search');
             if ($flag) {
                 $query = $this->db_model->select("*", "view_git_version", "", "id", "ASC", $limit, $start);
             } else {
@@ -132,7 +132,7 @@ class System_model extends CI_Model
                 $query = $this->db_model->countQuery("*", "view_git_version", "");
             }
         } else {
-            $this->db_model->build_search('template_search');
+            $this->db_model->build_search('update_search');
             if ($flag) {
                 $query = $this->db_model->select("*", "view_git_version", "", "id", "ASC", $limit, $start);
             } else {
