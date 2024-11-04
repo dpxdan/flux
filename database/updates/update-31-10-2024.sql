@@ -2,15 +2,13 @@ CREATE TABLE `git_version` (
   `id` int NOT NULL AUTO_INCREMENT,
   `commit_hash` varchar(40) NOT NULL,
   `description` text,
-  `tittle` text,
+  `title` text,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_current` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`)
 );
 
----  
-
-CREATE  OR REPLACE 
+CREATE 
     ALGORITHM = UNDEFINED 
     DEFINER = `fluxuser`@`localhost` 
     SQL SECURITY INVOKER
@@ -18,7 +16,7 @@ VIEW `view_git_version` AS
     SELECT 
         `git_version`.`id` AS `id`,
         `git_version`.`commit_hash` AS `commit_hash`,
-        `git_version`.`tittle` AS `tittle`,
+        `git_version`.`title` AS `title`,
         `git_version`.`description` AS `description`,
         `git_version`.`updated_at` AS `updated_at`,
         (CASE
@@ -27,5 +25,7 @@ VIEW `view_git_version` AS
         END) AS `is_current`
     FROM
         `git_version`;
+
+INSERT INTO `flux`.`menu_modules` (`menu_label`, `module_name`, `module_url`, `menu_title`, `menu_image`, `menu_subtitle`, `priority`) VALUES ('Updates', 'update', 'systems/update/', 'Configuration', 'TemplateManagement.png', '0', 90.3);
 
 

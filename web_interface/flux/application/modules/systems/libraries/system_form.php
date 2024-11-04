@@ -1051,7 +1051,7 @@ class System_form extends common
             array(
                 gettext("Tittle"),
                 "250",
-                "tittle",
+                "title",
                 "",
                 "",
                 "",

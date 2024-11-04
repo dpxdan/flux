@@ -18,8 +18,9 @@ class GitUpdate extends MX_Controller {
     }
 
     function getCommitDescriptionTittle($repoPath, $commitHash) {
+
+        $this->flux_log->write_log("GIT_UPDATE",  "result: " . json_encode($commitHash));
         $result = $this->runCommand("git log -1 --pretty=%B $commitHash", $repoPath);
-        
         if ($result['status'] !== 0) {
             throw new Exception('Erro ao buscar a descrição do commit: ' . implode("\n", $result['output']));
         }
@@ -53,10 +54,27 @@ class GitUpdate extends MX_Controller {
             throw new Exception('Erro ao buscar atualizações do repositório: ' . implode("\n", $fetchResult['output']));
         }
     
-        // Comparar as diferenças entre local e remoto
-        $checkCommits = $this->runCommand('git log HEAD..origin/master --oneline', $repoPath);
+        $newCommits = $this->runCommand('git log HEAD..origin/master --pretty=format:"%H %s"', $repoPath);
     
-        if (!empty($checkCommits['output'])) {
+        if (!empty($newCommits['output'])) {
+            $newCommits['output'] = array_reverse($newCommits['output']);
+    
+            foreach ($newCommits['output'] as $commitLine) {
+                list($commitHash) = explode(" ", $commitLine, 2);
+
+                $query = $this->db->query("SELECT COUNT(*) as count FROM git_version WHERE commit_hash = ?", [$commitHash]);
+                $result = $query->row_array();
+                if ($result['count'] == 0) {
+                    $descriptionTitle = $this->getCommitDescriptionTittle($repoPath, $commitHash);
+                    $this->db->insert('git_version', [
+                        'commit_hash' => $commitHash,
+                        'title' => $descriptionTitle['title'],
+                        'description' => $descriptionTitle['description'],
+                        'is_current' => 1
+                    ]);
+                }
+            }
+    
             return true;
         }
         return false;
@@ -114,7 +132,7 @@ class GitUpdate extends MX_Controller {
         
         if ($rollbackResult['status'] !== 0) {
             throw new Exception('Erro ao fazer rollback: ' . implode("\n", $rollbackResult['output']));
-        }else{
+        } else {
             $this->db->query($update_status);
             $this->db->query($update_query_rollback);
             $this->flux_log->write_log("GIT_ROLLBACK",  "RETORNADO AO HASH: " . json_encode($hashCommit));
@@ -122,6 +140,47 @@ class GitUpdate extends MX_Controller {
     
         return $rollbackResult['output'];
     }
+
+    function initializeCommitHistory($repoPath) {
+        // Verifica se a tabela de commits está vazia
+        $query = $this->db->query("SELECT COUNT(*) as count FROM git_version");
+        $result = $query->row_array();
+    
+        if ($result['count'] == 0) {
+            $this->flux_log->write_log("GIT_UPDATE", "Tabela git_version vazia. Salvando histórico inicial de commits...\n");
+    
+            // Obter os últimos 5 commits já mergeados
+            $commitHistory = $this->runCommand('git log -n 5 --pretty=format:"%H %s"', $repoPath);
+            
+            if ($commitHistory['status'] === 0 && !empty($commitHistory['output'])) {
+                
+                $commitHistory['output'] = array_reverse($commitHistory['output']);
+
+                foreach ($commitHistory['output'] as $commitLine) {
+                    list($commitHash) = explode(" ", $commitLine, 2);
+                    $descriptionTitle = $this->getCommitDescriptionTittle($repoPath, $commitHash);
+
+                    $this->db->insert('git_version', [
+                        'commit_hash' => $commitHash,
+                        'title' => $descriptionTitle['title'],
+                        'description' => $descriptionTitle['description'],
+                        'is_current' => 1
+                    ]);
+                }
+                $this->db->query("
+                    UPDATE git_version
+                    SET is_current = 0
+                    WHERE id = (
+                        SELECT id FROM (SELECT MAX(id) AS id FROM git_version) AS temp_table
+                    )
+                ");
+                $this->flux_log->write_log("GIT_UPDATE", "Histórico inicial de commits salvo com sucesso.\n");
+            } else {
+                throw new Exception("Erro ao obter o histórico de commits: " . implode("\n", $commitHistory['output']));
+            }
+        }
+    }
+    
 
     public function executeUpdate() {
         if ($this->input->is_ajax_request()) {
@@ -168,7 +227,10 @@ class GitUpdate extends MX_Controller {
     }
 
     private function processUpdate() {
-        try {
+        try {  
+
+            $this->initializeCommitHistory($this->repoPath);
+
             if ($this->checkForNewCommits($this->repoPath)) {
                 $this->flux_log->write_log("GIT_UPDATE",  "Novos commits encontrados. Realizando o merge...\n");
                 $mergeData = $this->mergeBranch($this->repoPath);
@@ -189,7 +251,7 @@ class GitUpdate extends MX_Controller {
             }
 
         } catch (Exception $e) {
-            $this->flux_log->write_log("GIT_ROLLBACK",  "erro: ". json_encode($e->getMessage()));
+            $this->flux_log->write_log("GIT_UPDATE",  "erro: ". json_encode($e->getMessage()));
 
             $response = [
                 'status' => 'error',
