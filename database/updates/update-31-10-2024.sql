@@ -28,4 +28,4 @@ VIEW `view_git_version` AS
 
 INSERT INTO `flux`.`menu_modules` (`menu_label`, `module_name`, `module_url`, `menu_title`, `menu_image`, `menu_subtitle`, `priority`) VALUES ('Updates', 'update', 'systems/update/', 'Configuration', 'TemplateManagement.png', '0', 90.3);
 
-
+UPDATE userlevels SET module_permissions = CONCAT(module_permissions, ',', (SELECT id FROM menu_modules WHERE module_name = 'update')) WHERE userlevelid = -1 AND FIND_IN_SET((SELECT id FROM menu_modules WHERE module_name = 'update'), module_permissions) = 0;
