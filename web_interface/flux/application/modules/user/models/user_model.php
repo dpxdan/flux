@@ -590,20 +590,20 @@ class user_model extends CI_Model
         return $query;
     }
 
-    function getproducts_list($flag, $start = 0, $limit = 0)
-    {
-        $this->db_model->build_search('orders_list_search', 'orders.');
+    function getproducts_list($flag, $start = 0, $limit = 0){
+        // $this->db_model->build_search('orders_list_search', 'orders.');
         $account_data = $this->session->userdata("accountinfo");
-        $where_arr = array(
-            "orders.accountid" => $account_data['id']
+        $where_arr = array (
+            "accountid"=>$account_data['id'],
+            "is_terminated" => 0
         );
-        $this->db->order_by("orders.order_date", "desc");
+        
         if ($flag) {
-            $query = $this->db_model->getJionQuery('orders', 'orders.id,orders.order_date,orders.order_id as id1,orders.payment_gateway,orders.payment_status,order_items.order_id as orderid,order_items.price,order_items.setup_fee,order_items.product_id', $where_arr, 'order_items', 'orders.id=order_items.order_id', 'inner', $limit, $start, '', '');
+            $query = $this->db_model->select("*", "packages_view", $where_arr, "", "desc", $limit, $start);
         } else {
-            $query = $this->db_model->getJionQueryCount('orders', 'orders.id,orders.order_date,orders.order_id as id1,orders.payment_gateway,order_items.order_id as orderid,order_items.price,order_items.setup_fee,order_items.product_id', $where_arr, 'order_items', 'orders.id=order_items.order_id', 'inner', '', '', '', '');
+            $query = $this->db_model->select("*", "packages_view", $where_arr, "", "desc", "", "");
         }
-
+        
         return $query;
     }
 

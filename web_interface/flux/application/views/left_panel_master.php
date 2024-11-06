@@ -91,8 +91,9 @@
 			 }
              
 			 $accountinfo=$this->session->userdata('accountinfo');
-			 if($accountinfo['type'] != 0  && $accountinfo['type'] !=3){
-			  $menu_info_temp= ($uri_arr[0]=="user"
+			 
+				if($accountinfo['type'] != 0  && $accountinfo['type'] !=3){
+				$menu_info_temp= ($uri_arr[0]=="user"
 							? unserialize(RESELLERPROFILE_ARRAY):($uri_arr[0]=="accounts"&& $entity_name =='customer'
 							? unserialize(CUSTOMEREDIT_ARRAY)   :($uri_arr[0]=="accounts"&& $entity_name =='provider'
 							? unserialize(PROVIDEREDIT_ARRAY)   :($uri_arr[0]=="accounts"&& $entity_name =='reseller' 
@@ -104,7 +105,6 @@
 					$menu_info = array();
 					$permission_edit_array = unserialize(PERMISSION_EDIT_ARRAY);
 					$permissioninfo=$this->session->userdata('permissioninfo');
-
 					foreach($menu_info_temp as $menu_key => $menu_value){
 						if(isset($permission_edit_array[$menu_key])){
 							$permission_check_array = explode('/',$permission_edit_array[$menu_key]);
@@ -116,24 +116,24 @@
 						}else{
 							$menu_info[$menu_key] = $menu_value;
 						}
-					   }else{
+						}else{
 
 						$menu_info[$menu_key] = $menu_value;
-					  }
+						}
 					}
 				}
-			 }else{
-			   $menu_info=null;
-			   $current_menu_url=$uri_arr[0]."/".$uri_arr[1]."/";
-			   $new_menu_info=array();
+			} else {
+				$menu_info=null;
+				$current_menu_url=$uri_arr[0]."/".$uri_arr[1]."/";
+				$new_menu_info=array();
 				$menus=  unserialize($this->session->userdata('menuinfo'));
 				foreach($menus as $entity_key=>$entity_menu){
 					foreach($entity_menu as $entity_subkey=>$entity_submenu){
-						 foreach($entity_submenu as $subkey=>$submenus){
-							 if($submenus['module_url']==$current_menu_url){
-								 $new_menu_info=$entity_menu;
-							 }
-						 }
+						foreach($entity_submenu as $subkey=>$submenus){
+							if($submenus['module_url']==$current_menu_url){
+								$new_menu_info=$entity_menu;
+							}
+						}
 					}
 				}
 				foreach($new_menu_info as $key=>$value){
@@ -141,14 +141,14 @@
 						$menu_info[$subvalue['menu_label']]=$subvalue['module_url'];
 					}
 				}
-			 }
-			 if($accountinfo['type']==0 || $accountinfo['type']==3 || $accountinfo['type']==4){
-					$menu_info=unserialize(CUSTOMERPROFILE_ARRAY);
-				
-			 }
+			}
+				// if ($accountinfo['type']==0 || $accountinfo['type']==3 || $accountinfo['type']==4){
+				// 	$menu_info=unserialize(CUSTOMERPROFILE_ARRAY);
+				// }
 			 
 			 if(!empty($menu_info)){
 				echo "<ul class='sidemenu'>";
+				// echo "<script>console.log(" . json_encode($menu_info) . ");</script>";
 				$i=0;
 				foreach($menu_info as $key=>$value){ 
 				$url=($entity_name=='provider'||$entity_name =='customer' || $entity_name =='reseller' || $uri_arr[0] =="package" || $uri_arr[0] =="plans") && isset($uri_arr[2]) && !empty($uri_arr[2])
@@ -156,37 +156,37 @@
 				base_url().$value.$uri_arr[2]."/" : 
 				base_url().$value;
 				$value_flag=false;
-		if($acc_info['type'] == '3' || $acc_info['type'] == '0'){
-		  if($value == "user/user_ipmap/" && $acc_info['allow_ip_management'] == '1'){
-			$value_flag=false;
-		  }elseif(in_array('user/user_sipdevices/',$menu_info) && $value == "user/user_sipdevices/" && common_model::$global_config['system_config']['opensips']== 0){
-			$value_flag=true;
-		  }else{
-			$value_flag=true;
-		  }
-				}else{
-		  if(common_model::$global_config['system_config']['opensips'] == 1 ){
-			  if($value != "accounts/".$entity_name."_opensips/"){
-			  $value_flag=true;
-			  }else{
-			$value_flag=false;
-			  }
-		  }
-		  if(common_model::$global_config['system_config']['opensips']== 0 ){
-			  if($value != "accounts/".$entity_name."_sipdevices/"){
-			  $value_flag=true;
-			  }else{
-			$value_flag=false;
-			  }
-		  }
-		  if(common_model::$global_config['system_config']['enterprise'] == 0 ){
-			  if(common_model::$global_config['system_config']['opensips']== 0 && $value == "accounts/".$entity_name."_sipdevices/"){
-						  $value_flag=true;	
-			  }
-			  if(common_model::$global_config['system_config']['opensips']== 0 && $value == "accounts/".$entity_name."_opensips/"){
-						  $value_flag=false;	
-			  }
-		  }
+				if($acc_info['type'] == '3' || $acc_info['type'] == '0'){
+					if($value == "user/user_ipmap/" && $acc_info['allow_ip_management'] == '1'){
+						$value_flag=false;
+					}elseif(in_array('user/user_sipdevices/',$menu_info) && $value == "user/user_sipdevices/" && common_model::$global_config['system_config']['opensips']== 0){
+						$value_flag=true;
+					}else{
+						$value_flag=true;
+					}
+				} else {
+					if(common_model::$global_config['system_config']['opensips'] == 1 ){
+						if($value != "accounts/".$entity_name."_opensips/"){
+							$value_flag=true;
+						} else {
+							$value_flag=false;
+						}
+					}
+					if(common_model::$global_config['system_config']['opensips']== 0 ){
+						if($value != "accounts/".$entity_name."_sipdevices/"){
+							$value_flag=true;
+						}else{
+							$value_flag=false;
+						}
+					}
+					if(common_model::$global_config['system_config']['enterprise'] == 0 ){
+						if(common_model::$global_config['system_config']['opensips']== 0 && $value == "accounts/".$entity_name."_sipdevices/"){
+							$value_flag=true;	
+						}
+						if(common_model::$global_config['system_config']['opensips']== 0 && $value == "accounts/".$entity_name."_opensips/"){
+							$value_flag=false;	
+						}
+					}
 				}
 				
 				$edit_permissioninfo=$this->session->userdata('edit_permissioninfo');
@@ -207,8 +207,7 @@
 					if($this->session->userdata('logintype') ==0 || $this->session->userdata('logintype')==3){
 						echo "<li class='$class'><a href ='$url'>".gettext($key)."</a></li>";
 					}else{
-							echo "<li class='$class'><a href ='$url'>".gettext($key)."</a></li>";
-
+						echo "<li class='$class'><a href ='$url'>".gettext($key)."</a></li>";
 					}
 				}
 				$i++;

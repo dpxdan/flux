@@ -1644,40 +1644,29 @@ class User_form extends common
     function build_user_sipdevices()
     {
         // Jaimin FLUXUPDATE-984
-            $sip_routing_status = $this->CI->db_model->countQuery ( "*", "addons", array    ("package_name" => "siprouting"));
-            if(isset($sip_routing_status) && $sip_routing_status == 1){
-                $action_array = array (
-                    gettext ( "Advance" ),
-                    "60",
-                    "",
-                    "",
-                    "",
-                    array (
-                        "EDIT" => array (
-                            "url" => "/siprouting/siprouting_edit/",
-                            "mode" => "single",
-                            "layout" => "medium"
-                        )
-                    ),
-                    "false"
-                );
-            }else{
-                $action_array = array();
-            }
+            // $sip_routing_status = $this->CI->db_model->countQuery ( "*", "addons", array    ("package_name" => "siprouting"));
+            // if(isset($sip_routing_status) && $sip_routing_status == 1){
+            //     $action_array = array (
+            //         gettext ( "Advance" ),
+            //         "60",
+            //         "",
+            //         "",
+            //         "",
+            //         array (
+            //             "EDIT" => array (
+            //                 "url" => "/siprouting/siprouting_edit/",
+            //                 "mode" => "single",
+            //                 "layout" => "medium"
+            //             )
+            //         ),
+            //         "false"
+            //     );
+            // }else{
+            //     $action_array = array();
+            // }
         // End
 
         $grid_field_arr = json_encode(array(
-            array(
-                "<input type='checkbox' name='chkAll' class='ace checkall'/><label class='lbl'></label>",
-                "30",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "false",
-                "center"
-            ),
             array(
                 gettext("User name"),
                 "90",
@@ -1768,7 +1757,7 @@ class User_form extends common
                 "center"
             ),
              // Jaimin FLUXUPDATE-984
-                $action_array
+                // $action_array
              // End
         ));
         return $grid_field_arr;
@@ -3890,22 +3879,22 @@ class User_form extends common
         $currency_id = $account_info['currency_id'];
         $currency = $this->CI->common->get_field_name('currency', 'currency', $currency_id);
 
-        if (($account_info['type'] == 3) || ($account_info['type'] == 0)) {
-            $action_array = array(
-                gettext("Action"),
-                "120",
-                "",
-                "",
-                "",
-                array(
-                    "EDIT" => array(
-                        "url" => "user/user_orders_complete/",
-                        "mode" => "single"
-                    )
-                ),
-                "false"
-            );
-        }
+        // if (($account_info['type'] == 3) || ($account_info['type'] == 0)) {
+        //     $action_array = array(
+        //         gettext("Action"),
+        //         "120",
+        //         "",
+        //         "",
+        //         "",
+        //         array(
+        //             "EDIT" => array(
+        //                 "url" => "user/user_orders_complete/",
+        //                 "mode" => "single"
+        //             )
+        //         ),
+        //         "false"
+        //     );
+        // }
 
         $grid_field_arr = json_encode(array(
             array(
@@ -3920,32 +3909,9 @@ class User_form extends common
                 "center"
             ),
             array(
-                gettext("Date"),
-                "240",
-                "order_date",
-                "order_date",
-                "order_date",
-                "convert_GMT_to",
-                "",
-                "true",
-                "center"
-            ),
-            array(
-                gettext("Order"),
-                "240",
-                "id",
-                "order_id",
-                "orders",
-                "get_order_id",
-                "EDITABLE",
-                "true",
-                "right"
-            ),
-
-            array(
-                gettext("Payment Method"),
+                gettext("Free Minutes"),
                 "150",
-                "payment_gateway",
+                "free_minutes",
                 "",
                 "",
                 "",
@@ -3953,18 +3919,6 @@ class User_form extends common
                 "true",
                 "center"
             ),
-            array(
-                gettext("Setup Fee")." ($currency)",
-                "150",
-                "setup_fee",
-                "setup_fee",
-                "setup_fee",
-                "convert_to_currency_account",
-                "",
-                "true",
-                "center"
-            ),
-
             array(
                 gettext("Price")." ($currency)",
                 "150",
@@ -3977,17 +3931,17 @@ class User_form extends common
                 "right"
             ),
             array(
-                gettext("Status"),
-                "100",
-                "payment_status",
+                gettext("Used Minutes"),
+                "150",
+                "counters_used_minutes",
                 "",
                 "",
                 "",
                 "",
                 "true",
                 "right"
-            ),
-            $action_array
+            )
+            // $action_array
         ));
         return $grid_field_arr;
     }

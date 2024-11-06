@@ -1759,6 +1759,12 @@ msgstr "Proxy de registro"
 msgid "Channel"
 msgstr "Canal"
 
+msgid "Max Channels"
+msgstr "Qtd. Canais"
+
+msgid "Active DIDs"
+msgstr "DIDs ativos"
+
 msgid "Failover GW Name"
 msgstr ""
 
@@ -2195,7 +2201,7 @@ msgid "My Account"
 msgstr "Minha conta"
 
 msgid "Alert Threshold"
-msgstr "Limiar de Alerta"
+msgstr "Alerta de Saldo Baixo"
 
 msgid "The Caller ID field is required."
 msgstr "O campo Caller ID é obrigatório."

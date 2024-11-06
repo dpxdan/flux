@@ -61,8 +61,8 @@
                 <?php }?>
             </div>     
             <div class="p-4 col-md-12">
-                <div class="col-md-12 p-0">
-                    <div class="float-left">
+                <div class="col-md-8 p-0">
+                    <!-- <div class="float-left">
                         <a href='<?php echo base_url()."user/user_sipdevices_add/"; ?>' rel="facebox_medium" title="Add">
                             <span class="btn btn-line-warning">
                                 <i class="fa fa-plus-circle fa-lg"></i><?php echo gettext('Create');?>
@@ -74,9 +74,9 @@
                             <i class="fa fa-times-circle fa-lg"></i>
                             <?php echo gettext('Delete');?>
                         </span>
-                    </div>
+                    </div> -->
                     
-                        <div  id="show_search" class= "btn btn-warning float-right"><i class="fa fa-search"></i><?php echo gettext('Search');?> </div>
+                        <div  id="show_search" class= "btn btn-warning float-left"><i class="fa fa-search"></i></div>
                 </div> 
               
                         <div class="col-12">

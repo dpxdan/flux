@@ -239,10 +239,10 @@ function PopupCenter(url, title, w, h) {
     	<?php 
 			$menu_info = unserialize($this->session->userdata("menuinfo"));
 			$permissioninfo = $this->session->userdata('permissioninfo');
-		$allow_menu_url = $this->config->item('allow_menu_url');
-		$allow_module=$this->config->item('allow_module');
-			 $menu_permission_info = $this->common->menu_permission_info();
-			 $sub_module_permission_info = $this->common->sub_module_permission_info();
+			$allow_menu_url = $this->config->item('allow_menu_url');
+			$allow_module=$this->config->item('allow_module');
+			$menu_permission_info = $this->common->menu_permission_info();
+			$sub_module_permission_info = $this->common->sub_module_permission_info();
 			foreach($menu_info as $menu_key => $menu_values){
 				if ($menu_key == ""){continue;}
 	  ?>                
@@ -390,10 +390,10 @@ function PopupCenter(url, title, w, h) {
 		      	<? } else{ ?>
 		    <a class="btn dropdown-toggle" href="<?php echo base_url();?>user/user/" role="button" id="admin_menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">	
 		<? }
-				if($this->session->userdata('logintype')!=2 && $this->session->userdata('logintype')!=4){
+				if($this->session->userdata('logintype')!=2 && $this->session->userdata('logintype')!=4 && $this->session->userdata('logintype')!=0){
 					$result=(array)$this->db->get_where('accounts',array("id"=>$acc_info['id']),1)->first_row();
-			$variable =$result['posttoexternal']==1 ? 'Credit' : gettext('Bal');  
-			$amount=$result['posttoexternal']==1 ? $result['credit_limit']-$result['balance'] :$result['balance'];
+					$variable =$result['posttoexternal']==1 ? 'Credit' : gettext('Bal');  
+					$amount=$result['posttoexternal']==1 ? $result['credit_limit']-$result['balance'] :$result['balance'];
 
 			
 						$value= $this->common_model->calculate_currency($amount,'','',true);
