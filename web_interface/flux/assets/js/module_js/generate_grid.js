@@ -249,12 +249,12 @@ function build_collumns(collumn_arr) {
             var col_str = col_field[i];
             if (col_str != 'null' && col_str != '') {
                 collumn_property = col_str.toString().split(',');
-                if (collumn_property[6] == 'false' && (collumn_property[0] == 'Action' || collumn_property[0] == 'Acción' || collumn_property[0] == 'action' || collumn_property[0] == 'действие' || collumn_property[0] == 'Açao')) {
+                if (collumn_property[6] == 'false' && (collumn_property[0] == 'Action' || collumn_property[0] == 'Acción' || collumn_property[0] == 'action' || collumn_property[0] == 'действие' || collumn_property[0] == 'Açao' || collumn_property[0] == 'Ação')) {
                     continue;
                 }
                 // 	    alert("{display:"+collumn_property[0]+", name:"+collumn_property[0]+", width:"+collumn_property[1]+" , sortable: 'false', align: 'center'}");
                 // sandip add else if condition for account disable sorting
-                if (collumn_property[7] == 'false' || collumn_property[0] == 'Action' || collumn_property[0] == 'Acción' || collumn_property[0] == 'action' || collumn_property[0] == 'действие' || collumn_property[0] == 'Açao') {
+                if (collumn_property[7] == 'false' || collumn_property[0] == 'Action' || collumn_property[0] == 'Acción' || collumn_property[0] == 'action' || collumn_property[0] == 'действие' || collumn_property[0] == 'Açao' || collumn_property[0] == 'Ação') {
                     searchflg = false;
                 } else if (collumn_property[0] == 'Account' && collumn_property[7] == 'build_concat_string' && collumn_property[9] == 'false') {
                     searchflg = false;
