@@ -98,7 +98,18 @@ class Trunk extends MX_Controller
                 $data['validation_errors'] = validation_errors();
                 echo $data['validation_errors'];
                 exit();
-            } else {
+            } 
+            else {
+            $carrier_id = $add_array['carrier_id'];
+            $tech = $add_array['tech'];
+            if (isset($carrier_id) && $carrier_id != "") {
+                    if ($add_array['carrier_id'] > 0) {
+            			$tech_prefix = $this->common->get_field_name('carrier_rn1', 'carrier_routing', array(
+            				'id' => $carrier_id
+            			));
+            			$add_array['tech'] = $tech_prefix;
+            		}
+                    }   
                 $this->trunk_model->edit_trunk($add_array, $add_array['id']);
                 echo json_encode(array(
                     "SUCCESS" => ucfirst($add_array["name"].' '.gettext('Trunk Updated Successfully!'))

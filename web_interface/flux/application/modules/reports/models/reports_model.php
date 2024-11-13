@@ -33,11 +33,9 @@ class Reports_model extends CI_Model
     {
         $this->db_model->build_search('customer_cdr_list_search');
         $account_data = $this->session->userdata("accountinfo");
-        // Ashish FLUXUPDATE-825
         if ($this->session->userdata('logintype') == 1 || $this->session->userdata('logintype') == 5) {
             $where['reseller_id'] = $account_data['type'] == 1 ? $account_data['id'] : 0;
         }
-        // FLUXUPDATE-825 end
         $table_name = 'cdrs';
         if ($this->session->userdata('advance_search_date') == 1) {
             $where['callstart >= '] = date("Y-m-d") . " 00:00:00";
@@ -62,14 +60,13 @@ class Reports_model extends CI_Model
             $this->db->order_by("callstart desc");
         }
         if ($flag) {
-            if (! $export)
-                $this->db->limit($limit, $start);
-            $this->db->select('callstart,is_recording,sip_user,call_direction,callerid,callednum,pattern,notes,billseconds,disposition,debit,cost,accountid,pricelist_id,calltype,trunk_id,uniqueid');
-        } else {
-            $this->db->select('count(*) as count,sum(billseconds) as billseconds,sum(debit) as total_debit,SUM(CASE WHEN calltype = "Gratuita" THEN debit ELSE 0 END) AS free_debit,sum(cost) as total_cost,group_concat(distinct(pricelist_id)) as pricelist_ids,group_concat(distinct(trunk_id)) as trunk_ids,group_concat(distinct(accountid)) as accounts_ids');
+      if (!$export) $this->db->limit($limit, $start);
+      $this->db->select('callstart,is_recording,sip_user,call_direction,callerid,callednum,pattern,notes,billseconds,disposition,debit,cost,accountid,pricelist_id,calltype,call_id_cadup,trunk_id,uniqueid');
+    }
+    else {
+      $this->db->select('count(*) as count,sum(billseconds) as billseconds,sum(debit) as total_debit,SUM(CASE WHEN calltype = "Gratuita" THEN debit ELSE 0 END) AS free_debit,sum(cost) as total_cost,group_concat(distinct(pricelist_id)) as pricelist_ids,group_concat(distinct(trunk_id)) as trunk_ids,group_concat(distinct(call_id_cadup)) as carrier_ids,group_concat(distinct(accountid)) as accounts_ids');
         }
         $result = $this->db->get($table_name);
-        // Kinjal FLUXUPDATE-978 Start
         $customer_cdr_list_search = $this->session->userdata('customer_cdr_list_search');
         if(!empty($customer_cdr_list_search)){
             $select_value = array('select_table' => 'cdrs','module' => 'cdrs');
@@ -92,7 +89,6 @@ class Reports_model extends CI_Model
             $encode = json_encode($select_values);
             $this->session->set_userdata('reports_list_automated', $encode);
         }
-        // Kinjal FLUXUPDATE-978 END
         return $result;
     }
 
@@ -183,7 +179,7 @@ class Reports_model extends CI_Model
         if ($flag) {
             if (! $export)
                 $this->db->limit($limit, $start);
-            $this->db->select('calltype,callstart,sip_user,call_direction,callerid,callednum,pattern,notes,billseconds,provider_call_cost,disposition,provider_id,cost');
+            $this->db->select('calltype,callstart,sip_user,call_direction,callerid,callednum,pattern,notes,billseconds,provider_call_cost,disposition,provider_id,cost,call_id_cadup');
         } else {
             $this->db->select('count(*) as count,sum(billseconds) as billseconds,sum(cost) as total_cost');
         }

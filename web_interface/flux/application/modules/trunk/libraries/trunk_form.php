@@ -147,9 +147,19 @@ class trunk_form extends common
                     "status" => "0"
                 )
             ),
-             
-        // FLUXUPDATE-944 Jaimin Start
-             array(
+            array(
+                gettext('Routing Prefix'),
+                'INPUT',
+                array(
+                    'name' => 'tech',
+                    'size' => '8',
+                    'class' => "text field medium"
+                ),
+                'trim|numeric|greater_than[-1]|integer|xss_clean',
+                'tOOL TIP',
+                'Please Enter tech prefix'
+            ),
+            array(
                     gettext('Remote ID'),
                     'sip_cid_type',
                     'SELECT',
@@ -162,7 +172,6 @@ class trunk_form extends common
                     '',
                     'sip_cid_types'
              )
-        // END
         );
 
         $form[gettext('Settings')] = array(
@@ -229,6 +238,27 @@ class trunk_form extends common
                 'tOOL TIP',
                 ''
             ),
+            
+            array (
+				gettext ( 'Carriers' ),
+				array (
+					'name'=>'carrier_id',
+					'id'=>'carrierid_search_drp',
+
+				),
+				'SELECT',
+				'',
+				'',
+				'tOOL TIP',
+				'Please Enter account number',
+				'id',
+				'id,carrier_rn1,carrier_name',
+				'carrier_routing',
+				'build_concat_dropdown_carriers',
+				'',
+				''
+		),
+
             array(
                 gettext('Status'),
                 'status',
@@ -448,7 +478,6 @@ class trunk_form extends common
                 "true",
                 "center"
             ),
-            // FLUXUPDATE-944 Jaimin Start
             array(
                 gettext("Remote ID"),
                 "130",
@@ -460,7 +489,6 @@ class trunk_form extends common
                 "true",
                 "center"
             ),
-            //  End
             array(
                 gettext("CC"),
                 "50",
@@ -482,6 +510,17 @@ class trunk_form extends common
                 "",
                 "true",
                 "right"
+            ),
+            array(
+                gettext("Carrier"),
+                "100",
+                "carrier_id",
+                "carrier_name,carrier_rn1",
+                "carrier_routing",
+                "build_concat_string",
+                "",
+                "true",
+                "center"
             ),
             array(
                 gettext("Codecs"),

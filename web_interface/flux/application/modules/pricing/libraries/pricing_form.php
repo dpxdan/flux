@@ -39,7 +39,7 @@ class pricing_form extends common
 
         if ($type_version != '') {
             $Routing_Prefix = array(
-                gettext('Routing Prefix').'',
+                gettext('Routing Prefix'),
                 'INPUT',
                 array(
                     'name' => 'routing_prefix',
@@ -52,7 +52,7 @@ class pricing_form extends common
             );
         } else {
             $Routing_Prefix = array(
-                gettext('Routing Prefix').'',
+                gettext('Routing Prefix'),
                 'INPUT',
                 array(
                     'name' => 'routing_prefix',
@@ -370,7 +370,7 @@ class pricing_form extends common
                     '',
                     '',
                     '',
-                    'set_routetype'
+                    'set_routetype_origination'
                 ),
                 array(
                     gettext('Trunks'),
@@ -389,6 +389,19 @@ class pricing_form extends common
                         "status" => "0"
                     ),
                     'multi'
+                ),
+                array(
+                    gettext('Check Carrier'),
+                    'check_carrier',
+                    'SELECT',
+                    '',
+                    '',
+                    'tOOL TIP',
+                    '',
+                    '',
+                    '',
+                    '',
+                    'set_carrier'
                 )
             );
         }
@@ -1010,7 +1023,8 @@ class pricing_form extends common
                 $status_array = array(
                     '0' => gettext('LCR'),
                     '1' => gettext('COST'),
-                    '2' => gettext('Priority (Enterprise)')
+                    '2' => gettext('Priority'),
+                    '3' => gettext('Percentage')
                 );
             } else {
                 $status_array = array(
@@ -1025,8 +1039,8 @@ class pricing_form extends common
                 $status_array = array(
                     '0' => gettext('LCR'),
                     '1' => gettext('Cost'),
-                    '2' => gettext('Priority (Enterprise)'),
-                    '3' => gettext('Percentage (Enterprise)')
+                    '2' => gettext('Priority'),
+                    '3' => gettext('Percentage')
                 );
             } else {
                 $status_array = array(
@@ -1055,11 +1069,27 @@ class pricing_form extends common
             return "Cost";
         } else if ($status == 2) {
             return "Priority";
+        } else if ($status == 3) {
+            return "Percentage";
+        } else if ($status == 4) {
+            return "Carrier";
         } else {
             return "Percentage";
         }
     }
 
+    function set_routetype_carrier($status = '')
+    {
+        $status_array = array(
+            '0' => 'LCR',
+            '1' => 'Cost',
+            '2' => 'Priority',
+            '3' => 'Percentage',
+            '4' => 'Carrier'
+        );
+        return $status_array;
+    }
+    
     function set_routetype_origination($status = '')
     {
         $status_array = array(
@@ -1091,14 +1121,18 @@ class pricing_form extends common
                 "" => gettext("--Select--"),
                 '0' => gettext('LCR'),
                 '1' => gettext('Cost'),
-                '2' => gettext('Priority (Enterprise)'),
-                '3' => gettext('Percentage')
+                '2' => gettext('Priority'),
+                '3' => gettext('Percentage'),
+                '4' => gettext('Carrier')
             );
         } else {
             $status_array = array(
                 "" => gettext("--Select--"),
                 '0' => gettext('LCR'),
-                '1' => gettext('Cost')
+                '1' => gettext('Cost'),
+                '2' => gettext('Priority'),
+                '3' => gettext('Percentage'),
+                '4' => gettext('Carrier')
             );
         }
         return $status_array;
