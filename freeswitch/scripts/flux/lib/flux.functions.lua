@@ -444,6 +444,8 @@ function do_number_translation(number_translation,destination_number)
     local tmp
 
     tmp = split(number_translation,",")
+    Logger.notice("[DONUMBERTRANSLATION] Before Localization CLI/DST : " .. number_translation)
+    Logger.notice("[DONUMBERTRANSLATION] Before Localization CLI/DST : " .. destination_number)
     for tmp_key,tmp_value in pairs(tmp) do
       tmp_value = string.gsub(tmp_value, "\"", "")
       tmp_str = split(tmp_value,"/")      
@@ -473,7 +475,7 @@ function do_number_translation(number_translation,destination_number)
 end
 
 -- Find Max length
-function get_call_maxlength(userinfo,destination_number,call_direction,number_loop,config,didinfo,callerid_number)   
+function get_call_maxlength(userinfo,destination_number,call_direction,number_loop,config,didinfo,callerid_number)     
     local maxlength = 0
     local rates
     local rate_group
@@ -483,13 +485,18 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
        Logger.warning("[DID PRICE] PRICE!!!")
 		userinfo['pricelist_id'] = didinfo['rate_group'];
 	end
+	Logger.warning("[get_call_maxlength] get_pricelists!!!")
     rate_group = get_pricelists (userinfo,destination_number,number_loop,call_direction)
+    
     if (rate_group == nil) then
-		Logger.warning("[FIND_MAXLENGTH] Rate group not found or Inactive!!!")
+		Logger.warning("[FIND_MAXLENGTH_2] Rate group not found or Inactive!!!")
 		return 'ORIGNATION_RATE_NOT_FOUND'
 	end
+	
 
+    
 	if (call_direction == "local" and config['free_inbound'] ~= nil) then
+	    Logger.warning("[call_direction] local!!!")
 		rates = {}
 		rates['pattern'] = '^'..destination_number..".*"
 		rates['comment'] = "Local"
@@ -510,8 +517,8 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 			rates['country_id']=28
 		end
 	else
-        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config,callerid_number)
-			Logger.info("call_direction:::::: "..call_direction)
+        Logger.warning("[rates] get_rates!!!")
+        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config)               
 		if (rates == nil) then
 			Logger.warning("[FIND_MAXLENGTH] Rates not found!!!")
 			return 'ORIGNATION_RATE_NOT_FOUND'
@@ -520,6 +527,12 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 		rates['calltype'] = rates['call_type']
 		rates['custom_call_type'] = rates['call_type']
 
+--		didinfo['cadupCN'] = rates['cadupCN'];
+--		didinfo['cadupAreaNum'] = rates['cadupAreaNum'];
+--		didinfo['cadupPrefix'] = rates['cadupPrefix'];
+--		didinfo['cadupFaixaFim'] = rates['cadupFaixaFim'];
+--        cadup_number = number_loop(a,'pattern')
+--        cadup = get_cadup (userinfo,destination_number,number_loop,call_direction,config)
 		rates['pattern'] = '^'..destination_number..".*"
 		if (rates['city'] ~= '' and rates['province'] ~= "" ) then 
 				rates['comment'] =  rates['city'] .. " " .. rates['province']
@@ -537,18 +550,28 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
         if (rates['calltype'] ~= '' and rates['call_type'] ~= "" ) then
         calltype = rates['calltype']
         userinfo['calltype'] = rates['calltype']
+        Logger.info("CallType : "..rates['calltype'])
         end
         if (rates['custom_call_type'] == '' or rates['custom_call_type'] == nil ) then
         rates['custom_call_type'] = "0";
         end
-		Logger.info("=============== Rates Information ===================")
+		Logger.info("=============== Rates Information get_call_maxlength ===================")
 		Logger.info("ID : "..rates['id'])  
 		Logger.info("Connectcost : "..rates['connectcost'])  
 		Logger.info("Includedseconds : "..rates['includedseconds'])  
 		Logger.info("Cost : "..rates['cost'])
 		Logger.info("Comment : "..rates['calltype'])
 		Logger.info("CallType : "..rates['call_type'])
+		if(rate_group['check_carrier'] ~= nil)then 
+		Logger.info("check_carrier: "..rate_group['check_carrier']) 
+		if(rate_group['check_carrier'] == '1') then
+		rates['check_carrier'] = rate_group['check_carrier']
+--		rates['routing_type'] = 4
+		end
+		end
+		
 --		Logger.info("Custom CallType : "..rates['custom_call_type'])
+
         if(rates['custom_call_type'] ~= nil)then Logger.info("Custom CallType: "..rates['custom_call_type']) end
 		Logger.info("Country Id : "..rates['country_id'])
 		Logger.info("Accid : "..userinfo['id'])
@@ -556,7 +579,7 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 		if(rates['routing_type'] ~= nil)then Logger.info("Routing type: "..rates['routing_type']) end
 		Logger.info("================================================================")  
 	end
-    rates['routing_type'] = rate_group['routing_type']		
+    --rates['routing_type'] = rate_group['routing_type']		
 	if( call_direction == "inbound" ) then
 		if(didinfo['accountid'] == nil) then
 			didinfo['accountid'] = userinfo['id'];
@@ -577,8 +600,10 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 		rates['comment'] = didinfo['did_number']		
 		rates['pattern'] = didinfo['pattern']
 		xml_rates = "ID:"..rates['id'].."|CODE:"..rates['pattern'].."|DESTINATION:"..rates['comment'].."|CONNECTIONCOST:"..rates['connectcost'].."|INCLUDEDSECONDS:"..rates['includedseconds'].."|CT:"..didinfo['call_type_rate'].."|COST:"..rates['cost'].."|INC:"..rates['inc'].."|INITIALBLOCK:"..rates['init_inc'].."|RATEGROUP:"..rate_group['id'].."|MARKUP:"..rate_group['markup'].."|CI:"..rates['country_id'].."|ACCID:"..didinfo['accountid'];
+		Logger.info("[xml_rates-586] xml_rates "..xml_rates.."")
 		else
 		xml_rates = "ID:"..rates['id'].."|CODE:"..rates['pattern'].."|DESTINATION:"..rates['comment'].."|CONNECTIONCOST:"..rates['connectcost'].."|INCLUDEDSECONDS:"..rates['includedseconds'].."|CT:"..rates['custom_call_type'].."|COST:"..rates['cost'].."|INC:"..rates['inc'].."|INITIALBLOCK:"..rates['init_inc'].."|RATEGROUP:"..rate_group['id'].."|MARKUP:"..rate_group['markup'].."|CI:"..rates['country_id'].."|ACCID:"..didinfo['accountid'];
+		Logger.info("[xml_rates-589] xml_rates "..xml_rates.."")
 		end
 	else
 		if( tonumber(rates['inc'])  == 0 or rates['inc'] == "" ) then
@@ -591,11 +616,12 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 			rates['init_inc']=0;
 		end
 		if (rates['custom_call_type'] == nil) then
-		Logger.warning("[FIND_DID_RATE] DID Rate group not found or Inactive!!!")
-		rates['custom_call_type'] = rates['call_type']
-	    end
-		if (rates['country_id']==nil) then rates['country_id']=28 end
+				Logger.warning("[FIND_DID_RATE] DID Rate group not found or Inactive!!!")
+				rates['custom_call_type'] = rates['call_type']
+			     end
+		if (rates['country_id']==nil) then rates['country_id']=28 end		
 		xml_rates = "ID:"..rates['id'].."|CODE:"..rates['pattern'].."|DESTINATION:"..rates['comment'].."|CONNECTIONCOST:"..rates['connectcost'].."|INCLUDEDSECONDS:"..rates['includedseconds'].."|CT:"..rates['custom_call_type'].."|COST:"..rates['cost'].."|INC:"..rates['inc'].."|INITIALBLOCK:"..rates['init_inc'].."|RATEGROUP:"..rate_group['id'].."|MARKUP:"..rate_group['markup'].."|CI:"..rates['country_id'].."|ACCID:"..userinfo['id'];
+		Logger.info("[xml_rates-603] xml_rates "..xml_rates.."")
 
 	end
 
@@ -746,23 +772,33 @@ function get_counters(userinfo,package_info,package_act_id)
 end
 
 -- Get carrier rates 
-function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_carrier_id,routing_type)
+function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_carrier_id,check_carrier,routing_type)
     
 	local carrier_rates = {}     
 	local trunk_id=0     
 	local query
-	if(routing_type == 1) then
-	Logger.debug("[GET_CARRIER_RATES_TRUNKS] routing_type :" .. routing_type)
-		query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.call_type,TR.comment,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM (select * from "..TBL_TERMINATION_RATES.." order by LENGTH (pattern) DESC) as TR "..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
+    if (check_carrier ~= '' or check_carrier ~= nil )then
+	if(check_carrier == "1") then
+	routing_type = "4"		
+	end	
+	end
+	if(routing_type == "1") then
+	Logger.debug("[GET_CARRIER_RATES_TRUNKS] routing_type 1:" .. routing_type)
+		query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.tech, TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.call_type,TR.comment,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM (select * from "..TBL_TERMINATION_RATES.." order by LENGTH (pattern) DESC) as TR, "..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
+	elseif(routing_type == "4") then
+	Logger.debug("[GET_CARRIER_RATES_TRUNKS] routing_type 4:" .. routing_type)
+			query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.tech,TK.carrier_id,TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.call_type,TR.comment,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM (select * from "..TBL_TERMINATION_RATES.." order by LENGTH (pattern) DESC) as TR, "..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
 	else
 	Logger.debug("[GET_CARRIER_RATES_TRUNKS] routing_type :" .. routing_type)
-		query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.comment,TR.call_type,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM "..TBL_TERMINATION_RATES.." as TR,"..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
+		query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.tech, TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.comment,TR.call_type,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM "..TBL_TERMINATION_RATES.." as TR,"..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
 	end
 	if(rate_carrier_id and rate_carrier_id ~= nil and rate_carrier_id ~= '0' and string.len(rate_carrier_id) >= 1 ) then
-	 if(rate_carrier_id == 0) then
+	 if(rate_carrier_id == "0") then
 		query = query.." AND TR.trunk_id is not null "
+	elseif(routing_type == "4") then
+	  query = query.." AND TR.trunk_id is not null AND TK.tech = "..rate_carrier_id..""
 		else
-		query = query.." AND TR.trunk_id IN ("..rate_carrier_id..") "
+		query = query.." AND TK.trunk_id IN ("..rate_carrier_id..") "
 		end
 	else
 		trunk_ids={}
@@ -783,6 +819,8 @@ function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_c
 	end
 	if(routing_type == "1") then
 		query = query.." ORDER by TR.cost ASC,TR.precedence ASC, TK.precedence"
+	elseif(routing_type == "4") then
+			query = query.." ORDER by LENGTH (pattern) DESC,TR.cost ASC,TR.precedence ASC, TK.precedence"
 	else
 		query = query.." ORDER by LENGTH (pattern) DESC,TR.cost ASC,TR.precedence ASC, TK.precedence"
 	end
@@ -797,6 +835,42 @@ function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_c
 		end
 	end))    
 	return carrier_rates
+end
+
+-- Get carrier rn1 routes out
+function get_carrier_out(userinfo,cn_dest_number,carrier_dest_number)
+    Logger.warning("[FUNCTION - get_carrier_out]")
+    carrier_destination = number_loop(carrier_dest_number,"pattern")
+    Logger.warning("[GET_CARRIER_OUT] carrier_destination :" .. carrier_destination)
+    Logger.warning("[GET_CARRIER_OUT] cn_dest_number :" .. cn_dest_number)
+    Logger.warning("[GET_CARRIER_OUT] carrier_dest_number :" .. carrier_dest_number)
+	local carrier_info
+
+        
+    	local query  = "SELECT * FROM "..TBL_CARRIER_RATES..", "..TBL_CARRIER_ROUTES.." WHERE "..TBL_CARRIER_RATES..".rn1 = "..TBL_CARRIER_ROUTES..".carrier_rn1 AND "..TBL_CARRIER_RATES..".nomePrestadora = "..TBL_CARRIER_ROUTES..".carrier_name AND cn = "..cn_dest_number.." AND " ..carrier_destination.." ORDER BY cn_prefix LIMIT 1";
+    	Logger.warning("[GET_CARRIER_OUT] Query :" .. query)
+		assert (dbh:query(query, function(u)
+    		carrier_info = u
+    	end))  
+--	end
+	return carrier_info
+end
+
+-- Get carrier rn1 routes in
+function get_carrier_in(userinfo,cn_dest_number,carrier_dest_number)
+    Logger.warning("[FUNCTION - get_cadup_in]")
+    cadup_destination = number_loop(cadup_dest_number,"pattern")
+    Logger.warning("[GET_CADUP] cadup_destination :" .. cadup_destination)
+    Logger.warning("[GET_CADUP] cn_dest_number :" .. cn_dest_number)
+    Logger.warning("[GET_CADUP] cadup_dest_number :" .. cadup_dest_number)
+	local cadup_info
+    Logger.warning("[GET_CADUP] call_direction :" .. call_direction)
+	local query  = "SELECT * FROM "..TBL_CADUP_RATES.." WHERE cn = "..cn_dest_number.." AND " ..cadup_destination.." ORDER BY cn_prefix LIMIT 1";
+	Logger.warning("[GET_CADUP_IN] Query :" .. query)
+	assert (dbh:query(query, function(u)
+	        cadup_info = u
+	    	end))
+	return cadup_info
 end
 
 -- Get outbound callerid to override in calls
@@ -853,6 +927,18 @@ function plus_destination_number(destination_number)
 	local dfirst =  string.match(dnumber, "^(.)")
 	if (dfirst == "+") then
 		dnumber = "\\"..dnumber
+	end
+    return dnumber
+end
+
+function cn_destination_number(destination_number)
+    destination_number = destination_number:gsub("%s+", "")
+    local dnumber = destination_number
+	local dfirst =  string.match(dnumber, "^(.)")
+	if (dfirst ~= "0") then
+		dnumber = "0"..dnumber
+	  else
+	dnumber = dnumber
 	end
     return dnumber
 end

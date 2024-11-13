@@ -34,13 +34,11 @@ class Reports_form extends common
     function get_customer_cdr_form()
     {
         $logintype = $this->CI->session->userdata('userlevel_logintype');
-        // Kinjal issue no FLUXUPDATE-978 Start
         $report_flag = $this->CI->db_model->countQuery("*", "addons", array(
             "package_name" => "automated_reports"
         ));
         $accountinfo = $this->CI->session->userdata['accountinfo'];
 
-        // Kinjal issue no FLUXUPDATE-978 END
 
         if ($logintype != 1) {
             if ($this->CI->session->userdata('logintype') == 1 || $this->CI->session->userdata('logintype') == 5) {
@@ -154,6 +152,25 @@ class Reports_form extends common
                     'Tool tips info',
                     '1',
                     'notes[notes-string]',
+                    '',
+                    '',
+                    '',
+                    'search_string_type',
+                    ''
+                ),
+                array(
+                    gettext('Carrier'),
+                    'INPUT',
+                    array(
+                        'name' => 'call_id_cadup[call_id_cadup]',
+                        'value' => '',
+                        'size' => '20',
+                        'class' => "text field "
+                    ),
+                    '',
+                    'Tool tips info',
+                    '1',
+                    'call_id_cadup[call_id_cadup-string]',
                     '',
                     '',
                     '',
@@ -697,7 +714,6 @@ class Reports_form extends common
             'type' => 'button',
             'class' => 'btn btn-success float-right'
         );
-        // Kinjal FLUXUPDATE-978 Start
         if($report_flag == '1' && $accountinfo['type'] == '-1'){
             $form['button_subscribe'] = array(
                 'name' => 'action',
@@ -712,7 +728,7 @@ class Reports_form extends common
                 "data-link" => "automated_report/automated_report_add/reports/"
             );
         }
-        // Kinjal FLUXUPDATE-978 END
+
         $form['button_reset'] = array(
             'name' => 'action',
             'id' => "id_reset",
@@ -1476,6 +1492,17 @@ class Reports_form extends common
                     "center"
                 ),
                 array(
+				   gettext("Carrier"),
+				   "200",
+				   "call_id_cadup",
+				   "",
+				   "",
+				   "",
+				   "",
+				   "true",
+				   "center"
+			   ),
+                array(
                     gettext("Duration"),
                     "80",
                     "billseconds",
@@ -2104,6 +2131,17 @@ class Reports_form extends common
                 "true",
                 "center"
             ),
+            array(
+                   gettext("Carrier"),
+                   "200",
+                   "call_id_cadup",
+                   "",
+                   "",
+                   "",
+                   "",
+                   "true",
+                   "center"
+               ),
             array(
                 gettext("Duration"),
                 "110",

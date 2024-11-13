@@ -261,6 +261,32 @@ class pricing extends MX_Controller
         echo json_encode($json_data);
     }
 
+    function price_termination_list()
+    {
+        $data['username'] = $this->session->userdata('user_name');
+        $data['page_title'] = gettext('Termination Rate Groups');
+        $data['search_flag'] = true;
+        $this->session->set_userdata('advance_search', 0);
+        $data['grid_fields'] = $this->pricing_form->build_pricing_termination_list_for_admin();
+        $data["grid_buttons"] = $this->pricing_form->build_grid_buttons();
+        $data['form_search'] = $this->form->build_serach_form($this->pricing_form->get_pricing_search_form());
+        $this->load->view('view_price_termination_list', $data);
+    }
+    
+    function price_termination_list_json()
+    {
+        $json_data = array();
+        $count_all = $this->pricing_model->getpricing_termination_list(false);
+        $paging_data = $this->form->load_grid_config($count_all, $_GET['rp'], $_GET['page']);
+        $json_data = $paging_data["json_paging"];
+    
+        $query = $this->pricing_model->getpricing_termination_list(true, $paging_data["paging"]["start"], $paging_data["paging"]["page_no"]);
+        $grid_fields = json_decode($this->pricing_form->build_pricing_termination_list_for_admin());
+        $json_data['rows'] = $this->form->build_grid($query, $grid_fields);
+    
+        echo json_encode($json_data);
+    }
+
     function price_delete_multiple()
     {
         $add_array = $this->input->post();

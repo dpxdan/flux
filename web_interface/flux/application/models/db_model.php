@@ -1393,6 +1393,30 @@ class Db_model extends CI_Model {
 		}
 		return $final_array;
 	}
+	
+	function build_concat_dropdown_carriers($select, $table, $id_where = '', $id_value = '') {
+        $this->db->select ( 'id,carrier_rn1,carrier_name' );
+        $this->db->order_by('carrier_name','asc');
+        $this->db->group_by ( 'carrier_rn1' );
+		$carrier_arr = $final_array = array();
+		$dropdown_params= array("name" => "carrier_id" ,"id" => "carrierid_search_drp", "class" => "col-md-12 form-control selectpicker form-control-lg carrierid_search_drp col-md-3");
+		$carriers_result =$this->db->get_where('carrier_routing',array("carrier_rn1 >"=>0));
+		if($carriers_result->num_rows () > 0)
+		{
+			$final_array = array();
+			$final_array[0]=gettext("--Select--");
+				
+			$carriers_result = $carriers_result -> result_array();
+			foreach ($carriers_result as $key=>$value) {
+					$carrier_arr[$value['id']] =  $value['carrier_name']."( ".$value['carrier_rn1']." )";
+			}
+			if(!empty($carrier_arr))
+			    
+				$final_array = $carrier_arr;
+		}
+		return $final_array;
+	}
+
 	function build_dropdown_languages($select, $table, $id_where = '', $id_value = '') {
 		$drp_array = $this->getSelect('name', 'languages', '');
 		$drp_array = $drp_array->result();

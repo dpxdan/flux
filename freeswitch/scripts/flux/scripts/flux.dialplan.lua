@@ -62,8 +62,7 @@ else
     callerid_number = params:getHeader('Caller-Caller-ID-Number') or ""
     callerid_name = params:getHeader('Caller-Caller-ID-Name') or ""
 end       
-
-if(config['opensips'] == '8') then
+if (tonumber(config['opensips']) == 8 ) then
     Logger.info("[Dialplan] config opensips")
     from_ip = "200.159.177.13"
 	callerid_name = params:getHeader('variable_sip_h_P-effective_caller_id_name') or ""
@@ -97,6 +96,7 @@ package_id = 0
 if (params:getHeader('variable_accountcode') ~= nil) then
 	accountcode = params:getHeader("variable_accountcode")
 	Logger.info("[Dialplan] Accountcode TESTE : ".. accountcode)
+	accountname = accountcode
 end
 
 
@@ -162,11 +162,11 @@ if (accountcode == nil or accountcode == '') then
     	--accountcode = didinfo['accountid']
     end
 end
--- FLUXUPDATE-982  start
+
 if (accountcode == nil or accountcode == "") then
 	accountcode = params:getHeader("variable_sip_h_P-Accountcode")
 end
--- FLUXUPDATE-982  End
+
 -- Still no account code that means call is not authenticated.
 if (accountcode == nil or accountcode == "") then
   Logger.notice("[Dialplan] Call authentication fail..!!"..config['playback_audio_notification'])
@@ -179,11 +179,11 @@ Logger.info("[Accountcode : ".. accountcode .."]" );
 
 --Destination number string 
 number_loop_str = number_loop(destination_number,'blocked_patterns')
+number_loop_str_dest = number_loop(destination_number,'pattern')
 number_loop_str_orig = number_loop(callerid_number,'pattern')
 
 
 -- Do authorization
-
 userinfo = doauthorization("number",accountcode,call_direction,destination_number,number_loop_str,config)
 
 --------------------------------------- SPEED DIAL --------------------------------------
@@ -199,9 +199,6 @@ if(string.len(destination_number) == 1 ) then
 end
 -----------------------------------------------------------------------------------------
 
--- @TODO : Need to confirm with Rushika for fraud feature
---Added for fraud detection checking
---if fraud_check then fraud_check(accountcode,destination_number) end
 
 is_did_check = is_did(destination_number,config,callerid_number);
 if (is_did_check ~= nil and is_did_check['id']) then
@@ -294,9 +291,8 @@ if (userinfo ~= nil) then
 		or_localization['number_originate'] = or_localization['number_originate']:gsub(" ", "")			
 		destination_number = do_number_translation(or_localization['number_originate'],destination_number)
 	end
-	
-    -- If call is pstn and caller id translation defined then do caller id translation
-	-- FLUXUPDATE-675(Localization - Outbound caller not apply from customer localization)
+
+
 	if (or_localization and tonumber(userinfo['localization_id']) > 0 and or_localization['out_caller_id_originate'] ~= nil and call_direction ~= 'inbound') then        
 		or_localization['out_caller_id_originate'] = or_localization['out_caller_id_originate']:gsub(" ", "")	
 		callerid_array['original_cid_name'] = do_number_translation(or_localization['out_caller_id_originate'],callerid_array['cid_name'])
@@ -327,20 +323,6 @@ if (userinfo ~= nil) then
 	user_rates = origination_array[2]
 	xml_user_rates = origination_array[3] or ""
 
-
---ALTERACAO BILHETAGEM 0800
---	if (config['realtime_billing'] == "0") then		
---		nibble_id = userinfo['id']
---		nibble_rate = user_rates['cost']
---		nibble_connect_cost = user_rates['connectcost']
---	    nibble_init_inc = user_rates['init_inc']
---	    nibble_inc = user_rates['inc']
---	end
-
---ALTERACAO BILHETAGEM 0800
-
--- EDICAO
-
 	if (config['realtime_billing'] == "0" and call_direction == 'outbound') then		
 		nibble_id = userinfo['id']
 		nibble_rate = user_rates['cost']
@@ -348,7 +330,6 @@ if (userinfo ~= nil) then
 	    nibble_init_inc = user_rates['init_inc']
 	    nibble_inc = user_rates['inc']
 	end	
-
 
 	if (config['realtime_billing'] == "0" and call_direction == 'inbound' and didinfo['reverse_rate'] == '0') then	
 		did_reverse = didinfo['reverse_rate']
@@ -360,15 +341,10 @@ if (userinfo ~= nil) then
 --	    nibble_inc = user_rates['inc']
 	end	
 	
--- FIM
-	
-	
-	-- If customer has free seconds then override max length variable with it. 
 	if(package_maxlength ~= "") then	
 		maxlength=package_maxlength
 	end   
     
-    -- Reseller validation starts
 	local reseller_ids = {}
 	local i = 1
     local reseller_cc_limit = ""
@@ -490,30 +466,7 @@ if (userinfo ~= nil) then
 		rate_carrier_id = reseller_rates['trunk_id']
 		userinfo = reseller_userinfo
 	end -- End while 
-	
-	
-	
-	
---ALTERACAO BILHETAGEM 0800
-    
---	if (config['realtime_billing'] == "0") then
---		Logger.info("NIBBLE ID "..nibble_id)
---		Logger.info("NIBBLE RATE "..nibble_rate)
---		Logger.info("NIBBLE CONNECT COST "..nibble_connect_cost)
---		Logger.info("NIBBLE INITIAL INC "..nibble_init_inc)
---		Logger.info("NIBBLE INC "..nibble_inc)
-  
---		customer_userinfo["nibble_accounts"] = nibble_id
---  	customer_userinfo["nibble_rates"] = nibble_rate
---   	customer_userinfo["nibble_connect_cost"] = nibble_connect_cost
---    	customer_userinfo["nibble_init_inc"] = nibble_init_inc
---    	customer_userinfo["nibble_inc"] = nibble_inc
---	end
-	
---ALTERACAO BILHETAGEM 0800
-	
---EDICAO
-	
+		
 	if (config['realtime_billing'] == "0" and call_direction == 'inbound' and didinfo['reverse_rate'] == '0') then
 --		Logger.info("NIBBLE ID "..nibble_id)
 --		Logger.info("NIBBLE RATE "..nibble_rate)
@@ -541,9 +494,6 @@ if (userinfo ~= nil) then
 --    	customer_userinfo["nibble_init_inc"] = nibble_init_inc
 --    	customer_userinfo["nibble_inc"] = nibble_inc
 	end
-	
---FIM
-	
 	
 	--- Reseller validation ends
 	if ( tonumber(maxlength) <= 0 ) then
@@ -652,12 +602,60 @@ if (userinfo ~= nil) then
 
 	else		
 		 force_outbound_routes =0;
-   		 if(rate_carrier_id ~= nil and string.len(rate_carrier_id) >= 1) then
-			Logger.info("[DIALPLAN] User Rate ID : ".. user_rates['id'])
+   		 if(rate_carrier_id ~= nil and rate_carrier_id ~= '' and rate_carrier_id ~= 0) then
+			Logger.info("[DIALPLAN] Force Routes User Rate ID : ".. user_rates['id'])
 			force_outbound_routes = user_rates['id']
 		 end
-		-- Get termination rates 
-		termination_rates = get_carrier_rates (destination_number,number_loop_str,userinfo['pricelist_id'],rate_carrier_id,user_rates['routing_type'])
+		if(user_rates['check_carrier'] ~= nil and user_rates['check_carrier'] == "1") then
+			Logger.info("[DIALPLAN] STRIPCADUP OUT")
+			a = destination_number	        
+			first_dig = string.sub(a, 1, 2)
+			if( tonumber(first_dig)  == 0) then    
+			cn_dest_number = string.sub(a, 2, 3)
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = string.sub(a, 2, 12)
+			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d$")) then
+			cn_dest_number=51
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = cn_dest_number..a
+			else
+			cn_dest_number = string.sub(a, 1, 3)
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = string.sub(a, 2, 12)
+			end
+			Logger.info("=============== Carrier Information ===================")
+			Logger.info("cn_dest_number : "..cn_dest_number)  
+			Logger.info("area_number : "..area_number)  
+			Logger.info("prefix_dest_number : "..prefix_dest_number)  
+			Logger.info("end_dest_number : "..end_dest_number)
+			Logger.info("carrier_dest_number : "..carrier_dest_number)
+			Logger.info("destination_number : "..destination_number)
+			Logger.info("callerid_number : "..callerid_number)
+			userinfo['cn_dest_number'] = cn_dest_number
+			Logger.info("================================================================")  	    		 
+			carrier_info = get_carrier_out (userinfo,cn_dest_number,carrier_dest_number)
+		end
+		if(carrier_info ~= nil and carrier_info['carrier_rn1'] ~= nil) then
+		-- Get termination RN1
+		user_rates['rn1'] = carrier_info['carrier_rn1']
+		rate_carrier_id = carrier_info['rn1']
+		check_carrier = user_rates['check_carrier']
+		else
+		user_rates['rn1'] = 0
+		rate_carrier_id = user_rates['trunk_id']
+		check_carrier = 0
+		end
+		-- Get termination rates
+		Logger.info("[DIALPLAN] User Rate RN1 : ".. user_rates['rn1'])
+		Logger.info("[DIALPLAN] User Rate check_carrier : ".. check_carrier)
+		Logger.info("[DIALPLAN] User Rate rate_carrier_id : ".. rate_carrier_id)
+		termination_rates = get_carrier_rates (destination_number,number_loop_str_dest,userinfo['pricelist_id'],rate_carrier_id,user_rates['check_carrier'],user_rates['routing_type'])
 	
 	if (termination_rates ~= nil) then
 	    local i = 1
@@ -687,13 +685,54 @@ if (userinfo ~= nil) then
 			Logger.info("Prefix : "..termination_value['pattern'])      		    
 			Logger.info("Strip : "..termination_value['strip'])      		  
 			Logger.info("Prepend : "..termination_value['prepend'])      		  
-			Logger.info("Carrier id : "..termination_value['trunk_id'])  		      		    
-			Logger.info("carrier_name : "..termination_value['path'])
+			Logger.info("Trunk ID : "..termination_value['trunk_id'])  		      		    
+			Logger.info("Carrier Name : "..termination_value['path'])
 			Logger.info("dialplan_variable : "..termination_value['dialplan_variable']) 
 			Logger.info("Failover gateway : "..termination_value['path1']) 
 			Logger.info("Custom CallType : "..termination_value['call_type']) 
 			Logger.info("Vendor id : "..termination_value['provider_id'])      		    		    			
-			Logger.info("Max channels : "..termination_value['maxchannels'])	    		
+			Logger.info("Max channels : "..termination_value['maxchannels'])
+			if(carrier_info ~= nil and carrier_info['rn1'] ~= nil) then
+			termination_value['idCadup'] = carrier_info['idCadup']
+			termination_value['carrier_name'] = carrier_info['carrier_name']
+			termination_value['carrier_id'] = carrier_info['carrier_id']			
+			termination_value['carrier_rn1'] = carrier_info['carrier_rn1']
+			termination_value['call_count'] = carrier_info['call_count']
+			termination_value['carrier_route_id'] = carrier_info['id']						
+			termination_value['nomeLocalidade'] = carrier_info['nomeLocalidade']
+			termination_value['nomePrestadora'] = carrier_info['nomePrestadora']
+			termination_value['tipo'] = carrier_info['tipo']
+			if(termination_value['tipo'] == 'M' ) then
+			termination_value['tipo'] = 'Movel'
+			else
+			termination_value['tipo'] = 'Fixo'
+			end	
+			termination_value['prefixo'] = carrier_info['prefixo']
+			termination_value['areaLocal'] = carrier_info['areaLocal']
+			termination_value['codArea'] = carrier_info['codArea']
+			termination_value['uf'] = carrier_info['uf']
+			termination_value['carrier_id'] = carrier_info['id']
+			termination_value['rn1'] = carrier_info['rn1']						
+			if (termination_value['rn1'] ~= nil and termination_value['rn1'] ~= '0') then
+            force_outbound_routes = termination_value['rn1'];
+            Logger.info("force_outbound_routes : "..force_outbound_routes);
+            end
+			Logger.info("idCadup : "..termination_value['idCadup']) 
+			Logger.info("carrier_id : "..termination_value['carrier_id'])      		  
+			Logger.info("nomeLocalidade : "..termination_value['nomeLocalidade'])
+			Logger.info("nomePrestadora : "..termination_value['nomePrestadora'])  		  
+			Logger.info("areaLocal : "..termination_value['areaLocal'])  		      		    
+			Logger.info("tipo : "..termination_value['tipo'])      		  
+			Logger.info("prefixo : "..termination_value['prefixo'])
+			Logger.info("codArea : "..termination_value['codArea'])  		  
+			Logger.info("uf : "..termination_value['uf'])			
+			Logger.info("carrier_name : "..termination_value['carrier_name'])
+			Logger.info("carrier_id : "..termination_value['carrier_id'])
+			Logger.info("carrier_rn1 : "..termination_value['carrier_rn1'])
+			Logger.info("call_count : "..termination_value['call_count'])
+			Logger.info("carrier_route_id: "..termination_value['carrier_route_id'])						  		
+			Logger.info("rn1 : "..termination_value['rn1'])			
+			end	    		
 			custom_calltype = termination_value['comment'];
 			call_typecustom = termination_value['call_type'];
 			userinfo['call_type_custom'] = call_typecustom;

@@ -52,8 +52,9 @@ function freeswitch_xml_header(xml,destination_number,accountcode,maxlength,call
 	table.insert(xml, [[<action application="set" data="entity_id=]]..customer_userinfo['type']..[["/>]]);
 	table.insert(xml, [[<action application="set" data="call_processed=internal"/>]]);    
 	table.insert(xml, [[<action application="export" data="user_domain=$${domain_name}"/>]]);
-	table.insert(xml, [[<action application="set" data="call_direction=]]..call_direction..[["/>]]); 	
-	table.insert(xml, [[<action application="set" data="accountname=]]..accountcode..[["/>]]);
+	table.insert(xml, [[<action application="set" data="call_direction=]]..call_direction..[["/>]]);
+	table.insert(xml, [[<action application="set" data="accountcode=]]..accountcode..[["/>]]);
+	table.insert(xml, [[<action application="set" data="accountname=]]..accountname..[["/>]]);
 	if (package_id and tonumber(package_id) > 0) then
 		table.insert(xml, [[<action application="set" data="package_id=]]..package_id..[["/>]]);              
 	end
@@ -119,7 +120,7 @@ function freeswitch_xml_header(xml,destination_number,accountcode,maxlength,call
         table.insert(xml, reseller_cc_limit);
     end   
     
-	if(tonumber(customer_userinfo['is_recording']) == 0) then 
+	if(tonumber(customer_userinfo['is_recording']) == 1) then 
 		table.insert(xml, [[<action application="export" data="is_recording=1"/>]]);
 		table.insert(xml, [[<action application="export" data="media_bug_answer_req=true"/>]]);
 		table.insert(xml, [[<action application="export" data="RECORD_STEREO=true"/>]]);
@@ -161,7 +162,6 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 		tr_localization_tunk['number_terminate'] = tr_localization_tunk['number_terminate']:gsub(" ", "")
 		destination_number = do_number_translation(tr_localization_tunk['number_terminate'],destination_number)
 	end
-	-- trunk localization end
 	local temp_destination_number = destination_number
 	local tr_localization=nil
 	tr_localization = get_localization(outbound_info['provider_id'],'T')
@@ -193,22 +193,81 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 
 		temp_destination_number = do_number_translation(outbound_info['strip'].."/"..outbound_info['prepend'],temp_destination_number)
 	end
-    
-	xml_termiantion_rates= "ID:"..outbound_info['outbound_route_id'].."|CODE:"..outbound_info['pattern'].."|DESTINATION:"..outbound_info['comment'].."|CONNECTIONCOST:"..outbound_info['connectcost'].."|INCLUDEDSECONDS:"..outbound_info['includedseconds'].."|COST:"..outbound_info['cost'].."|INC:"..outbound_info['inc'].."|INITIALBLOCK:"..outbound_info['init_inc'].."|TRUNK:"..outbound_info['trunk_id'].."|PROVIDER:"..outbound_info['provider_id'];
+        if (outbound_info['idCadup'] ~= nil and outbound_info['idCadup'] ~= '0')then
+                idCadup = outbound_info['idCadup']
+                carrier_id = outbound_info['carrier_id']
+                nomeLocalidade = outbound_info['nomeLocalidade']
+                nomePrestadora = outbound_info['nomePrestadora']
+                areaLocal = outbound_info['areaLocal']
+                tipo = outbound_info['tipo']
+                prefixo = outbound_info['prefixo']
+                codArea = outbound_info['codArea']
+                uf = outbound_info['uf']
+                rn1 = outbound_info['rn1']
+                
+                carrier_rn1 = outbound_info['carrier_rn1']
+                call_count = outbound_info['call_count']
+                carrier_name = outbound_info['carrier_name']
+                carrier_route_id = outbound_info['carrier_route_id']
+                                
+            
+                Logger.debug("idCadup : "..idCadup)
+                Logger.debug("carrier_id : "..carrier_id)
+                Logger.debug("nomeLocalidade : "..nomeLocalidade)
+                Logger.debug("nomePrestadora : "..nomePrestadora)
+                Logger.debug("areaLocal : "..areaLocal)
+                Logger.debug("tipo : "..tipo)
+                Logger.debug("prefixo : "..prefixo)
+                Logger.debug("carrier_rn1 : "..carrier_rn1)
+                Logger.debug("carrier_name : "..carrier_name)
+                Logger.debug("carrier_route_id : "..carrier_route_id)
+                Logger.debug("call_count : "..call_count)
+                Logger.debug("codArea : "..codArea)
+                Logger.debug("uf : "..uf)
+                Logger.debug("rn1 : "..rn1)
+                table.insert(xml, [[<action application="export" data="idCadup=]]..idCadup..[["/>]]);
+                table.insert(xml, [[<action application="set" data="check_cadup=true"/>]]);
+                table.insert(xml, [[<action application="export" data="routing_type=4"/>]]);
+                table.insert(xml, [[<action application="export" data="rate_flag=4"/>]]);
+                table.insert(xml, [[<action application="export" data="carrier_id=]]..carrier_id..[["/>]]);
+                table.insert(xml, [[<action application="export" data="nomeLocalidade=]]..nomeLocalidade..[["/>]]);
+                table.insert(xml, [[<action application="export" data="nomePrestadora=]]..nomePrestadora..[["/>]]);
+                table.insert(xml, [[<action application="export" data="areaLocal=]]..areaLocal..[["/>]]);
+                table.insert(xml, [[<action application="export" data="tipo=]]..tipo..[["/>]])    
+            	table.insert(xml, [[<action application="export" data="prefixo=]]..prefixo..[["/>]]);
+            	table.insert(xml, [[<action application="export" data="codArea=]]..codArea..[["/>]]);
+            	table.insert(xml, [[<action application="export" data="uf=]]..uf..[["/>]]);
+            	table.insert(xml, [[<action application="export" data="rn1=]]..carrier_rn1..[["/>]]);
+            	
+            	table.insert(xml, [[<action application="export" data="carrier_route_id=]]..carrier_route_id..[["/>]]);
+            	table.insert(xml, [[<action application="export" data="carrier_rn1=]]..carrier_rn1..[["/>]]);
+            	table.insert(xml, [[<action application="export" data="carrier_name=]]..carrier_name..[["/>]]);
+    else 
+        outbound_info['idCadup'] = 0;
+        table.insert(xml, [[<action application="set" data="rate_flag=]]..rategroup_type..[["/>]]);
+        table.insert(xml, [[<action application="export" data="idCadup=0"/>]]);
+        table.insert(xml, [[<action application="set" data="check_cadup=true"/>]]);
+        table.insert(xml, [[<action application="export" data="routing_type=4"/>]]);
+        table.insert(xml, [[<action application="export" data="rate_flag=4"/>]]);
+    end
+	xml_termination_rates= "ID:"..outbound_info['outbound_route_id'].."|CODE:"..outbound_info['pattern'].."|DESTINATION:"..outbound_info['comment'].."|CONNECTIONCOST:"..outbound_info['connectcost'].."|INCLUDEDSECONDS:"..outbound_info['includedseconds'].."|IDCADUP:"..outbound_info['idCadup'].."|COST:"..outbound_info['cost'].."|CARRIER_ROUTE_ID:"..outbound_info['carrier_route_id'].."|CARRIER_ID:"..outbound_info['carrier_id'].."|INC:"..outbound_info['inc'].."|INITIALBLOCK:"..outbound_info['init_inc'].."|TRUNK:"..outbound_info['trunk_id'].."|PROVIDER:"..outbound_info['provider_id'];
 	if(params:getHeader("variable_sip_h_P-Voice_broadcast") == 'true')then
 		local sip_user = params:getHeader("variable_sip_h_P-Voice_broadcast_type")
 		table.insert(xml, [[<action application="set" data="calltype=BROADCAST"/>]]);
 		table.insert(xml, [[<action application="set" data="sip_user=]]..sip_user..[["/>]]);
 	else
-		table.insert(xml, [[<action application="set" data="calltype=Padrao"/>]]);        
-     end
-	table.insert(xml, [[<action application="set" data="termination_rates=]]..xml_termiantion_rates..[["/>]]);        
+		table.insert(xml, [[<action application="set" data="calltype=]]..rategroup_type..[["/>]]);        
+	end
+	table.insert(xml, [[<action application="set" data="termination_rates=]]..xml_termination_rates..[["/>]]);    
 	table.insert(xml, [[<action application="set" data="trunk_id=]]..outbound_info['trunk_id']..[["/>]]);        
 	table.insert(xml, [[<action application="set" data="provider_id=]]..outbound_info['provider_id']..[["/>]]);           
-	table.insert(xml, [[<action application="set" data="rate_flag=]]..rategroup_type..[["/>]]);           
+--	table.insert(xml, [[<action application="set" data="rate_flag=]]..rategroup_type..[["/>]]);           
 	table.insert(xml, [[<action application="set" data="force_trunk_flag=]]..force_outbound_routes..[["/>]]);    
     table.insert(xml, [[<action application="export" data="presence_data=trunk_id=]]..outbound_info['trunk_id']..[["/>]])
-    table.insert(xml, [[<action application="set" data="intcall=]]..(outbound_info['intcall'] and 1 or 0)..[["/>]])
+    table.insert(xml, [[<action application="set" data="intcall=]]..(outbound_info['intcall'] and 1 or 0)..[["/>]])      
+	table.insert(xml, [[<action application="unset" data="direction"/>]]);
+	table.insert(xml, [[<action application="set" data="direction=outbound"/>]]);
+	table.insert(xml, [[<action application="export" data="direction=outbound"/>]]);	
 
 	-- Check if is there any gateway configuration params available for it.
 	if (outbound_info['dialplan_variable'] ~= '') then 
@@ -236,11 +295,12 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
     table.insert(xml, [[<action application="export" data="presence_data=]]..livecall_data..[[|||STD"/>]])
 	
     chan_var = "leg_timeout="..outbound_info['leg_timeout']
-    --HP:FLUXUPDATE-944
+    if (tonumber(outbound_info['rn1']) ~=nil and tonumber(outbound_info['rn1']) > 0) then
+    chan_var = chan_var..",carrier_id="..outbound_info['carrier_id']..",nomeLocalidade="..outbound_info['nomeLocalidade']..",nomePrestadora="..outbound_info['nomePrestadora']..",areaLocal="..outbound_info['areaLocal']..",tipo="..outbound_info['tipo']..",prefixo="..outbound_info['prefixo']..",codArea="..outbound_info['codArea']..",uf="..outbound_info['uf']..",rn1="..outbound_info['rn1']
+    end
     p_id_var = "{sip_cid_type="..outbound_info['sip_cid_type'].."}"
     if (outbound_info['codec'] ~= '') then
             chan_var = chan_var..",absolute_codec_string=".."^^:"..outbound_info['codec']:gsub("%,", ":")
-     --//HP: FLUXUPDATE-945
      else
 	if(params:getHeader('variable_sip_from_user') and params:getHeader('variable_sip_from_user') ~= "")then
 		local sip_codec = get_sip_codec(params:getHeader('variable_sip_from_user'))
@@ -249,7 +309,6 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 			chan_var = chan_var..",absolute_codec_string=".."^^:"..sip_codec:gsub("%,", ":")
 		end
 	end
-	--//HP: FLUXUPDATE-945 END
             
     end            
 
@@ -259,19 +318,16 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 	end
 
 	if(tonumber(outbound_info['maxchannels']) > 0) then    
-    --HP:FLUXUPDATE-944	
 		table.insert(xml, [[<action application="limit_execute" data="db ]]..outbound_info['path']..[[ gw_]]..outbound_info['path']..[[ ]]..outbound_info['maxchannels']..[[ bridge ]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path']..[[/]]..temp_destination_number..[["/>]]);
 	else
-    --HP:FLUXUPDATE-944	
 		table.insert(xml, [[<action application="bridge" data="]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path']..[[/]]..temp_destination_number..[["/>]]);
 	end
-    --HP:FLUXUPDATE-944
 	if(outbound_info['path1'] ~= '' and outbound_info['path1'] ~= outbound_info['path']) then
+		table.insert(xml, [[<action application="info" data=""/>]]);
 		table.insert(xml, [[<action application="bridge" data="]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path1']..[[/]]..temp_destination_number..[["/>]]);
 	end
 
 	if(outbound_info['path2'] ~= '' and outbound_info['path2'] ~= outbound_info['path'] and outbound_info['path2'] ~= outbound_info['path1']) then
-    --HP:FLUXUPDATE-944
 		table.insert(xml, [[<action application="bridge" data="]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path2']..[[/]]..temp_destination_number..[["/>]]);
 	end
     return xml
@@ -280,7 +336,6 @@ end
 -- Dialplan for inbound calls
 function freeswitch_xml_inbound(xml,didinfo,userinfo,config,xml_did_rates,callerid_array,livecall_data)
 	local is_local_extension = "0"
-
 	callerid_array['cid_name'] = do_number_translation(didinfo['did_cid_translation'],callerid_array['cid_name'])
 	callerid_array['cid_number'] = do_number_translation(didinfo['did_cid_translation'],callerid_array['cid_number'])
 	--if(tonumber(didinfo['maxchannels']) > 0) then    		
@@ -295,49 +350,57 @@ function freeswitch_xml_inbound(xml,didinfo,userinfo,config,xml_did_rates,caller
 	if(tonumber(didinfo['maxchannels']) > 0) then    
 	    table.insert(xml, [[<action application="limit" data="db ]]..destination_number..[[ did_]]..destination_number..[[ ]]..didinfo['maxchannels']..[[ !SWITCH_CONGESTION"/>]]);        
 	end
-	table.insert(xml, [[<action application="export" data="presence_data=]]..livecall_data..[[||||||DID"/>]])
---	table.insert(xml, [[<action application="export" data="call_type=]]..didinfo['call_type']..[["/>]])
-	table.insert(xml, [[<action application="export" data="provider_id=]]..didinfo['provider_id']..[["/>]])
---	table.insert(xml, [[<action application="export" data="rate_flag=3"/>]])
---	table.insert(xml, [[<action application="export" data="rate_flag=3"/>]])
-	local did_reverse = "reverse_inbound_"..didinfo['reverse_rate']
-	local reverse_rate = didinfo['reverse_rate']
-	if (reverse_rate == '0') then	
+	if callerid_lookup_dialplan then callerid_lookup_dialplan(xml,didinfo) end
 	
-		    table.insert(xml, [[<action application="set" data="origination_rates_did=]]..xml_did_rates..[["/>]]);
-	    table.insert(xml, [[<action application="set" data="origination_rates=]]..xml_user_rates..[["/>]]);
---	    table.insert(xml, [[<action application="set" data="termination_rates=]]..xml_user_rates..[["/>]]);
-	    table.insert(xml, [[<action application="set" data="leg=A"/>]]);
-	    table.insert(xml, [[<action application="set" data="call_type_custom=DID-REVERSE"/>]]);
-	    table.insert(xml, [[<action application="set" data="rate_flag=3"/>]]);
-	    table.insert(xml, [[<action application="set" data="caller_did_account_id=]]..didinfo['accountid']..[["/>]]);
---	    table.insert(xml, [[<action application="set" data="call_type_rate=]]..didinfo['call_type_rate']..[["/>]]);
-	    table.insert(xml, [[<action application="set" data="call_type=]]..didinfo['rate_group']..[["/>]]);
-	     table.insert(xml, [[<action application="set" data="sip_user=$${original_caller_id_number}"/>]]);
-	    table.insert(xml, [[<action application="set" data="provider_id=]]..didinfo['provider_id']..[["/>]]);
-	    table.insert(xml, [[<action application="export" data="ignore_display_updates=true"/>]]);		
---		table.insert(xml, [[<action application="unset" data="origination_rates"/>]]);
---	    table.insert(xml, [[<action application="unset" data="origination_rates_did"/>]]);
---	    table.insert(xml, [[<action application="set" data="origination_rates=]]..xml_user_rates..[["/>]]);
-	    table.insert(xml, [[<action application="export" data="leg=A"/>]]);
-	    table.insert(xml, [[<action application="export" data="call_type_custom=DID-REVERSE"/>]]);
-    table.insert(xml, [[<action application="export" data="reverse_rate=]]..didinfo['reverse_rate']..[["/>]])
-    table.insert(xml, [[<action application="export" data="did_number=]]..didinfo['did_number']..[["/>]])
-	table.insert(xml, [[<action application="export" data="did_calltype=]]..didinfo['call_type']..[["/>]])
---	table.insert(xml, [[<action application="export" data="did_custom_call_type=]]..didinfo['custom_call_type']..[["/>]])
-	table.insert(xml, [[<action application="export" data="caller_did_account_id=]]..didinfo['accountid']..[["/>]])
-	table.insert(xml, [[<action application="export" data="call_group=]]..userinfo['type']..[["/>]])
-	table.insert(xml, [[<action application="export" data="entity_id=$${call_group}"/>]])
-	table.insert(xml, [[<action application="export" data="did_rate_id=]]..didinfo['rate_group']..[["/>]])
-	table.insert(xml, [[<action application="export" data="service=reverse_rate"/>]])
---	table.insert(xml, [[<action application="export" data="origination_rates_did=]]..xml_did_rates..[["/>]])
---	table.insert(xml, [[<action application="info" data=""/>]])
-	else
-	table.insert(xml, [[<action application="set" data="origination_rates_did=]]..xml_did_rates..[["/>]]);
-    table.insert(xml, [[<action application="set" data="call_type_custom=DID"/>]]);
-	end 		
+	
+	
+	if (didinfo['idCadup'] ~= nil and didinfo['idCadup'] ~= '0') then
+	       idCadup = didinfo['idCadup']
+	       nomeLocalidade = didinfo['nomeLocalidade']
+	       nomePrestadora = didinfo['nomePrestadora']
+	       areaLocal = didinfo['areaLocal']
+	       tipo = didinfo['tipo']
+	       prefixo = didinfo['prefixo']
+	       codArea = didinfo['codArea']
+	       uf = didinfo['uf']
+	       rn1 = didinfo['rn1']
+	       Logger.debug("idCadup : "..idCadup)
+	       Logger.debug("nomeLocalidade : "..nomeLocalidade)
+	       Logger.debug("nomePrestadora : "..nomePrestadora)
+	       Logger.debug("areaLocal : "..areaLocal)
+	       Logger.debug("tipo : "..tipo)
+	       Logger.debug("prefixo : "..prefixo)
+	       Logger.debug("codArea : "..codArea)
+	       Logger.debug("uf : "..uf)
+	       Logger.debug("rn1 : "..rn1)
+	       table.insert(xml, [[<action application="export" data="idCadup=]]..idCadup..[["/>]]);
+	       table.insert(xml, [[<action application="export" data="nomeLocalidade=]]..nomeLocalidade..[["/>]]);
+	       table.insert(xml, [[<action application="export" data="nomePrestadora=]]..nomePrestadora..[["/>]]);
+	       table.insert(xml, [[<action application="export" data="areaLocal=]]..areaLocal..[["/>]]);
+	       table.insert(xml, [[<action application="export" data="tipo=]]..tipo..[["/>]])    
+	   	table.insert(xml, [[<action application="export" data="prefixo=]]..prefixo..[["/>]]);
+	   	table.insert(xml, [[<action application="export" data="codArea=]]..codArea..[["/>]]);
+	   	table.insert(xml, [[<action application="export" data="uf=]]..uf..[["/>]]);
+	   	table.insert(xml, [[<action application="export" data="rn1=]]..rn1..[["/>]])
+	   
+	   end
+	
+	
+	if (config['check_cadup'] ~= nil and config['check_cadup'] == '0' and didinfo['cadupCN'] ~= nil) then
+		check_cadup = config['check_cadup'];
+		table.insert(xml, [[<action application="export" data="cadupCN=]]..didinfo['cadupCN']..[["/>]])
+		table.insert(xml, [[<action application="export" data="cadupAreaNum=]]..didinfo['cadupAreaNum']..[["/>]])
+		table.insert(xml, [[<action application="export" data="cadupPrefix=]]..didinfo['cadupPrefix']..[["/>]])
+		table.insert(xml, [[<action application="export" data="cadupFaixaFim=]]..didinfo['cadupFaixaFim']..[["/>]])
+		
+--		table.insert(xml, [[<action application="set" data="check_cadup=true"/>]]);
+	end
+	
+	
+	table.insert(xml, [[<action application="export" data="presence_data=]]..livecall_data..[[||||||DID"/>]])
+	table.insert(xml, [[<action application="export" data="call_type=]]..didinfo['call_type']..[["/>]])
 	local custom_function_name = "custom_inbound_"..didinfo['call_type']
-	Logger.debug("did_reverse:::::::::::::::::::::::::" .. did_reverse)
+--	table.insert(xml, [[<action application="info" data=""/>]])
 	Logger.debug("custom_function_name:::::::::::::::::::::::::" .. custom_function_name)
 	_G[custom_function_name](xml,didinfo,userinfo,config,xml_did_rates,callerid_array,livecall_data) -- calls function from the global namespace
 	return xml
@@ -374,12 +437,12 @@ function custom_inbound_0(xml,didinfo,userinfo,config,xml_did_rates,callerid_arr
 end
 function custom_inbound_1(xml,didinfo,userinfo,config,xml_did_rates,callerid_array,livecall_data)
 	table.insert(xml, [[<action application="set" data="calltype=DID@IP"/>]]);
-	--//HP: FLUXUPDATE-945
+--	table.insert(xml, [[<action application="info" data=""/>]]);
 	local did_local_chan = ""
 	if(params:getHeader('variable_sip_from_user') and params:getHeader('variable_sip_from_user') ~= "")then
 		local sip_codec = get_sip_codec(params:getHeader('variable_sip_from_user'))
 		if(sip_codec and sip_codec ~= "")then
-			Logger.warning("[XML] sip_codec : "..sip_codec)
+			Logger.warning("[XML] sip_codec : "..sip_codec) 
 			did_local_chan = ",absolute_codec_string=".."^^:"..sip_codec:gsub("%,", ":")
 		end
 	end
@@ -427,11 +490,11 @@ function custom_inbound_5(xml,didinfo,userinfo,config,xml_did_rates,callerid_arr
 		common_chan_var = "{sip_contact_user="..destination_number.."}"
 		for i = 1, #destination_str do
 			if notify then notify(xml,destination_str[i]) end
-			--//HP: FLUXUPDATE-945
+			
 			local sip_codec = get_sip_codec(destination_str[i])
 			local did_local_chan = ""
 			if(sip_codec and sip_codec ~= "")then
-				Logger.warning("[XML]  did_local_sip_codec : "..sip_codec) --//HP: FLUXUPDATE-4002
+				Logger.warning("[XML]  did_local_sip_codec : "..sip_codec)
 				did_local_chan = ",absolute_codec_string=".."^^:"..sip_codec:gsub("%,", ":")
 			end		
 			bridge_str = bridge_str.."[leg_timeout="..didinfo['leg_timeout']..did_local_chan.."]sofia/${sofia_profile_name}/"..destination_number.."${regex(${sofia_contact("..destination_str[i].."@${domain_name})}|^[^@]+(.*)|%1)}"
@@ -452,6 +515,7 @@ function freeswitch_xml_local(xml,destination_number,destinationinfo,callerid_ar
     -------------- Caller Id translation ---------    
     callerid_array['cid_name'] = do_number_translation(destinationinfo['did_cid_translation'],callerid_array['cid_name'])
 	callerid_array['cid_number'] = do_number_translation(destinationinfo['did_cid_translation'],callerid_array['cid_number'])
+--	tr_localization = get_localization(destinationinfo['did_cid_translation'],'T')
 	xml = freeswitch_xml_callerid(xml,callerid_array)	    	       
     ----------------------------------------------------------------------
 
@@ -480,7 +544,6 @@ function freeswitch_xml_callerid(xml,calleridinfo)
         end
         return xml
 end
-
 
 -- not found dialplan
 function not_found(xml)
@@ -542,7 +605,7 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 
      local xml = {};
 
-	Logger.warning("[ERROR]  call_direction:" .. call_direction)
+	--Logger.warning("[ERROR]  call_direction:" .. call_direction)
 	local log_type
 	local log_message
 	local hangup_cause 
@@ -562,12 +625,12 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." is not authenticated!!";
 		hangup_cause = "AUTHENTICATION_FAIL";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux_expired.wav";
 	elseif(error_code == "ACCOUNT_INACTIVE_DELETED") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." is either inactive or deleted!!";
 		hangup_cause = "ACCOUNT_INACTIVE_DELETED";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux_expired.wav";
 		if(account_id ~= '' and tonumber(account_id) >= 0)then post_cdrs = 1 end
 	--~ Fraud Detection
 	elseif(error_code == "FRAUD_CALL_PER_ACCOUNT") then
@@ -594,52 +657,57 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 		hangup_cause = "CALLERID_NOT_FOUND";
 	--~ CLI - NONCLI Rategroup End
 	elseif(error_code == "ACCOUNT_EXPIRE") then
-		log_type = "DEBUG";
+		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." Account has been expired!!";
 		hangup_cause = "ACCOUNT_EXPIRE";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux_expired.wav";
 	elseif(error_code == "NO_SUFFICIENT_FUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode.." doesn't have sufficiant fund!!";
 		hangup_cause = "NO_SUFFICIENT_FUND";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-not-enough-credit.wav";
 	elseif(error_code == "DESTINATION_BLOCKED") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") is blocked for account!!";
 		hangup_cause = "DESTINATION_BLOCKED";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badnumber.wav";
 	elseif(error_code == "ORIGNATION_RATE_NOT_FOUND") then
 		log_type = "WARNING";
 
 		log_message = "Accountcode ".. accountcode ..". Dialed number ("..destination_number..")  origination rates not found!!";
 		hangup_cause = "ORIGNATION_RATE_NOT_FOUND";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
+	elseif(error_code == "DID_RATE_NOT_FOUND") then
+	log_type = "WARNING";
+	log_message = "Accountcode ".. accountcode ..". Dialed number ("..destination_number..")  did rates not found!!";
+	hangup_cause = "DID_RATE_NOT_FOUND";
+	audio_file = sound_path ..  "flux-badphone.wav";
 	elseif(error_code == "RESELLER_COST_CHEAP") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") , Reseller call is priced too cheap! Call being barred!!";
 		hangup_cause = "RESELLER_COST_CHEAP";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
 
 	elseif(error_code == "TERMINATION_RATE_NOT_FOUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") termination rates not found!!";
 		hangup_cause = "TERMINATION_RATE_NOT_FOUND";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
 	elseif(error_code == "DID_DESTINATION_NOT_FOUND") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed number ("..destination_number..") destination not found!!";
 		hangup_cause = "DID_DESTINATION_NOT_FOUND";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
 	elseif(error_code == "UNALLOCATED_NUMBER") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed DID number ("..destination_number..") is inactive!!";
 		hangup_cause = "UNALLOCATED_NUMBER";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
 	elseif(error_code == "NO_ROUTE_DESTINATION") then
 		log_type = "WARNING";
 		log_message = "Accountcode ".. accountcode..". Dialed DID number ("..destination_number..") routes not set!!";
 		hangup_cause = "NO_ROUTE_DESTINATION";
-		audio_file = sound_path ..  "flux-indisponivel.wav";
+		audio_file = sound_path ..  "flux-badphone.wav";
 	end
 	    Logger.debug("post_cdrs:::" .. post_cdrs)
 	if(calltype ~= "FLUX-CALLINGCARD" and tonumber(post_cdrs) ==0) then
@@ -686,8 +754,7 @@ function error_xml_without_cdr(destination_number,error_code,calltype,playback_a
 		end
 	    table.insert(xml, [[<action application="set" data="sip_ignore_remote_cause=true"/>]]);        
 	    table.insert(xml, [[<action application="set" data="call_processed=internal"/>]]);
-	    table.insert(xml, [[<action application="set" data="effective_destination_number=]]..destination_number..[["/>]]);
---	    table.insert(xml, [[<action application="info" data=""/>]]); 
+	    table.insert(xml, [[<action application="set" data="effective_destination_number=]]..destination_number..[["/>]]); 
 	    --table.insert(xml, [[<action application="set" data="hangup_cause=${last_bridge_hangup_cause}"/>]]);  
 	    --table.insert(xml, [[<action application="set" data="process_cdr=false"/>]]);      
 	    table.insert(xml, [[<action application="set" data="last_bridge_hangup_cause=]]..hangup_cause..[["/>]]);        

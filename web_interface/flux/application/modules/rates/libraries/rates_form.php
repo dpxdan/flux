@@ -2072,7 +2072,7 @@ class rates_form extends common
                 "true",
                 "right"
             ),
-          /*  array(
+            array(
                 gettext("Prepend"),
                 "50",
                 "prepend",
@@ -2082,17 +2082,6 @@ class rates_form extends common
                 "",
                 "true",
                 "right"
-            ),*/
-            array(
-                gettext("Call Type"),
-                "90",
-                "call_type",
-                "call_type",
-                "calltype",
-                "get_field_name",
-                "",
-                "true",
-                "center"
             ),
             array(
                 gettext("Trunk"),
@@ -2875,14 +2864,16 @@ class rates_form extends common
             $status_array = array(
                 "" => gettext('--Select--'),
                 '0' => gettext('Priority'),
-                '1' => gettext('Percentage')
+                '1' => gettext('Percentage'),
+                '2' => gettext('Carrier')
             );
             return $status_array;
         } else {
             $status_array = array(
                 "" => gettext('--Select--'),
                 '0' => gettext('Priority'),
-                '1' => gettext('Percentage')
+                '1' => gettext('Percentage'),
+                '2' => gettext('Carrier')
             );
             return $status_array;
         }

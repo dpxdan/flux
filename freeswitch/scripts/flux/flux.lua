@@ -71,11 +71,11 @@ if (not params) then
 	end
 end
 
-if (config['debug']==1) then
-    -- print all params 
+if (tonumber(config['debug']) == 1 ) then
+
     if (params:serialize() ~= nil) then
     	Logger.notice ("[xml_handler] Params:\n" .. params:serialize())
-    end	
+    end
 
     for param_key,param_value in pairs(XML_REQUEST) do --pseudocode
     	Logger.info ("[xml_REQUEST] "..param_key..": " .. param_value)

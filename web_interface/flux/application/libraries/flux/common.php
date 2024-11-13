@@ -530,6 +530,20 @@ class common {
 		);
 		return $status_array;
 	}
+	function set_cadup($status = '') {
+		$status_array = array (
+				'0' => gettext ( 'Yes' ),
+				'1' => gettext ( 'No' )
+		);
+		return $status_array;
+	}
+	function set_carrier($status = '') {
+			$status_array = array (
+					'0' => gettext ( 'No' ),
+					'1' => gettext ( 'Yes' )
+			);
+			return $status_array;
+	}
 	function set_allow_invoice($status = '') {
 		$status_array = array (
 				'1' => gettext ( 'Yes' ),
@@ -554,6 +568,12 @@ class common {
 	function get_allow($select = "", $table = "", $status) {
 		return ($status == 1) ? "Yes" : "No";
 	}
+	function get_cadup($select = "", $table = "", $status) {
+		return ($status == 1) ? "No" : "Yes";
+	}
+	function get_carrier($select = "", $table = "", $status) {
+			return ($status == 1) ? "No" : "Yes";
+		}
 	function get_hg_type($select = "", $table = "", $hg_type) {
 	                $hg_type_array = array (
 	                                '' => ""
@@ -3878,6 +3898,26 @@ $cc_email_ids = strtolower($this->CI->common->get_field_name("notification_email
 			return $extensions;
 		}
 	}
+	function carrier_dropdown($id){
+		  		$drop_down = "";
+				$drop_down .= '<select name="'.$id.'" id="'.$id.'" class="form-control float-left col-md-12 form-control-lg selectpicker '.$id.'" data-live-search="true">';
+				$drop_down .=	'<option value="0">-- Select --</option>';
+				$query = $this->CI->db_model->getSelect("id,rn1,operadora", "rn1_operadoras",array('rn1 >' => 0)); 
+				if ($query->num_rows() > 0){
+					$carriers = $query->result_array();
+					foreach($carriers as $key=>$val){
+						if($val['id'] == $id){
+							$selected = "selected = selected";
+						}
+						else{
+							$selected = "";
+						}
+						$drop_down .= '<option value="'.$val['id'].'" '.$selected.'>'.$val['operadora'].'</option>';
+					}
+				}
+				$drop_down .= '</select>';
+				return $drop_down;
+		  }
 	function sip_dropdown($id,$accountid,$value){
   		$drop_down = "";
 		$drop_down .= '<select name="'.$id.'" id="'.$id.'" class="form-control float-left col-md-12 form-control-lg selectpicker '.$id.'" data-live-search="true">';
@@ -4142,8 +4182,8 @@ $cc_email_ids = strtolower($this->CI->common->get_field_name("notification_email
 		}
 		return $status;
 	}
-	function set_routetype_origination($status = '') {
-		$status_array = array( ""=>'--Select--','0' => 'Priority','1' => 'Percentage');
+	function set_routetype_new($status = '') {	
+		$status_array = array( ""=>'--Select--','0' => 'LCR','1' => 'Cost','2' => 'Priority','3' => 'Percentage','4' => 'Carrier');
 		return $status_array;
 	}
 	function set_voice_broadcast_status($status) {

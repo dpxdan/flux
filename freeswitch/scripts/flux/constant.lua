@@ -43,5 +43,5 @@ TBL_CALL_TYPE="calltype"
 TBL_RESELLER_PRICING="reseller_pricing"
 TBL_LOCALIZATION="localization"
 TBL_CALL_BARRING="call_barring"
-
-
+TBL_CARRIER_RATES="view_carriers"
+TBL_CARRIER_ROUTES="carrier_routing"
