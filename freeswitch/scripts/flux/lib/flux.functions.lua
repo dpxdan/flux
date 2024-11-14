@@ -102,7 +102,7 @@ end
 -- Check DID info
 function check_did(destination_number,config,callerid_number)
 	local did_localization = nil
-	destination_number = check_local_number(destination_number, callerid_number)
+	destination_number = check_local_number(destination_number,callerid_number)
 
 	if (config['did_global_translation'] ~= nil and config['did_global_translation'] ~= '' and tonumber(config['did_global_translation']) > 0) then
 		did_localization = get_localization(config['did_global_translation'],'O')
@@ -117,84 +117,58 @@ function check_did(destination_number,config,callerid_number)
 	Logger.debug("[CHECK_DID] Query :" .. query)
 	assert (dbh:query(query, function(u)
 		didinfo = u;
-
-		--"'^'..callerid_number..".*""
-
-		if (didinfo['reverse_rate'] == "0") then
-			Logger.warning("[GET_DID_RATE] Reverse :" .. didinfo['reverse_rate'])
-			--Logger.warning("[GET_DID_CLIENT] Client :" .. didinfo['account_code'])
-			Logger.warning("[GET_DID_PRICELIST_ID] Pricelist ID:" .. didinfo['rate_group'])
-			Logger.warning("[GET_DID_PRICELIST_NAME] Pricelist Name:" .. didinfo['price_name'])
-			Logger.warning("[GET_CUSTOMER_AREA_CODE] Area Code:" .. didinfo['area_code'])
-			a = callerid_number		
+		
+        if(didinfo['reverse_rate'] ~= nil and didinfo['reverse_rate'] == "0") then
+			Logger.info("[DIALPLAN] STRIPCADUP IN")
+			a = callerid_number	        
+			first_dig = string.sub(a, 1, 2)
+			if( tonumber(first_dig)  == 0) then    
+			cn_dest_number = string.sub(a, 2, 3)
 			area_number = string.sub(a, 1, 2)
-			Logger.warning("[ENTRADA_AREA_CODE] Entrada Area Code:" .. area_number)
-			Logger.warning("[CALLERID_NUMBER] Callerid:" .. a)
-			if (didinfo['area_code'] == area_number) then
-	--		area_number_cut = string.sub(a, 3, 3)
-				area_number_dest = number_loop(a,'pattern')
-				local query_rate_area = "SELECT * FROM "..TBL_ORIGINATION_RATES.." WHERE "..area_number_dest.." AND status = 0 AND (pricelist_id = "..didinfo['rate_group'].." OR accountid="..didinfo['accountid']..")  ORDER BY accountid DESC,LENGTH(pattern) DESC,cost DESC LIMIT 1";
-
-				Logger.notice("CHAMADA DE ENTRADA COM O MESMO CN DO CLIENTE")
-				Logger.warning("[DID_RATE] Query :" .. query_rate_area)
-				assert (dbh:query(query_rate_area, function(u)
-				didrate = u;
-				Logger.warning("[GET_DID_CONNECTCOST] Cost :" .. didrate['cost'])
-				didinfo['cost'] = didrate['cost']
-				didinfo['connectcost'] = didrate['connectcost']
-				didinfo['includedseconds'] = didrate['includedseconds']
-				didinfo['pricelist_id'] = didrate['pricelist_id']
-				didinfo['inc'] = didrate['inc']		
-				didinfo['country_id'] = didrate['country_id']
-				didinfo['call_type_rate'] = didrate['call_type']
-				didinfo['routing_type'] = didrate['routing_type']
-				didinfo['comment'] = didrate['comment']		
-				didinfo['pattern'] = didrate['pattern']
-
-		end))
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = string.sub(a, 2, 12)
+			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d$")) then
+			cn_dest_number=51
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = cn_dest_number..a
+			else
+			cn_dest_number = string.sub(a, 1, 3)
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = string.sub(a, 2, 12)
+			end
+			Logger.info("=============== Carrier Information ===================")
+			Logger.info("cn_dest_number : "..cn_dest_number)  
+			Logger.info("area_number : "..area_number)  
+			Logger.info("prefix_dest_number : "..prefix_dest_number)  
+			Logger.info("end_dest_number : "..end_dest_number)
+			Logger.info("carrier_dest_number : "..carrier_dest_number)
+			Logger.info("callerid_number : "..callerid_number)
+			Logger.info("callerid_number : "..callerid_number)
+			userinfo['cn_dest_number'] = cn_dest_number
+			Logger.info("================================================================")  	    		 
+			carrier_info = get_carrier_in(userinfo,cn_dest_number,carrier_dest_number)
+		end
+		if(carrier_info ~= nil and carrier_info['carrier_rn1'] ~= nil) then
+		-- Get termination RN1
+		didinfo['rn1'] = carrier_info['carrier_rn1']
+		rate_carrier_id = carrier_info['rn1']
 		else
+		didinfo['rn1'] = 0
+		end
 
-			Logger.notice("CHAMADA DE ENTRADA COM O CN DIFERENTE DO CLIENTE")
-			s = callerid_number
 
-			orig_number = string.sub(s, 1, 3)
-			Logger.warning("[ENTRADA_AREA_CODE] Entrada Area Code:" .. orig_number)
-			orig_number_dest = number_loop(s,'pattern')
-			local query_rate = "SELECT * FROM "..TBL_ORIGINATION_RATES.." WHERE "..orig_number_dest.." AND status = 0 AND (pricelist_id = "..didinfo['rate_group'].." OR accountid="..didinfo['accountid']..")  ORDER BY accountid DESC,LENGTH(pattern) DESC,cost DESC LIMIT 1";
-			Logger.warning("[DID_RATE] Query :" .. query_rate)
-			assert (dbh:query(query_rate, function(u)
-			didrate = u;
-			Logger.warning("[GET_DID_CONNECTCOST] Cost :" .. didrate['cost'])
-			didinfo['cost'] = didrate['cost']
-			didinfo['connectcost'] = didrate['connectcost']
-			didinfo['includedseconds'] = didrate['includedseconds']
-			didinfo['pricelist_id'] = didrate['pricelist_id']
-			didinfo['inc'] = didrate['inc']		
-			didinfo['country_id'] = didrate['country_id']
-			didinfo['call_type_rate'] = didrate['call_type']
-			didinfo['routing_type'] = didrate['routing_type']
-			didinfo['comment'] = didrate['comment']		
-			didinfo['pattern'] = didrate['pattern']
-			--didinfo['cost'] = didrate['cost']
-			--didrate = didrate['connectcost'])
-			--return didrate
-	end))
-end
-end
 
-		--didinfo['reverse_rate'] = didinfo['reverse_rate']
-		-- B.did_cid_translation as did_cid_translation,
 		if (did_localization ~= nil) then
 			did_localization['in_caller_id_originate'] = did_localization['in_caller_id_originate']:gsub(" ", "")
 			didinfo['did_cid_translation'] = did_localization['in_caller_id_originate']
 		else
 			didinfo['did_cid_translation'] = ""
 		end
-
-
-		---edição tarifa reversa 0800
-
-
 	end))
 	return didinfo;
 end
@@ -489,12 +463,9 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
     rate_group = get_pricelists (userinfo,destination_number,number_loop,call_direction)
     
     if (rate_group == nil) then
-		Logger.warning("[FIND_MAXLENGTH_2] Rate group not found or Inactive!!!")
+		Logger.warning("[FIND_MAXLENGTH] Rate group not found or Inactive!!!")
 		return 'ORIGNATION_RATE_NOT_FOUND'
 	end
-	
-
-    
 	if (call_direction == "local" and config['free_inbound'] ~= nil) then
 	    Logger.warning("[call_direction] local!!!")
 		rates = {}
@@ -518,7 +489,7 @@ function get_call_maxlength(userinfo,destination_number,call_direction,number_lo
 		end
 	else
         Logger.warning("[rates] get_rates!!!")
-        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config)               
+        rates = get_rates (userinfo,destination_number,number_loop,call_direction,config,callerid_number)               
 		if (rates == nil) then
 			Logger.warning("[FIND_MAXLENGTH] Rates not found!!!")
 			return 'ORIGNATION_RATE_NOT_FOUND'
@@ -856,8 +827,28 @@ function get_carrier_out(userinfo,cn_dest_number,carrier_dest_number)
 	return carrier_info
 end
 
--- Get carrier rn1 routes in
+
 function get_carrier_in(userinfo,cn_dest_number,carrier_dest_number)
+    Logger.warning("[FUNCTION - get_carrier_in]")
+    carrier_destination = number_loop(carrier_dest_number,"pattern")
+    Logger.warning("[GET_CARRIER_IN] carrier_destination :" .. carrier_destination)
+    Logger.warning("[GET_CARRIER_IN] cn_dest_number :" .. cn_dest_number)
+    Logger.warning("[GET_CARRIER_IN] carrier_dest_number :" .. carrier_dest_number)
+	local carrier_info
+
+        
+    	local query  = "SELECT * FROM "..TBL_CARRIER_RATES..", "..TBL_CARRIER_ROUTES.." WHERE "..TBL_CARRIER_RATES..".rn1 = "..TBL_CARRIER_ROUTES..".carrier_rn1 AND "..TBL_CARRIER_RATES..".nomePrestadora = "..TBL_CARRIER_ROUTES..".carrier_name AND cn = "..cn_dest_number.." AND " ..carrier_destination.." ORDER BY cn_prefix LIMIT 1";
+    	Logger.warning("[GET_CARRIER_IN] Query :" .. query)
+		assert (dbh:query(query, function(u)
+    		carrier_info = u
+    	end))  
+--	end
+	return carrier_info
+end
+
+
+-- Get carrier rn1 routes in
+function get_carrier_in2(userinfo,cn_dest_number,carrier_dest_number)
     Logger.warning("[FUNCTION - get_cadup_in]")
     cadup_destination = number_loop(cadup_dest_number,"pattern")
     Logger.warning("[GET_CADUP] cadup_destination :" .. cadup_destination)

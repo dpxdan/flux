@@ -42,10 +42,13 @@ function freeswitch_xml_header(xml,destination_number,accountcode,maxlength,call
 	local continue_on_fail = '!USER_BUSY'
 	if (config['continue_on_fail'] ~= nil) then
 		continue_on_fail = config['continue_on_fail']
+		table.insert(xml, [[<action application="set" data="continue_on_fail=]]..continue_on_fail..[["/>]]);
+	 else
+	 table.insert(xml, [[<action application="set" data="continue_on_fail=TRUE"/>]]); 
 	end
 
-	table.insert(xml, [[<action application="set" data="continue_on_fail=TRUE"/>]]);      
-	--table.insert(xml, [[<action application="set" data="ignore_early_media=true"/>]]);       
+	     
+	table.insert(xml, [[<action application="set" data="ignore_early_media=true"/>]]);       
 
 	table.insert(xml, [[<action application="set" data="account_id=]]..customer_userinfo['id']..[["/>]]);              
 	table.insert(xml, [[<action application="set" data="parent_id=]]..customer_userinfo['reseller_id']..[["/>]]);
@@ -193,7 +196,8 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 
 		temp_destination_number = do_number_translation(outbound_info['strip'].."/"..outbound_info['prepend'],temp_destination_number)
 	end
-        if (outbound_info['idCadup'] ~= nil and outbound_info['idCadup'] ~= '0')then
+    if (outbound_info ~= nil and tonumber(outbound_info['rn1']) ~=nil and tonumber(carrier_info['rn1']) > 0) then
+--    if (outbound_info['idCadup'] ~= nil and outbound_info['idCadup'] ~= '0')then
                 idCadup = outbound_info['idCadup']
                 carrier_id = outbound_info['carrier_id']
                 nomeLocalidade = outbound_info['nomeLocalidade']
@@ -244,11 +248,13 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
             	table.insert(xml, [[<action application="export" data="carrier_name=]]..carrier_name..[["/>]]);
     else 
         outbound_info['idCadup'] = 0;
-        table.insert(xml, [[<action application="set" data="rate_flag=]]..rategroup_type..[["/>]]);
+        outbound_info['carrier_route_id'] = 0;
+        table.insert(xml, [[<action application="set" data="rate_flag=]]..outbound_info['outbound_route_id']..[["/>]]);
         table.insert(xml, [[<action application="export" data="idCadup=0"/>]]);
-        table.insert(xml, [[<action application="set" data="check_cadup=true"/>]]);
-        table.insert(xml, [[<action application="export" data="routing_type=4"/>]]);
-        table.insert(xml, [[<action application="export" data="rate_flag=4"/>]]);
+        table.insert(xml, [[<action application="set" data="check_cadup=false"/>]]);
+        table.insert(xml, [[<action application="export" data="routing_type=1"/>]]);
+        
+--        table.insert(xml, [[<action application="export" data="rate_flag=1"/>]]);
     end
 	xml_termination_rates= "ID:"..outbound_info['outbound_route_id'].."|CODE:"..outbound_info['pattern'].."|DESTINATION:"..outbound_info['comment'].."|CONNECTIONCOST:"..outbound_info['connectcost'].."|INCLUDEDSECONDS:"..outbound_info['includedseconds'].."|IDCADUP:"..outbound_info['idCadup'].."|COST:"..outbound_info['cost'].."|CARRIER_ROUTE_ID:"..outbound_info['carrier_route_id'].."|CARRIER_ID:"..outbound_info['carrier_id'].."|INC:"..outbound_info['inc'].."|INITIALBLOCK:"..outbound_info['init_inc'].."|TRUNK:"..outbound_info['trunk_id'].."|PROVIDER:"..outbound_info['provider_id'];
 	if(params:getHeader("variable_sip_h_P-Voice_broadcast") == 'true')then
@@ -265,9 +271,9 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 	table.insert(xml, [[<action application="set" data="force_trunk_flag=]]..force_outbound_routes..[["/>]]);    
     table.insert(xml, [[<action application="export" data="presence_data=trunk_id=]]..outbound_info['trunk_id']..[["/>]])
     table.insert(xml, [[<action application="set" data="intcall=]]..(outbound_info['intcall'] and 1 or 0)..[["/>]])      
-	table.insert(xml, [[<action application="unset" data="direction"/>]]);
-	table.insert(xml, [[<action application="set" data="direction=outbound"/>]]);
-	table.insert(xml, [[<action application="export" data="direction=outbound"/>]]);	
+--	table.insert(xml, [[<action application="unset" data="direction"/>]]);
+--	table.insert(xml, [[<action application="set" data="direction=outbound"/>]]);
+--	table.insert(xml, [[<action application="export" data="direction=outbound"/>]]);	
 
 	-- Check if is there any gateway configuration params available for it.
 	if (outbound_info['dialplan_variable'] ~= '') then 
@@ -323,7 +329,7 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
 		table.insert(xml, [[<action application="bridge" data="]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path']..[[/]]..temp_destination_number..[["/>]]);
 	end
 	if(outbound_info['path1'] ~= '' and outbound_info['path1'] ~= outbound_info['path']) then
-		table.insert(xml, [[<action application="info" data=""/>]]);
+--		table.insert(xml, [[<action application="info" data=""/>]]);
 		table.insert(xml, [[<action application="bridge" data="]]..p_id_var..[[[]]..chan_var..[[]sofia/gateway/]]..outbound_info['path1']..[[/]]..temp_destination_number..[["/>]]);
 	end
 
