@@ -750,7 +750,7 @@ function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_c
 	local query
     if (check_carrier ~= '' or check_carrier ~= nil )then
 	if(check_carrier == "1") then
-	routing_type = "4"		
+		routing_type = "4"		
 	end	
 	end
 	if(routing_type == "1") then
@@ -764,15 +764,15 @@ function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_c
 		query = "SELECT TK.id as trunk_id,TK.name as trunk_name,TK.sip_cid_type,TK.codec,GW.name as path,GW.dialplan_variable,TK.tech, TK.provider_id,TR.init_inc,TK.status,TK.maxchannels,TK.cps,TK.leg_timeout,TR.pattern,TR.id as outbound_route_id,TR.connectcost,TR.comment,TR.call_type,TR.includedseconds,TR.cost,TR.inc,TR.prepend,TR.strip,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id) as path1,(select name from "..TBL_GATEWAYS.." where status=0 AND id = TK.failover_gateway_id1) as path2 FROM "..TBL_TERMINATION_RATES.." as TR,"..TBL_TRUNKS.." as TK,"..TBL_GATEWAYS.." as GW WHERE GW.status=0 AND GW.id= TK.gateway_id AND TK.status=0 AND TK.id= TR.trunk_id AND "..number_loop_str.." AND TR.status = 0 "
 	end
 	if(rate_carrier_id and rate_carrier_id ~= nil and rate_carrier_id ~= '0' and string.len(rate_carrier_id) >= 1 ) then
-	 if(rate_carrier_id == "0") then
-		query = query.." AND TR.trunk_id is not null "
-	elseif(routing_type == "4") then
-	  query = query.." AND TR.trunk_id is not null AND TK.tech = "..rate_carrier_id..""
+		if(rate_carrier_id == "0") then
+			query = query.." AND TR.trunk_id is not null "
+		elseif(routing_type == "4") then
+			query = query.." AND TR.trunk_id is not null AND TK.tech = "..rate_carrier_id..""
 		else
-		query = query.." AND TK.trunk_id IN ("..rate_carrier_id..") "
+			query = query.." AND TK.id IN ("..rate_carrier_id..") "
 		end
 	else
-		trunk_ids={}
+		trunk_ids = {}
 		local query_trunks  = "SELECT GROUP_CONCAT(trunk_id) as ids FROM "..TBL_ROUTING.." WHERE pricelist_id="..ratecard_id.." ORDER by id asc";   
 		
 		Logger.debug("[GET_CARRIER_RATES_TRUNKS] Query :" .. query_trunks)
@@ -780,12 +780,12 @@ function get_carrier_rates(destination_number,number_loop_str,ratecard_id,rate_c
 			trunk_ids = u
 		end))
 		if (trunk_ids['ids'] == "" or trunk_ids['ids'] == nil) then
-			trunk_ids['ids']=0
+			trunk_ids['ids'] = 0
 		end
 		if(trunk_id == 0) then
-		query = query.." AND TR.trunk_id is not null"
+			query = query.." AND TR.trunk_id is not null"
 		else
-		query = query.." AND TR.trunk_id IN ("..trunk_ids['ids']..")"
+			query = query.." AND TR.trunk_id IN ("..trunk_ids['ids']..")"
 		end
 	end
 	if(routing_type == "1") then
