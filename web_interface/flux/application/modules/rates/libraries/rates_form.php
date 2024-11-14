@@ -574,8 +574,7 @@ class rates_form extends common
             
         );
 
-
-        $form['Rate Information'][] = array(
+        $form[gettext('Rate Information')][] = array(
             gettext('Status'),
             'status',
             'SELECT',
