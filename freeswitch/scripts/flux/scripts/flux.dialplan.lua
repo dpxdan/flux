@@ -532,8 +532,8 @@ if (userinfo ~= nil) then
 
 		-- ********* Check & get Dialer Rate card information *********
 		origination_array_DID = ''
---		if(tonumber(config['free_inbound']) == 1)then
-		if(tonumber(config['free_inbound']) == 1 and didinfo['reverse_rate'] ~= nil and didinfo['reverse_rate'] == "0")then
+		if(tonumber(config['free_inbound']) == 1)then
+--		if(tonumber(config['free_inbound']) == 1 and didinfo['reverse_rate'] ~= nil and didinfo['reverse_rate'] == "0")then
 		Logger.info("[userinfo] Actual origination_array_DID XML DEBUG:")
 			origination_array_DID = get_call_maxlength(customer_userinfo,callerid_number,"outbound",number_loop_str_orig,config,didinfo,callerid_number)
 		else
@@ -602,7 +602,7 @@ if (userinfo ~= nil) then
 
 	else		
 		 force_outbound_routes =0;
-   		 if(rate_carrier_id ~= nil and rate_carrier_id ~= '' and rate_carrier_id ~= 0) then
+   		if(rate_carrier_id ~= nil and rate_carrier_id ~= '' and rate_carrier_id ~= 0) then
 			Logger.info("[DIALPLAN] Force Routes User Rate ID : ".. user_rates['id'])
 			force_outbound_routes = user_rates['id']
 		 end
@@ -610,19 +610,44 @@ if (userinfo ~= nil) then
 			Logger.info("[DIALPLAN] STRIPCADUP OUT")
 			a = destination_number	        
 			first_dig = string.sub(a, 1, 2)
-			if( tonumber(first_dig)  == 0) then    
+			
+			--numero iniciando por 0
+			if( tonumber(first_dig)  == 0) then
+			Logger.info("[DIALPLAN] first_dig 0: "..first_dig)
 			cn_dest_number = string.sub(a, 2, 3)
 			area_number = string.sub(a, 1, 2)
 			prefix_dest_number = string.sub(a, 4, 8)
 			end_dest_number = string.sub(a, 8, 12)
 			carrier_dest_number = string.sub(a, 2, 12)
+			-- Chamada local 8 digitos
 			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d$")) then
+			Logger.info("[DIALPLAN] first_dig 8 digitos: "..first_dig)
+			cn_dest_number=51
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = cn_dest_number..a
+			
+			-- Chamada local 9 digitos
+			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d%d$")) then
+			Logger.info("[DIALPLAN] first_dig 9 digitos: "..first_dig)
+			cn_dest_number=51
+			area_number = string.sub(a, 1, 2)
+			prefix_dest_number = string.sub(a, 4, 8)
+			end_dest_number = string.sub(a, 8, 12)
+			carrier_dest_number = cn_dest_number..a
+			
+			-- Chamada LDN Fixo			
+			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[1-9]%d[2-9]%d%d%d%d%d%d%d$")) then
+			Logger.info("[DIALPLAN] first_dig LDN: "..first_dig)
 			cn_dest_number=51
 			area_number = string.sub(a, 1, 2)
 			prefix_dest_number = string.sub(a, 4, 8)
 			end_dest_number = string.sub(a, 8, 12)
 			carrier_dest_number = cn_dest_number..a
 			else
+			Logger.info("[DIALPLAN] first_dig null: "..first_dig)
+			
 			cn_dest_number = string.sub(a, 1, 3)
 			area_number = string.sub(a, 1, 2)
 			prefix_dest_number = string.sub(a, 4, 8)
@@ -692,7 +717,8 @@ if (userinfo ~= nil) then
 			Logger.info("Custom CallType : "..termination_value['call_type']) 
 			Logger.info("Vendor id : "..termination_value['provider_id'])      		    		    			
 			Logger.info("Max channels : "..termination_value['maxchannels'])
-			if(carrier_info ~= nil and carrier_info['rn1'] ~= nil) then
+			 if (carrier_info ~= nil and tonumber(carrier_info['rn1']) ~=nil and tonumber(carrier_info['rn1']) > 0) then
+--			if(carrier_info ~= nil and carrier_info['rn1'] ~= nil and carrier_info['rn1'] ~= '0') then
 			termination_value['idCadup'] = carrier_info['idCadup']
 			termination_value['carrier_name'] = carrier_info['carrier_name']
 			termination_value['carrier_id'] = carrier_info['carrier_id']			
