@@ -609,62 +609,61 @@ if (userinfo ~= nil) then
 		if(user_rates['check_carrier'] ~= nil and user_rates['check_carrier'] == "1") then
 			Logger.info("[DIALPLAN] STRIPCADUP OUT")
 			a = destination_number	        
-			first_dig = string.sub(a, 1, 2)
-			
+			first_dig = string.sub(a, 1, 1)
 			--numero iniciando por 0
-			if( tonumber(first_dig)  == 0) then
-			Logger.info("[DIALPLAN] first_dig 0: "..first_dig)
-			cn_dest_number = string.sub(a, 2, 3)
-			area_number = string.sub(a, 1, 2)
-			prefix_dest_number = string.sub(a, 4, 8)
-			end_dest_number = string.sub(a, 8, 12)
-			carrier_dest_number = string.sub(a, 2, 12)
+			if( tonumber(first_dig) == 0) then
+				Logger.info("[DIALPLAN] first_dig 0: "..first_dig)
+				cn_dest_number = string.sub(a, 2, 3)
+				area_number = string.sub(a, 1, 2)
+				prefix_dest_number = string.sub(a, 4, 8)
+				end_dest_number = string.sub(a, 8, 12)
+				carrier_dest_number = string.sub(a, 2, 12)
 			-- Chamada local 8 digitos
 			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d$")) then
-			Logger.info("[DIALPLAN] first_dig 8 digitos: "..first_dig)
-			cn_dest_number=51
-			area_number = string.sub(a, 1, 2)
-			prefix_dest_number = string.sub(a, 4, 8)
-			end_dest_number = string.sub(a, 8, 12)
-			carrier_dest_number = cn_dest_number..a
+				Logger.info("[DIALPLAN] first_dig 8 digitos: "..first_dig)
+				cn_dest_number= string.sub(callerid_number, 1, 2)
+				area_number = string.sub(a, 1, 2)
+				prefix_dest_number = string.sub(a, 4, 8)
+				end_dest_number = string.sub(a, 8, 12)
+				carrier_dest_number = cn_dest_number..a
 			
 			-- Chamada local 9 digitos
 			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[2-9]%d%d%d%d%d%d%d%d$")) then
-			Logger.info("[DIALPLAN] first_dig 9 digitos: "..first_dig)
-			cn_dest_number=51
-			area_number = string.sub(a, 1, 2)
-			prefix_dest_number = string.sub(a, 4, 8)
-			end_dest_number = string.sub(a, 8, 12)
-			carrier_dest_number = cn_dest_number..a
-			
+				Logger.info("[DIALPLAN] first_dig 9 digitos: "..first_dig)
+				cn_dest_number=string.sub(callerid_number, 1, 2)
+				area_number = string.sub(a, 1, 2)
+				prefix_dest_number = string.sub(a, 4, 8)
+				end_dest_number = string.sub(a, 8, 12)
+				carrier_dest_number = cn_dest_number..a
+				
 			-- Chamada LDN Fixo			
 			elseif( tonumber(first_dig)  > 0 and string.find(a,"^[1-9]%d[2-9]%d%d%d%d%d%d%d$")) then
-			Logger.info("[DIALPLAN] first_dig LDN: "..first_dig)
-			cn_dest_number=51
-			area_number = string.sub(a, 1, 2)
-			prefix_dest_number = string.sub(a, 4, 8)
-			end_dest_number = string.sub(a, 8, 12)
-			carrier_dest_number = cn_dest_number..a
+				Logger.info("[DIALPLAN] first_dig LDN: "..first_dig)
+				cn_dest_number=51
+				area_number = string.sub(a, 1, 2)
+				prefix_dest_number = string.sub(a, 4, 8)
+				end_dest_number = string.sub(a, 8, 12)
+				carrier_dest_number = cn_dest_number..a
 			else
-			Logger.info("[DIALPLAN] first_dig null: "..first_dig)
-			
-			cn_dest_number = string.sub(a, 1, 3)
-			area_number = string.sub(a, 1, 2)
-			prefix_dest_number = string.sub(a, 4, 8)
-			end_dest_number = string.sub(a, 8, 12)
-			carrier_dest_number = string.sub(a, 2, 12)
+				Logger.info("[DIALPLAN] first_dig null: "..first_dig)
+				
+				cn_dest_number = string.sub(a, 1, 3)
+				area_number = string.sub(a, 1, 2)
+				prefix_dest_number = string.sub(a, 4, 8)
+				end_dest_number = string.sub(a, 8, 12)
+				carrier_dest_number = string.sub(a, 2, 12)
 			end
-			Logger.info("=============== Carrier Information ===================")
-			Logger.info("cn_dest_number : "..cn_dest_number)  
-			Logger.info("area_number : "..area_number)  
-			Logger.info("prefix_dest_number : "..prefix_dest_number)  
-			Logger.info("end_dest_number : "..end_dest_number)
-			Logger.info("carrier_dest_number : "..carrier_dest_number)
-			Logger.info("destination_number : "..destination_number)
-			Logger.info("callerid_number : "..callerid_number)
-			userinfo['cn_dest_number'] = cn_dest_number
-			Logger.info("================================================================")  	    		 
-			carrier_info = get_carrier_out (userinfo,cn_dest_number,carrier_dest_number)
+				Logger.info("=============== Carrier Information ===================")
+				Logger.info("cn_dest_number : "..cn_dest_number)  
+				Logger.info("area_number : "..area_number)  
+				Logger.info("prefix_dest_number : "..prefix_dest_number)  
+				Logger.info("end_dest_number : "..end_dest_number)
+				Logger.info("carrier_dest_number : "..carrier_dest_number)
+				Logger.info("destination_number : "..destination_number)
+				Logger.info("callerid_number : "..callerid_number)
+				userinfo['cn_dest_number'] = cn_dest_number
+				Logger.info("================================================================")  	    		 
+				carrier_info = get_carrier_out (userinfo,cn_dest_number,carrier_dest_number)
 		end
 		if(carrier_info ~= nil and carrier_info['carrier_rn1'] ~= nil) then
 		-- Get termination RN1
@@ -717,54 +716,54 @@ if (userinfo ~= nil) then
 			Logger.info("Custom CallType : "..termination_value['call_type']) 
 			Logger.info("Vendor id : "..termination_value['provider_id'])      		    		    			
 			Logger.info("Max channels : "..termination_value['maxchannels'])
-			 if (carrier_info ~= nil and tonumber(carrier_info['rn1']) ~=nil and tonumber(carrier_info['rn1']) > 0) then
---			if(carrier_info ~= nil and carrier_info['rn1'] ~= nil and carrier_info['rn1'] ~= '0') then
-			termination_value['idCadup'] = carrier_info['idCadup']
-			termination_value['carrier_name'] = carrier_info['carrier_name']
-			termination_value['carrier_id'] = carrier_info['carrier_id']			
-			termination_value['carrier_rn1'] = carrier_info['carrier_rn1']
-			termination_value['call_count'] = carrier_info['call_count']
-			termination_value['carrier_route_id'] = carrier_info['id']						
-			termination_value['nomeLocalidade'] = carrier_info['nomeLocalidade']
-			termination_value['nomePrestadora'] = carrier_info['nomePrestadora']
-			termination_value['tipo'] = carrier_info['tipo']
-			if(termination_value['tipo'] == 'M' ) then
-			termination_value['tipo'] = 'Movel'
-			else
-			termination_value['tipo'] = 'Fixo'
-			end	
-			termination_value['prefixo'] = carrier_info['prefixo']
-			termination_value['areaLocal'] = carrier_info['areaLocal']
-			termination_value['codArea'] = carrier_info['codArea']
-			termination_value['uf'] = carrier_info['uf']
-			termination_value['carrier_id'] = carrier_info['id']
-			termination_value['rn1'] = carrier_info['rn1']						
-			if (termination_value['rn1'] ~= nil and termination_value['rn1'] ~= '0') then
-            force_outbound_routes = termination_value['rn1'];
-            Logger.info("force_outbound_routes : "..force_outbound_routes);
-            end
-			Logger.info("idCadup : "..termination_value['idCadup']) 
-			Logger.info("carrier_id : "..termination_value['carrier_id'])      		  
-			Logger.info("nomeLocalidade : "..termination_value['nomeLocalidade'])
-			Logger.info("nomePrestadora : "..termination_value['nomePrestadora'])  		  
-			Logger.info("areaLocal : "..termination_value['areaLocal'])  		      		    
-			Logger.info("tipo : "..termination_value['tipo'])      		  
-			Logger.info("prefixo : "..termination_value['prefixo'])
-			Logger.info("codArea : "..termination_value['codArea'])  		  
-			Logger.info("uf : "..termination_value['uf'])			
-			Logger.info("carrier_name : "..termination_value['carrier_name'])
-			Logger.info("carrier_id : "..termination_value['carrier_id'])
-			Logger.info("carrier_rn1 : "..termination_value['carrier_rn1'])
-			Logger.info("call_count : "..termination_value['call_count'])
-			Logger.info("carrier_route_id: "..termination_value['carrier_route_id'])						  		
-			Logger.info("rn1 : "..termination_value['rn1'])			
+			if (carrier_info ~= nil and tonumber(carrier_info['rn1']) ~=nil and tonumber(carrier_info['rn1']) > 0) then
+	--			if(carrier_info ~= nil and carrier_info['rn1'] ~= nil and carrier_info['rn1'] ~= '0') then
+				termination_value['idCadup'] = carrier_info['idCadup']
+				termination_value['carrier_name'] = carrier_info['carrier_name']
+				termination_value['carrier_id'] = carrier_info['carrier_id']			
+				termination_value['carrier_rn1'] = carrier_info['carrier_rn1']
+				termination_value['call_count'] = carrier_info['call_count']
+				termination_value['carrier_route_id'] = carrier_info['id']						
+				termination_value['nomeLocalidade'] = carrier_info['nomeLocalidade']
+				termination_value['nomePrestadora'] = carrier_info['nomePrestadora']
+				termination_value['tipo'] = carrier_info['tipo']
+				if(termination_value['tipo'] == 'M' ) then
+					termination_value['tipo'] = 'Movel'
+				else
+					termination_value['tipo'] = 'Fixo'
+				end	
+				termination_value['prefixo'] = carrier_info['prefixo']
+				termination_value['areaLocal'] = carrier_info['areaLocal']
+				termination_value['codArea'] = carrier_info['codArea']
+				termination_value['uf'] = carrier_info['uf']
+				termination_value['carrier_id'] = carrier_info['id']
+				termination_value['rn1'] = carrier_info['rn1']						
+				if (termination_value['rn1'] ~= nil and termination_value['rn1'] ~= '0') then
+				force_outbound_routes = termination_value['rn1'];
+				Logger.info("force_outbound_routes : "..force_outbound_routes);
+				end
+				Logger.info("idCadup : "..termination_value['idCadup']) 
+				Logger.info("carrier_id : "..termination_value['carrier_id'])      		  
+				Logger.info("nomeLocalidade : "..termination_value['nomeLocalidade'])
+				Logger.info("nomePrestadora : "..termination_value['nomePrestadora'])  		  
+				Logger.info("areaLocal : "..termination_value['areaLocal'])  		      		    
+				Logger.info("tipo : "..termination_value['tipo'])      		  
+				Logger.info("prefixo : "..termination_value['prefixo'])
+				Logger.info("codArea : "..termination_value['codArea'])  		  
+				Logger.info("uf : "..termination_value['uf'])			
+				Logger.info("carrier_name : "..termination_value['carrier_name'])
+				Logger.info("carrier_id : "..termination_value['carrier_id'])
+				Logger.info("carrier_rn1 : "..termination_value['carrier_rn1'])
+				Logger.info("call_count : "..termination_value['call_count'])
+				Logger.info("carrier_route_id: "..termination_value['carrier_route_id'])						  		
+				Logger.info("rn1 : "..termination_value['rn1'])			
 			end	    		
 			custom_calltype = termination_value['comment'];
 			call_typecustom = termination_value['call_type'];
 			userinfo['call_type_custom'] = call_typecustom;
 			Logger.info("Call Type : "..custom_calltype);
 			Logger.info("User Call Type : "..userinfo['call_type_custom']);
-			termination_value['trunk_name'] = termination_value['path'];
+			-- termination_value['trunk_name'] = termination_value['path'];
 			Logger.info("Trunk Name : "..termination_value['trunk_name'])			
 			termination_value['intcall']=customer_userinfo['international_call']
 			Logger.info("========================END OF TERMINATION RATES=======================")

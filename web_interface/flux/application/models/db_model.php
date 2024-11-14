@@ -1401,18 +1401,16 @@ class Db_model extends CI_Model {
 		$carrier_arr = $final_array = array();
 		$dropdown_params= array("name" => "carrier_id" ,"id" => "carrierid_search_drp", "class" => "col-md-12 form-control selectpicker form-control-lg carrierid_search_drp col-md-3");
 		$carriers_result =$this->db->get_where('carrier_routing',array("carrier_rn1 >"=>0));
-		if($carriers_result->num_rows () > 0)
-		{
+		if($carriers_result->num_rows () > 0){
 			$final_array = array();
-			$final_array[0]=gettext("--Select--");
 				
 			$carriers_result = $carriers_result -> result_array();
 			foreach ($carriers_result as $key=>$value) {
 					$carrier_arr[$value['id']] =  $value['carrier_name']."( ".$value['carrier_rn1']." )";
 			}
 			if(!empty($carrier_arr))
-			    
 				$final_array = $carrier_arr;
+				$final_array[0] = gettext("--Select--");
 		}
 		return $final_array;
 	}

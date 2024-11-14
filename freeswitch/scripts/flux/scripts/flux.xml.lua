@@ -249,6 +249,7 @@ function freeswitch_xml_outbound(xml,destination_number,outbound_info,callerid_a
     else 
         outbound_info['idCadup'] = 0;
         outbound_info['carrier_route_id'] = 0;
+        outbound_info['carrier_id'] = 0;
         table.insert(xml, [[<action application="set" data="rate_flag=]]..outbound_info['outbound_route_id']..[["/>]]);
         table.insert(xml, [[<action application="export" data="idCadup=0"/>]]);
         table.insert(xml, [[<action application="set" data="check_cadup=false"/>]]);
