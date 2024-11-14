@@ -30,6 +30,7 @@ class common {
 		$this->CI->load->model ( 'db_model' );
 		$this->CI->load->library ( 'email' );
 		$this->CI->load->library ( 'session' );
+		$this->CI->load->library ( 'flux_log' );
 	}
 	function generate_password() {
 
@@ -229,6 +230,12 @@ class common {
 	 }
 	function get_field_name($select, $table, $where) {
 		$timezone_name = $where;
+		if ($select == 'currency' && $where == '16'){
+			return "BRL";
+		}
+		if ($select == 'country' && $where == '28'){
+			return "BRAZIL";
+		}
 		if (is_array ( $where )) {
 			$where = $where;
 		} else {
@@ -2601,7 +2608,7 @@ $cc_email_ids = strtolower($this->CI->common->get_field_name("notification_email
 		return $status_array;
 	}
 	function country() {
-		return $this->CI->common_model->get_country_list ();
+		return $this->CI->common_model->get_country_list();
 	}
 	function default_timezone() {
 		return $this->CI->db_model->build_dropdown_timezone ( 'id,timezone_name', 'timezone' );
