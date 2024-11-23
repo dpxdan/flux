@@ -1,6 +1,6 @@
 <?php
 // ##############################################################################
-// Flux SBC - Unindo pessoas e negócios
+// Flux SBC - Unindo pessoas e negocios
 //
 // Copyright (C) 2022 Flux Telecom
 // Daniel Paixao <daniel@flux.net.br>
@@ -46,9 +46,9 @@ function load_acl($logger, $db, $config) {
 	
 	// For customer and provider ips
 	$query = "SELECT ip FROM ip_map,accounts WHERE ip_map.accountid=accounts.id AND ip_map.status=0 AND accounts.status=0 AND accounts.deleted=0";
-	//$logger->log ( "ACL Query : " . $query );
+	$logger->log ( "ACL Query : " . $query );
 	$res_acl = $db->run ( $query );
-	//$logger->log ( $res_acl );
+	$logger->log ( $res_acl );
 	
 	foreach ( $res_acl as $res_acl_key => $res_acl_value ) {
 		if(preg_match("/[a-zA-Z\-]/i", $res_acl_value ['ip'])){
@@ -62,9 +62,9 @@ function load_acl($logger, $db, $config) {
 	
 	// For gateways
 	$query = "SELECT * FROM gateways WHERE status=0";
-	//$logger->log ( "Sofia Gateway Query : " . $query );
+	$logger->log ( "Sofia Gateway Query : " . $query );
 	$sp_gw = $db->run ( $query );
-	//$logger->log ( $sp_gw );
+	$logger->log ( $sp_gw );
 	
 	foreach ( $sp_gw as $sp_gw_key => $sp_gw_value ) {
 		
@@ -115,10 +115,34 @@ function load_acl($logger, $db, $config) {
 	$xml .= "       </configuration>\n";
 	$xml .= "   </section>\n";
 	$xml .= "</document>\n";
-	//$logger->log ( $xml );
+	$logger->log ( $xml );
 	return $xml;
 }
 
+// Build translate xml
+function load_translate($logger, $db, $config) {
+	$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
+	$xml .= "<document type=\"freeswitch/xml\">\n";
+	$xml .= "   <section name=\"Configuration\" description=\"Configuration\">\n";
+	$xml .= "   <configuration name=\"translate.conf\" description=\"Number Translation Rules\">\n";	
+	$xml .= "   <profiles>\n";
+	$query = "SELECT * FROM number_translations WHERE status=0";
+	$logger->log ( "Translate Query : " . $query );
+	$res_translate = $db->run ( $query );
+	$logger->log($res_translate);	
+	foreach ( $res_translate as $translate_key => $translate_value ) {
+		$xml .= "   <profile name=\"" . $translate_value['name'] . "\" description=\"" . $translate_value['description'] . "\">\n";
+        $xml .= "   <rule regex=\"" . $translate_value['pattern'] . "\" replace=\"" . $translate_value['replace'] . "\"/>\n";		
+		$xml .= "   </profile>\n";
+		//$xml .= "   </profiles>\n";
+	}
+    $xml .= "   </profiles>\n";
+	$xml .= "   </configuration>\n";
+	$xml .= "   </section>\n";
+	$xml .= "</document>\n";
+	$logger->log ( $xml );
+	return $xml;
+}
 // Build sofia xml
 function load_sofia($logger, $db, $config) {
 	$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
@@ -137,14 +161,14 @@ function load_sofia($logger, $db, $config) {
 	$xml .= "   <profiles>\n";
 	
 	$query = "SELECT * FROM sip_profiles WHERE status=0";
-//	$logger->log ( "Sofia Query : " . $query );
+	$logger->log ( "Sofia Query : " . $query );
 	$res_sp = $db->run ( $query );
-//	$logger->log($res_sp);
+	$logger->log($res_sp);
 	
 	foreach ( $res_sp as $sp_key => $sp_value ) {
 		
 		$settings = json_decode ( $sp_value ['profile_data'], true );
-//		$logger->log(print_r($settings,true));
+		$logger->log(print_r($settings,true));
 		$domain_name = $sp_value ['domain_name'];
 		$xml .= "   <profile name=\"" . $sp_value ['name'] . "\">\n";
 		
@@ -174,9 +198,9 @@ function load_sofia($logger, $db, $config) {
 		// Gateway block start
 		$xml .= "   <gateways>\n";
 		$query = "SELECT * FROM gateways WHERE sip_profile_id=" . $sp_value ['id'] . " AND status=0";
-//		$logger->log ( "Sofia Gateway Query : " . $query );
+		$logger->log ( "Sofia Gateway Query : " . $query );
 		$sp_gw = $db->run ( $query );
-//		$logger->log ( $sp_gw );
+		$logger->log ( $sp_gw );
 		foreach ( $sp_gw as $sp_gw_key => $sp_gw_value ) {
 			$xml .= "       <gateway name=\"" . $sp_gw_value ['name'] . "\">\n";
 			
@@ -197,12 +221,14 @@ function load_sofia($logger, $db, $config) {
 	$xml .= "   </configuration>\n";
 	$xml .= "   </section>\n";
 	$xml .= "</document>\n";
-//	$logger->log ( $xml );
+	$logger->log ( $xml );
 	return $xml;
 }
+
+
 function update_vm_data($logger, $db, $password, $user) {
 	$query = "SELECT * FROM sip_devices where username='" . $_REQUEST ['user'] . "' limit 1";
-	//$logger->log ( "Directory Query : " . $query );
+	$logger->log ( "Directory Query : " . $query );
 	$res_dir = $db->run ( $query );
 	$params = json_decode ( $res_dir [0] ['dir_params'], true );
 	$params ['vm-password'] = $password;
@@ -216,9 +242,9 @@ function load_directory($logger, $db) {
 	$xml = "";
 	
 	$query = "SELECT username,dir_params,dir_vars,number as accountcode,accountid FROM sip_devices,accounts WHERE sip_devices.status=0 AND accounts.status=0 AND accounts.deleted=0 AND accounts.id=sip_devices.accountid AND username='" . $_REQUEST ['user'] . "' limit 1";
-	//$logger->log ( "Directory Query : " . $query );
+	$logger->log ( "Directory Query : " . $query );
 	$res_dir = $db->run ( $query );
-	//$logger->log ( $res_dir );
+	$logger->log ( $res_dir );
 	
 	foreach ( $res_dir as $res_dir_key => $res_dir_value ) {
 		$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
@@ -247,7 +273,7 @@ function load_directory($logger, $db) {
 		$xml .= "               <variables>\n";
 		$xml .= $var_xml;
 		$xml .= "<variable name=\"sipcall\" value=\"true\"/>\n";
-		$xml .= "<variable name=\"sip-force-contact\" value=\"NDLB-tls-connectile-dysfunction\"/>\n";
+//		$xml .= "<variable name=\"sip-force-contact\" value=\"NDLB-tls-connectile-dysfunction\"/>\n";
 		$xml .= "<variable name=\"sip_user\" value=\"" . $_REQUEST ['user'] . "\"/>\n";
 		$xml .= "<variable name=\"accountcode\" value=\"" . $res_dir_value ['accountcode'] . "\"/>\n";
 		$xml .= "<variable name=\"domain_name\" value=\"" . $_REQUEST ['domain'] . "\"/>\n";
@@ -260,7 +286,7 @@ function load_directory($logger, $db) {
 		$xml .= "</document>\n";
 	}
 	
-	//$logger->log ( $xml );
+	$logger->log ( $xml );
 	return $xml;
 }
 

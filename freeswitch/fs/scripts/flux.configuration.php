@@ -31,6 +31,10 @@ if ($_REQUEST ['key_value'] == 'sofia.conf') {
 	$xml = load_acl ( $logger, $db, $config );
 	header ( 'Content-Type: text/xml' );
 	echo $xml;
+} elseif ($_REQUEST ['key_value'] == 'translate.conf') {
+	$xml = load_translate ( $logger, $db, $config );
+	header ( 'Content-Type: text/xml' );
+	echo $xml;
 } else {
 	xml_not_found ();
 }
